@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ROWM", "ROWM\ROWM.csproj", "{31360B6A-20FE-4159-A5F6-081E6126D04A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ROWM.Dal", "ROWM.Dal\ROWM.Dal.csproj", "{B84BA747-F2A6-4804-BE7A-5F76D5ED2826}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ROWM.Dal.Test", "ROWM.Dal.Test\ROWM.Dal.Test.csproj", "{12F6627B-C8AE-4A58-97DA-2F3900316B51}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{31360B6A-20FE-4159-A5F6-081E6126D04A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31360B6A-20FE-4159-A5F6-081E6126D04A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31360B6A-20FE-4159-A5F6-081E6126D04A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B84BA747-F2A6-4804-BE7A-5F76D5ED2826}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B84BA747-F2A6-4804-BE7A-5F76D5ED2826}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B84BA747-F2A6-4804-BE7A-5F76D5ED2826}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B84BA747-F2A6-4804-BE7A-5F76D5ED2826}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12F6627B-C8AE-4A58-97DA-2F3900316B51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12F6627B-C8AE-4A58-97DA-2F3900316B51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12F6627B-C8AE-4A58-97DA-2F3900316B51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12F6627B-C8AE-4A58-97DA-2F3900316B51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
