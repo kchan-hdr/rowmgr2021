@@ -13,7 +13,7 @@ namespace ROWM.Dal.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201708100820183_initial"; }
+            get { return "201708150102479_initial"; }
         }
         
         string IMigrationMetadata.Source

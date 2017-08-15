@@ -33,8 +33,17 @@ namespace ROWM.Dal
         public virtual ICollection<Ownership> Owners { get; set; }
 
         // contact logs
-        public virtual ICollection<ContactLog> ContactLogs { get; set; }
+        public virtual ICollection<ContactLog> ContactsLog { get; set; }
 
+        // initial offer date
+        public DateTimeOffset InitialOffer { get; set; }
+        public Double InitialOfferAmount { get; set; }
+        public string InitialOfferNotes { get; set; }
+
+        // final offer date
+        public DateTimeOffset FinalOffer { get; set; }
+        public Double FinalOfferAmount { get; set; }
+        public string FinalOfferNotes { get; set; }
 
         // audit
         [Required]

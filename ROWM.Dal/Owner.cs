@@ -17,6 +17,9 @@ namespace ROWM.Dal
         [StringLength(200)]
         public string PartyName { get; set; }
 
+        [StringLength(50)]
+        public string OwnerType { get; set; }
+
         // contact info
         public virtual ICollection<ContactInfo> Contacts { get; set; }
 

@@ -17,7 +17,7 @@ namespace ROWM.Dal.Test
 
             var pid = repo.GetParcels().Last();
             var p = await repo.GetParcel(pid);
-            var n = p.ContactLogs.Count();
+            var n = p.ContactsLog.Count();
 
             var a = await repo.GetAgent("Agent 99");
 
@@ -25,7 +25,7 @@ namespace ROWM.Dal.Test
 
             Assert.IsNotNull(px);
             Assert.AreEqual(pid, px.ParcelId);
-            Assert.AreEqual(n + 1, px.ContactLogs.Count());
+            Assert.AreEqual(n + 1, px.ContactsLog.Count());
         }
     }
 }

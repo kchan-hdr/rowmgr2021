@@ -38,6 +38,8 @@ namespace ROWM.Dal
         public Guid ContactOwnerId { get; set; }
         public virtual Owner ContactOwner { get; set; }
 
+        public ICollection<ContactLog> ContactsLog { get; set; }
+
 
         // audit
         [Required]

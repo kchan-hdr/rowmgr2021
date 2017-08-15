@@ -11,7 +11,7 @@ namespace ROWM.Dal
     [Table("ContactLog", Schema ="ROWM")]
     public class ContactLog
     {
-        public enum Channel { InPerson = 1, Phone, Email, Written, Followup = 10, Research = 20 }
+        public enum Channel { InPerson = 1, Phone, TextMessage, Email, Letter, NotesToFile, Followup = 10, Research = 20 }
 
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid ContactLogId { get; set; }
@@ -26,11 +26,14 @@ namespace ROWM.Dal
 
         public string ProjectPhase { get; set; }
 
+        [StringLength(200)]
+        public string Title { get; set; }
+
         [StringLength(int.MaxValue)]
         public string Notes { get; set; }
 
         //
-        public virtual ICollection<Owner> Owners { get; set; }
+        public virtual ICollection<ContactInfo> Contacts { get; set; }
         public virtual ICollection<Parcel> Parcels { get; set; }
 
         // audit

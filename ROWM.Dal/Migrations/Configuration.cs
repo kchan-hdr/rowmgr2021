@@ -17,16 +17,38 @@ namespace ROWM.Dal.Migrations
 
         protected override void Seed(ROWM.Dal.ROWM_Context context)
         {
-            var data = File.ReadAllText(@"D:\Sunflower\ROWM\ROWM.Dal\Sample_Data\parcels.json");
+            var data = File.ReadAllText(@"c:\ROWM\ROWM.Dal\Sample_Data\parcels.json");
 
             var parcels = JObject.Parse(data);
 
+            var olist = new List<Owner>();
             var plist = new List<Parcel>();
+            var orlist = new List<Ownership_import>();
+
             foreach (var parcel in parcels["parcels"])
             {
-                var l = new List<Owner>();
+                // parcels
+                var p = new Parcel
+                {
+                    ParcelId = parcel["PID"].Value<string>(),
+                    SitusAddress = parcel["Situs_Address"].Value<string>(),
+                    Acreage = parcel["Acres"].Value<double>(),
+                };
+
+                // owners
                 foreach (var owner in parcel["owners"])
                 {
+                    var party = owner["Party_Name"].Value<string>();
+
+                    orlist.Add(new Ownership_import
+                    {
+                        PartyName = party,
+                        PID = p.ParcelId
+                    });
+
+                    if (olist.Any(ox => ox.PartyName.Equals(party, StringComparison.CurrentCultureIgnoreCase)))
+                        continue;
+
                     var cl = new List<ContactInfo>
                     {
                         new ContactInfo
@@ -38,26 +60,12 @@ namespace ROWM.Dal.Migrations
                         }
                     };
 
-                    l.Add(new Owner
+                    olist.Add(new Owner
                     {
                         PartyName = owner["Party_Name"].Value<string>(),
                         Contacts = cl
                     });
                 }
-
-                var p = new Parcel
-                {
-                    ParcelId = parcel["PID"].Value<string>(),
-                    SitusAddress = parcel["Situs_Address"].Value<string>(),
-                    Acreage = parcel["Acres"].Value<double>(),
-                };
-
-                p.Owners = l.Select(lx => new Ownership
-                {
-                    Owner = lx,
-                    Parcel = p,
-                    Ownership_t = Ownership.OwnershipType.Primary
-                }).ToList();
 
                 plist.Add(p);
             }
@@ -66,12 +74,22 @@ namespace ROWM.Dal.Migrations
                 p => p.ParcelId,
                 plist.ToArray());
 
+            context.Owners.AddOrUpdate(
+                p => p.PartyName,
+                olist.ToArray());
+
+            context.OwnershipWorking.AddOrUpdate( p=> p.PID, orlist.ToArray());
 
             context.Agents.AddOrUpdate(
                 a => a.AgentName,
                 new Agent
                 {
                     AgentName = "Agent 99",
+                    Created = DateTimeOffset.Now
+                },
+                new Agent
+                {
+                    AgentName = "Erin",
                     Created = DateTimeOffset.Now
                 });
         }

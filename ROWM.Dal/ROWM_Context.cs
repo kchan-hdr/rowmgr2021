@@ -15,6 +15,9 @@ namespace ROWM.Dal
         public DbSet<ContactLog> ContactLogs { get; set; }
         public DbSet<Agent> Agents { get; set; }
 
+        // for seed
+        public DbSet<Ownership_import> OwnershipWorking { get; set; }
+
         public ROWM_Context() : base(DbConnection.GetConnectionString()) { }
     }
 }

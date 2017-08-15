@@ -16,6 +16,8 @@ namespace ROWM.Dal
             InitialCatalog = "rowm",
             IntegratedSecurity = false,
             ConnectTimeout = 15,
+            UserID="rowm_app",
+            Password = "SbhrDX6Cq5VPcR9z",
             Encrypt = false,
             TrustServerCertificate = false,
             MultipleActiveResultSets = true,

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 using System.Data.Entity;
+using System.Diagnostics;
 
 namespace ROWM.Dal
 {
@@ -26,8 +27,10 @@ namespace ROWM.Dal
         {
             return await _ctx.Owners
                 .Include(ox => ox.OwnParcel)
-                .Include(ox => ox.ContactLogs)
+                //.Include(ox => ox.ContactLogs)
+                //.Include(ox => ox.ContactLogs.Select(ocx => ocx.ContactAgent))
                 .Include(ox => ox.Contacts)
+                .Include(ox => ox.Contacts.Select( ocx => ocx.ContactsLog))
                 .FirstOrDefaultAsync(ox => ox.OwnerId == uid);
         }
 
@@ -40,12 +43,22 @@ namespace ROWM.Dal
         {
             return await _ctx.Parcels
                 .Include(px => px.Owners)
-                .Include(px => px.ContactLogs)
+                .Include(px => px.ContactsLog)
                 .FirstOrDefaultAsync(px => px.ParcelId == pid);
         }
 
         public IEnumerable<string> GetParcels() => _ctx.Parcels.AsNoTracking().Select(px => px.ParcelId);
-        public IEnumerable<Agent> GetAgents() => _ctx.Agents.AsNoTracking().ToList();
+
+        public async Task<Parcel> UpdateParcel (Parcel p)
+        {
+            if (_ctx.Entry<Parcel>(p).State == EntityState.Detached)
+                _ctx.Entry<Parcel>(p).State = EntityState.Modified;
+
+            if (await WriteDb() <= 0)
+                throw new ApplicationException("update parcel failed");
+
+            return p;
+        }
 
         public async Task<Owner> AddOwner(string name, string first = "", string last = "", string address = "", string city = "", string state = "", string z = "", string email = "", string hfone = "", string wfone = "", string cfone = "",   bool primary = true )
         {
@@ -80,6 +93,63 @@ namespace ROWM.Dal
             return o;
         }
 
+        public async Task<Owner> UpdateOwner(Owner o)
+        {
+            if (_ctx.Entry<Owner>(o).State == EntityState.Detached)
+                _ctx.Entry<Owner>(o).State = EntityState.Modified;
+
+            if (await WriteDb() <= 0)
+                throw new ApplicationException("Update owner failed");
+
+            return o;
+        }
+
+        public async Task<ContactInfo> UpdateContact(ContactInfo c)
+        {
+            if (_ctx.Entry<ContactInfo>(c).State == EntityState.Detached)
+                _ctx.Entry<ContactInfo>(c).State = EntityState.Modified;
+
+            if (await WriteDb() <= 0)
+                throw new ApplicationException("Add owner failed");
+
+            return c;
+        }
+
+        public async Task<ContactLog> AddContactLog(IEnumerable<string> pids, IEnumerable<Guid> cids, ContactLog log)
+        {
+            var dt = DateTimeOffset.Now;
+
+            _ctx.ContactLogs.Add(log);
+
+            if (pids != null && pids.Count() > 0)
+            {
+                foreach (var pid in pids)
+                {
+                    var px = await _ctx.Parcels.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
+                    if (px == null)
+                        Trace.TraceWarning($"invalid parcel {pid}");
+                    log.Parcels.Add(px);
+                }
+            }
+
+            if (cids != null && cids.Count() > 0)
+            {
+                foreach (var cid in cids)
+                {
+                    var cx = await _ctx.Contacts.SingleOrDefaultAsync(oxid => oxid.ContactId.Equals(cid));
+                    if (cx == null)
+                        Trace.TraceWarning($"invalid contact {cid}");
+                    log.Contacts.Add(cx);
+                }
+            }
+
+            if (await WriteDb() <= 0)
+                throw new ApplicationException("Add log failed");
+
+            return log;
+        }
+
+        [Obsolete("use add contactlog")]
         public async Task<Parcel> RecordContact(Parcel p, Agent a, string notes, DateTimeOffset date, string phase)
         {
             var dt = DateTimeOffset.Now;
@@ -91,7 +161,7 @@ namespace ROWM.Dal
             log.DateAdded = date;
             log.ProjectPhase = phase;
 
-            p.ContactLogs.Add(log);
+            p.ContactsLog.Add(log);
 
             _ctx.ContactLogs.Add(log);
 
@@ -101,6 +171,7 @@ namespace ROWM.Dal
             return p;
         }
 
+        [Obsolete("use add contactlog")]
         public async Task<Owner> RecordOwnerContact(Owner o, Agent a, string notes, DateTimeOffset date, string phase)
         {
             var dt = DateTimeOffset.Now;
@@ -123,7 +194,8 @@ namespace ROWM.Dal
         }
         #region row agents
         public async Task<Agent> GetAgent(string name) => await _ctx.Agents.FirstOrDefaultAsync(ax => ax.AgentName.Equals(name, StringComparison.CurrentCultureIgnoreCase));
-        
+        public async Task<IEnumerable<Agent>> GetAgents() => await _ctx.Agents.AsNoTracking().ToArrayAsync();
+         
         #endregion
         #region helpers
         internal async Task<int> WriteDb()

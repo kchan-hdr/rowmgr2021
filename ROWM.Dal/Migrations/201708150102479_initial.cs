@@ -28,26 +28,18 @@ namespace ROWM.Dal.Migrations
                         ContactAgentId = c.Guid(nullable: false),
                         ContactChannel = c.Int(nullable: false),
                         ProjectPhase = c.String(),
+                        Title = c.String(maxLength: 200),
                         Notes = c.String(),
                         Created = c.DateTimeOffset(nullable: false, precision: 7),
                         LastModified = c.DateTimeOffset(nullable: false, precision: 7),
                         ModifiedBy = c.String(maxLength: 50),
+                        Owner_OwnerId = c.Guid(),
                     })
                 .PrimaryKey(t => t.ContactLogId)
                 .ForeignKey("ROWM.Agent", t => t.ContactAgentId, cascadeDelete: true)
-                .Index(t => t.ContactAgentId);
-            
-            CreateTable(
-                "ROWM.Owner",
-                c => new
-                    {
-                        OwnerId = c.Guid(nullable: false, identity: true),
-                        PartyName = c.String(maxLength: 200),
-                        Created = c.DateTimeOffset(nullable: false, precision: 7),
-                        LastModified = c.DateTimeOffset(nullable: false, precision: 7),
-                        ModifiedBy = c.String(maxLength: 50),
-                    })
-                .PrimaryKey(t => t.OwnerId);
+                .ForeignKey("ROWM.Owner", t => t.Owner_OwnerId)
+                .Index(t => t.ContactAgentId)
+                .Index(t => t.Owner_OwnerId);
             
             CreateTable(
                 "ROWM.ContactInfo",
@@ -75,6 +67,19 @@ namespace ROWM.Dal.Migrations
                 .Index(t => t.ContactOwnerId);
             
             CreateTable(
+                "ROWM.Owner",
+                c => new
+                    {
+                        OwnerId = c.Guid(nullable: false, identity: true),
+                        PartyName = c.String(maxLength: 200),
+                        OwnerType = c.String(maxLength: 50),
+                        Created = c.DateTimeOffset(nullable: false, precision: 7),
+                        LastModified = c.DateTimeOffset(nullable: false, precision: 7),
+                        ModifiedBy = c.String(maxLength: 50),
+                    })
+                .PrimaryKey(t => t.OwnerId);
+            
+            CreateTable(
                 "ROWM.Ownership",
                 c => new
                     {
@@ -100,6 +105,12 @@ namespace ROWM.Dal.Migrations
                         SitusAddress = c.String(maxLength: 800),
                         ParcelStatus = c.Int(nullable: false),
                         Acreage = c.Double(nullable: false),
+                        InitialOffer = c.DateTimeOffset(nullable: false, precision: 7),
+                        InitialOfferAmount = c.Double(nullable: false),
+                        InitialOfferNotes = c.String(),
+                        FinalOffer = c.DateTimeOffset(nullable: false, precision: 7),
+                        FinalOfferAmount = c.Double(nullable: false),
+                        FinalOfferNotes = c.String(),
                         Created = c.DateTimeOffset(nullable: false, precision: 7),
                         LastModified = c.DateTimeOffset(nullable: false, precision: 7),
                         ModifiedBy = c.String(maxLength: 50),
@@ -107,17 +118,14 @@ namespace ROWM.Dal.Migrations
                 .PrimaryKey(t => t.ParcelId);
             
             CreateTable(
-                "dbo.OwnerContactLogs",
+                "dbo.Ownership_import",
                 c => new
                     {
-                        Owner_OwnerId = c.Guid(nullable: false),
-                        ContactLog_ContactLogId = c.Guid(nullable: false),
+                        Id = c.Int(nullable: false, identity: true),
+                        PartyName = c.String(),
+                        PID = c.String(),
                     })
-                .PrimaryKey(t => new { t.Owner_OwnerId, t.ContactLog_ContactLogId })
-                .ForeignKey("ROWM.Owner", t => t.Owner_OwnerId, cascadeDelete: true)
-                .ForeignKey("ROWM.ContactLog", t => t.ContactLog_ContactLogId, cascadeDelete: true)
-                .Index(t => t.Owner_OwnerId)
-                .Index(t => t.ContactLog_ContactLogId);
+                .PrimaryKey(t => t.Id);
             
             CreateTable(
                 "dbo.ParcelContactLogs",
@@ -132,32 +140,48 @@ namespace ROWM.Dal.Migrations
                 .Index(t => t.Parcel_ParcelId)
                 .Index(t => t.ContactLog_ContactLogId);
             
+            CreateTable(
+                "dbo.ContactInfoContactLogs",
+                c => new
+                    {
+                        ContactInfo_ContactId = c.Guid(nullable: false),
+                        ContactLog_ContactLogId = c.Guid(nullable: false),
+                    })
+                .PrimaryKey(t => new { t.ContactInfo_ContactId, t.ContactLog_ContactLogId })
+                .ForeignKey("ROWM.ContactInfo", t => t.ContactInfo_ContactId, cascadeDelete: true)
+                .ForeignKey("ROWM.ContactLog", t => t.ContactLog_ContactLogId, cascadeDelete: true)
+                .Index(t => t.ContactInfo_ContactId)
+                .Index(t => t.ContactLog_ContactLogId);
+            
         }
         
         public override void Down()
         {
+            DropForeignKey("dbo.ContactInfoContactLogs", "ContactLog_ContactLogId", "ROWM.ContactLog");
+            DropForeignKey("dbo.ContactInfoContactLogs", "ContactInfo_ContactId", "ROWM.ContactInfo");
+            DropForeignKey("ROWM.ContactInfo", "ContactOwnerId", "ROWM.Owner");
             DropForeignKey("ROWM.Ownership", "ParcelId", "ROWM.Parcel");
             DropForeignKey("dbo.ParcelContactLogs", "ContactLog_ContactLogId", "ROWM.ContactLog");
             DropForeignKey("dbo.ParcelContactLogs", "Parcel_ParcelId", "ROWM.Parcel");
             DropForeignKey("ROWM.Ownership", "OwnerId", "ROWM.Owner");
-            DropForeignKey("ROWM.ContactInfo", "ContactOwnerId", "ROWM.Owner");
-            DropForeignKey("dbo.OwnerContactLogs", "ContactLog_ContactLogId", "ROWM.ContactLog");
-            DropForeignKey("dbo.OwnerContactLogs", "Owner_OwnerId", "ROWM.Owner");
+            DropForeignKey("ROWM.ContactLog", "Owner_OwnerId", "ROWM.Owner");
             DropForeignKey("ROWM.ContactLog", "ContactAgentId", "ROWM.Agent");
+            DropIndex("dbo.ContactInfoContactLogs", new[] { "ContactLog_ContactLogId" });
+            DropIndex("dbo.ContactInfoContactLogs", new[] { "ContactInfo_ContactId" });
             DropIndex("dbo.ParcelContactLogs", new[] { "ContactLog_ContactLogId" });
             DropIndex("dbo.ParcelContactLogs", new[] { "Parcel_ParcelId" });
-            DropIndex("dbo.OwnerContactLogs", new[] { "ContactLog_ContactLogId" });
-            DropIndex("dbo.OwnerContactLogs", new[] { "Owner_OwnerId" });
             DropIndex("ROWM.Ownership", new[] { "OwnerId" });
             DropIndex("ROWM.Ownership", new[] { "ParcelId" });
             DropIndex("ROWM.ContactInfo", new[] { "ContactOwnerId" });
+            DropIndex("ROWM.ContactLog", new[] { "Owner_OwnerId" });
             DropIndex("ROWM.ContactLog", new[] { "ContactAgentId" });
+            DropTable("dbo.ContactInfoContactLogs");
             DropTable("dbo.ParcelContactLogs");
-            DropTable("dbo.OwnerContactLogs");
+            DropTable("dbo.Ownership_import");
             DropTable("ROWM.Parcel");
             DropTable("ROWM.Ownership");
-            DropTable("ROWM.ContactInfo");
             DropTable("ROWM.Owner");
+            DropTable("ROWM.ContactInfo");
             DropTable("ROWM.ContactLog");
             DropTable("ROWM.Agent");
         }
