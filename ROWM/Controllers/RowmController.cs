@@ -69,7 +69,7 @@ namespace ROWM.Controllers
                 ModifiedBy = _APP_NAME
             });
 
-            return Json(await _repo.UpdateOwner(o));
+            return Json(new OwnerDto(await _repo.UpdateOwner(o)));
         }
 
         [Route("owners/{id:Guid}/contacts/{cinfo}"), HttpPut]
@@ -101,7 +101,7 @@ namespace ROWM.Controllers
             c.LastModified = dt;
             c.ModifiedBy = _APP_NAME;
 
-            return Json(await _repo.UpdateContact(c));
+            return Json(new ContactInfoDto(await _repo.UpdateContact(c)));
         }
         #endregion
         #endregion
