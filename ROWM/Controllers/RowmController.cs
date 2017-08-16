@@ -113,9 +113,9 @@ namespace ROWM.Controllers
         }
 
         [Route("parcels/{pid}"), HttpGet]
-        public async Task<Parcel> GetParcel(string pid)
+        public async Task<ParcelGraph> GetParcel(string pid)
         {
-            return await _repo.GetParcel(pid);
+            return new ParcelGraph( await _repo.GetParcel(pid));
         }
         #region offer
         [Route("parcels/{pid}/initialOffer"), HttpPut]
@@ -295,11 +295,34 @@ namespace ROWM.Controllers
         public string ContactName { get; set; }
         public bool IsPrimary { get; set; }
 
+
+        public string OwnerFirstName { get; set; }
+        public string OwnerLastName { get; set; }
+        public string OwnerStreetAddress { get; set; }
+        public string OwnerCity { get; set; }
+        public string OwnerState { get; set; }
+        public string OwnerZIP { get; set; }
+        public string OwnerEmail { get; set; }
+        public string OwnerHomePhone { get; set; }
+        public string OwnerCellPhone { get; set; }
+        public string OwnerWorkPhone { get; set; }
+
         internal ContactInfoDto(ContactInfo c)
         {
             ContactId = c.ContactId;
             ContactName = $"{c.OwnerFirstName ?? ""} {c.OwnerLastName ?? ""}";
             IsPrimary = c.IsPrimaryContact;
+
+            OwnerFirstName = c.OwnerFirstName;
+            OwnerLastName = c.OwnerLastName;
+            OwnerStreetAddress = c.OwnerStreetAddress;
+            OwnerCity = c.OwnerCity;
+            OwnerState = c.OwnerState;
+            OwnerZIP = c.OwnerZIP;
+
+            OwnerCellPhone = c.OwnerCellPhone;
+            OwnerWorkPhone = c.OwnerWorkPhone;
+            OwnerHomePhone = c.OwnerHomePhone;
         }
     }
 
@@ -317,7 +340,9 @@ namespace ROWM.Controllers
             PartyName = o.PartyName;
             OwnedParcel = o.OwnParcel.Select(ox=> new ParcelHeaderDto(ox));
             Contacts = o.Contacts.Select(cx => new ContactInfoDto(cx));
-            ContactLogs = o.Contacts.SelectMany( cx => cx.ContactsLog.Select( cxl => new ContactLogDto(cxl ))); //  o.ContactLogs.Select(cx => new ContactLogDto(cx));
+            ContactLogs = o.Contacts
+                .Where( cx => cx.ContactsLog != null )
+                .SelectMany( cx => cx.ContactsLog.Select( cxl => new ContactLogDto(cxl ))); //  o.ContactLogs.Select(cx => new ContactLogDto(cx));
         }
     }
 
@@ -332,6 +357,44 @@ namespace ROWM.Controllers
             ParcelId = o.ParcelId;
             SitusAddress = o.Parcel.SitusAddress;
             IsPrimaryOwner = o.Ownership_t == Ownership.OwnershipType.Primary;
+        }
+    }
+    #endregion
+    #region parcel graph
+    public class ParcelGraph
+    {
+        public string ParcelId { get; set; }
+        public string ParcelStatus { get; set; }
+        public string SitusAddress { get; set; }
+        public double Acreage { get; set; }
+
+        public DateTimeOffset FinalOffer { get; set; }
+        public double FinalAmount { get; set; }
+        public string FinalOfferNotes { get; set; }
+
+        public DateTimeOffset InitialOffer { get; set; }
+        public double InitialOfferAmount { get; set; }
+        public string InitialOfferNotes { get; set; }
+
+        public IEnumerable<OwnerDto> Owners { get; set; }
+        public IEnumerable<ContactLogDto> ContactsLog { get; set; }
+
+        internal ParcelGraph( Parcel p)
+        {
+            ParcelId = p.ParcelId;
+            ParcelStatus = Enum.GetName(typeof(Parcel.RowStatus), p.ParcelStatus);
+            SitusAddress = p.SitusAddress;
+            
+            Acreage = p.Acreage;
+            FinalOffer = p.FinalOffer;
+            FinalAmount = p.FinalOfferAmount;
+            FinalOfferNotes = p.FinalOfferNotes;
+            InitialOffer = p.InitialOffer;
+            InitialOfferAmount = p.InitialOfferAmount;
+            InitialOfferNotes = p.InitialOfferNotes;
+
+            Owners = p.Owners.Select( ox => new OwnerDto(ox.Owner));
+            ContactsLog =  p.ContactsLog.Select( cx => new ContactLogDto(cx));
         }
     }
     #endregion

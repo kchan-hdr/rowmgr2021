@@ -36,13 +36,17 @@ namespace ROWM.Dal
 
         public async Task<IEnumerable<Owner>> FindOwner(string name)
         {
-            return await _ctx.Owners.Where(ox => ox.PartyName.Contains(name)).ToArrayAsync();
+            return await _ctx.Owners
+                .Include(ox => ox.Contacts)
+                .Include(ox => ox.Contacts.Select(ocx => ocx.ContactsLog))
+                .Where(ox => ox.PartyName.Contains(name)).ToArrayAsync();
         }
 
         public async Task<Parcel> GetParcel(string pid)
         {
             return await _ctx.Parcels
                 .Include(px => px.Owners)
+                .Include(px => px.Owners.Select( ox => ox.Owner.ContactLogs))
                 .Include(px => px.ContactsLog)
                 .FirstOrDefaultAsync(px => px.ParcelId == pid);
         }
