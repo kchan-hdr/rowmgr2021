@@ -320,7 +320,7 @@ namespace ROWM.Controllers
             OwnerCity = c.OwnerCity;
             OwnerState = c.OwnerState;
             OwnerZIP = c.OwnerZIP;
-
+            OwnerEmail = c.OwnerEmail;
             OwnerCellPhone = c.OwnerCellPhone;
             OwnerWorkPhone = c.OwnerWorkPhone;
             OwnerHomePhone = c.OwnerHomePhone;
