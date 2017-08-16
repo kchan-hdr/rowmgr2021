@@ -181,6 +181,7 @@ namespace ROWM.Controllers
                 ContactAgent = a,
                 ContactChannel = contactType,
                 ProjectPhase = logRequest.Phase,
+                DateAdded = logRequest.DateAdded,
                 Title = logRequest.Title,
                 Notes = logRequest.Notes,
                 Created = dt, LastModified = dt, ModifiedBy = _APP_NAME,
