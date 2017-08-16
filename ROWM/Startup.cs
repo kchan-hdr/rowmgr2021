@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
+using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ROWM
 {
@@ -43,6 +45,10 @@ namespace ROWM
             {
                 c.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info { Title = "ROW Manager", Version = "v1" });
             });
+            services.ConfigureSwaggerGen(o =>
+           {
+               o.OperationFilter<FileOperation>();
+           });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -77,6 +83,26 @@ namespace ROWM
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "ROW Manager V1");
             });
+        }
+    }
+
+    // swagger helper
+    public class FileOperation : IOperationFilter
+    {
+        public void Apply(Operation operation, OperationFilterContext context)
+        {
+            if ( operation.OperationId.Equals("ApiParcelsByPidDocumentsPost"))
+            {
+                operation.Parameters.Add(new NonBodyParameter
+                {
+                    Name = "File",
+                    In = "formData",
+                    Description = "documents",
+                    Required = true,
+                    Type = "file"
+                });
+                operation.Consumes.Add("multipart/form-data");
+            }
         }
     }
 }

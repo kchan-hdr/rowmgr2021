@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ROWM.Dal;
+using System.Diagnostics;
+using System.IO;
 
 namespace ROWM.Controllers
 {
@@ -26,14 +28,14 @@ namespace ROWM.Controllers
         [Route("owners/{id:Guid}"), HttpGet]
         public async Task<OwnerDto> GetOwner(Guid id)
         {
-            return new OwnerDto( await _repo.GetOwner(id));
+            return new OwnerDto(await _repo.GetOwner(id));
         }
 
         [Route("owners"), HttpGet]
         public async Task<IEnumerable<OwnerDto>> FindOwner(string name)
         {
             return (await _repo.FindOwner(name))
-                .Select( ox => new OwnerDto(ox));
+                .Select(ox => new OwnerDto(ox));
         }
         #region contacts
         [Route("owners/{id:Guid}/contacts"), HttpPost]
