@@ -13,7 +13,12 @@ namespace ROWM.Dal
         public DbSet<ContactInfo> Contacts { get; set; }
         public DbSet<Parcel> Parcels { get; set; }
         public DbSet<ContactLog> ContactLogs { get; set; }
+
         public DbSet<Agent> Agents { get; set; }
+
+        public DbSet<Document> Documents { get; set; }
+        public DbSet<DocumentPackage> DocumentPackages { get; set; }
+        public DbSet<DocumentTracking> DocumentActivities { get; set; }
 
         // for seed
         public DbSet<Ownership_import> OwnershipWorking { get; set; }

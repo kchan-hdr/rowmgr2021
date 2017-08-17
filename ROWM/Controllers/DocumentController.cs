@@ -33,14 +33,6 @@ namespace ROWM.Controllers
         // request body data
         private static readonly FormOptions _defaultFormOptions = new FormOptions();
 
-        [HttpPost("api/parcels/{pid}/documents_x")]
-        [Consumes("multipart/form-data")]
-        public async Task<IActionResult> AddDocument(string pid)
-        {
-            return Ok();
-        }
-
-        #region snippet1
 
         // 1. Disable the form value model binding here to take control of handling 
         //    potentially large files.
@@ -48,7 +40,7 @@ namespace ROWM.Controllers
         //    do not want to read the request body early, the tokens are made to be 
         //    sent via headers. The antiforgery token filter first looks for tokens
         //    in the request header and then falls back to reading the body.
-        [HttpPost("api/parcels/{pid}/documents")]
+        [Route("api/parcels/{pid}/documents"), HttpPost]
         [DisableFormValueModelBinding]
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(string pid)
@@ -128,13 +120,13 @@ namespace ROWM.Controllers
             }
 
             // Bind form data to a model
-            var user = new User();
+            var header = new DocumentHeader();
             var formValueProvider = new FormValueProvider(
                 BindingSource.Form,
                 new FormCollection(formAccumulator.GetResults()),
                 CultureInfo.CurrentCulture);
 
-            var bindingSuccessful = await TryUpdateModelAsync(user, prefix: "",
+            var bindingSuccessful = await TryUpdateModelAsync(header, prefix: "",
                 valueProvider: formValueProvider);
 
             if (!bindingSuccessful)
@@ -145,18 +137,8 @@ namespace ROWM.Controllers
                 }
             }
 
-            var uploadedData = new UploadedData()
-            {
-                Name = user.Name,
-                Age = user.Age,
-                Zipcode = user.Zipcode,
-                FilePath = targetFilePath
-            };
-
-            return Json(uploadedData);
+            return Json(header);
         }
-
-        #endregion
 
 
 
@@ -178,6 +160,14 @@ namespace ROWM.Controllers
     }
 
 
+    public class DocumentHeader
+    {
+        public string DocumentType { get; set; }
+        public string DocumentTitle { get; set; }
+        public string AgentName { get; set; }
+    }
+
+    /*
     public class User
     {
         [Required(ErrorMessage = "Name is required")]
@@ -202,4 +192,5 @@ namespace ROWM.Controllers
 
         public string FilePath { get; set; }
     }
+    */
 }

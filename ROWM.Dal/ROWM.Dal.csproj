@@ -54,10 +54,25 @@
     <Compile Include="ContactInfo.cs" />
     <Compile Include="ContactLog.cs" />
     <Compile Include="DbConnection.cs" />
+    <Compile Include="Document.cs" />
+    <Compile Include="DocumentPackage.cs" />
+    <Compile Include="DocumentTracking.cs" />
     <Compile Include="InternalTestSetting.cs" />
     <Compile Include="Migrations\201708150102479_initial.cs" />
     <Compile Include="Migrations\201708150102479_initial.Designer.cs">
       <DependentUpon>201708150102479_initial.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201708171902499_documents.cs" />
+    <Compile Include="Migrations\201708171902499_documents.Designer.cs">
+      <DependentUpon>201708171902499_documents.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201708171905385_documents xref.cs" />
+    <Compile Include="Migrations\201708171905385_documents xref.Designer.cs">
+      <DependentUpon>201708171905385_documents xref.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201708171910057_documents title.cs" />
+    <Compile Include="Migrations\201708171910057_documents title.Designer.cs">
+      <DependentUpon>201708171910057_documents title.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Owner.cs" />
@@ -76,6 +91,15 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201708150102479_initial.resx">
       <DependentUpon>201708150102479_initial.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201708171902499_documents.resx">
+      <DependentUpon>201708171902499_documents.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201708171905385_documents xref.resx">
+      <DependentUpon>201708171905385_documents xref.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201708171910057_documents title.resx">
+      <DependentUpon>201708171910057_documents title.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

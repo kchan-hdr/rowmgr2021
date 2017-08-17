@@ -35,6 +35,8 @@ namespace ROWM.Dal
         // contact logs
         public virtual ICollection<ContactLog> ContactsLog { get; set; }
 
+        public virtual ICollection<Document> Documents { get; set; }
+
         // initial offer date
         public DateTimeOffset InitialOffer { get; set; }
         public Double InitialOfferAmount { get; set; }

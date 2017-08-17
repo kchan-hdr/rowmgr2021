@@ -8,27 +8,17 @@ using System.Threading.Tasks;
 
 namespace ROWM.Dal
 {
-    [Table("Owner", Schema ="ROWM")]
-    public class Owner
+    [Table("DocumentPackage", Schema ="ROWM")]
+    public class DocumentPackage
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid OwnerId { get; set; }
+        public Guid PackageId { get; set; }
 
-        [StringLength(200)]
-        public string PartyName { get; set; }
+        [Required, StringLength(100)]
+        public string PackageName { get; set; }
 
-        [StringLength(50)]
-        public string OwnerType { get; set; }
-
-        // contact info
-        public virtual ICollection<ContactInfo> Contacts { get; set; }
-
-        // owned parcel
-        public virtual ICollection<Ownership> OwnParcel { get; set; }
-
-        // contact logs
-        public virtual ICollection<ContactLog> ContactLogs { get; set; }
         public virtual ICollection<Document> Documents { get; set; }
+
 
         // audit
         [Required]
