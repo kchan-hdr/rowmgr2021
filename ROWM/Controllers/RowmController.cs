@@ -119,6 +119,7 @@ namespace ROWM.Controllers
         }
         #region offer
         [Route("parcels/{pid}/initialOffer"), HttpPut]
+        [ProducesResponseType(typeof(ParcelGraph), 202)]
         public async Task<IActionResult> UpdateInitialOffer(string pid, [FromBody]OfferRequest offer)
         {
             if (!ModelState.IsValid)
@@ -130,10 +131,11 @@ namespace ROWM.Controllers
             p.InitialOfferAmount = offer.Amount;
             p.InitialOfferNotes = offer.Notes;
 
-            return Json(await _repo.UpdateParcel(p));
+            return Ok(new ParcelGraph(await _repo.UpdateParcel(p)));
         }
 
         [Route("parcels/{pid}/finalOffer"), HttpPut]
+        [ProducesResponseType(typeof(ParcelGraph), 202)]
         public async Task<IActionResult> UpdateFinalOffer(string pid, [FromBody]OfferRequest offer)
         {
             if (!ModelState.IsValid)
@@ -145,7 +147,7 @@ namespace ROWM.Controllers
             p.FinalOfferAmount = offer.Amount;
             p.FinalOfferNotes = offer.Notes;
 
-            return Json(await _repo.UpdateParcel(p));
+            return Json(new ParcelGraph(await _repo.UpdateParcel(p)));
         }
         #endregion
         #endregion
@@ -370,7 +372,7 @@ namespace ROWM.Controllers
         public double Acreage { get; set; }
 
         public DateTimeOffset FinalOffer { get; set; }
-        public double FinalAmount { get; set; }
+        public double FinalOfferAmount { get; set; }
         public string FinalOfferNotes { get; set; }
 
         public DateTimeOffset InitialOffer { get; set; }
@@ -388,7 +390,7 @@ namespace ROWM.Controllers
             
             Acreage = p.Acreage;
             FinalOffer = p.FinalOffer;
-            FinalAmount = p.FinalOfferAmount;
+            FinalOfferAmount = p.FinalOfferAmount;
             FinalOfferNotes = p.FinalOfferNotes;
             InitialOffer = p.InitialOffer;
             InitialOfferAmount = p.InitialOfferAmount;
