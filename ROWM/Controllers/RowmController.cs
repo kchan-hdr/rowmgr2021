@@ -203,6 +203,18 @@ namespace ROWM.Controllers
             return a.Select( ax => new AgentDto(ax));
         }
         #endregion
+        #region statistics
+        [HttpGet("statistics")]
+        public async Task<StatisticsDto> GetStatistics()
+        {
+            var s = await _repo.Snapshot();
+            return new StatisticsDto
+            {
+                NumberOfOwners = s.nOwners,
+                NumberOfParcels = s.nParcels
+            };
+        }
+        #endregion
     }
 
     #region request dto
@@ -247,6 +259,11 @@ namespace ROWM.Controllers
     }
     #endregion
     #region dto
+    public class StatisticsDto
+    {
+        public int NumberOfParcels { get; set; }
+        public int NumberOfOwners { get; set; }
+    }
     public class AgentDto
     {
         public Guid AgentId { get; set; }

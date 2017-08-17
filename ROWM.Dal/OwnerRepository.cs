@@ -23,6 +23,14 @@ namespace ROWM.Dal
         }
         #endregion
 
+        public async Task<( int nParcels, int nOwners)> Snapshot()
+        {
+            var np = await _ctx.Parcels.CountAsync();
+            var no = await _ctx.Owners.CountAsync();
+
+            return (np, no);
+        }
+
         public async Task<Owner> GetOwner(Guid uid)
         {
             return await _ctx.Owners
