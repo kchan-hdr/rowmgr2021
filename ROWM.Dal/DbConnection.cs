@@ -9,7 +9,7 @@ namespace ROWM.Dal
 {
     internal class DbConnection
     {
-        internal static readonly SqlConnectionStringBuilder _CONN_ = new SqlConnectionStringBuilder
+        internal static readonly SqlConnectionStringBuilder _CONN = new SqlConnectionStringBuilder
         {
             //Data Source=octa-dev.database.windows.net;Initial Catalog=octa_dev;Integrated Security=False;User ID=stella;Password=********;Connect Timeout=15;Encrypt=True;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False
             DataSource = "octa-dev.database.windows.net",
@@ -26,7 +26,7 @@ namespace ROWM.Dal
             ApplicationName = "ROWM"
         };
 
-        internal static readonly SqlConnectionStringBuilder _CONN = new SqlConnectionStringBuilder
+        internal static readonly SqlConnectionStringBuilder _CONN_ = new SqlConnectionStringBuilder
         {
             DataSource = @"(localdb)\MSSQLLocalDB",
             InitialCatalog = "rowm",
