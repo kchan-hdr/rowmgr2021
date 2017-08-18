@@ -269,12 +269,14 @@ namespace ROWM.Controllers
         public Guid AgentId { get; set; }
         public string AgentName { get; set; }
         public IEnumerable<ContactLogDto> ContactsLog { get; set; }
+        public IEnumerable<DocumentHeader> Documents { get; set; }
 
         internal AgentDto(Agent a)
         {
             AgentId = a.AgentId;
             AgentName = a.AgentName;
             ContactsLog = a.Logs.Select(cx => new ContactLogDto(cx));
+            Documents = a.Documents.Select(dx => new DocumentHeader(dx));
         }
     }
     public class ContactLogDto
@@ -353,6 +355,7 @@ namespace ROWM.Controllers
         public IEnumerable<ParcelHeaderDto> OwnedParcel { get; set; }
         public IEnumerable<ContactInfoDto> Contacts { get; set; }
         public IEnumerable<ContactLogDto> ContactLogs { get; set; }
+        public IEnumerable<DocumentHeader> Documents { get; set; }
 
         public OwnerDto( Owner o)
         {
@@ -363,6 +366,7 @@ namespace ROWM.Controllers
             ContactLogs = o.Contacts
                 .Where( cx => cx.ContactsLog != null )
                 .SelectMany( cx => cx.ContactsLog.Select( cxl => new ContactLogDto(cxl ))); //  o.ContactLogs.Select(cx => new ContactLogDto(cx));
+            Documents = o.Documents.Select(dx => new DocumentHeader(dx));
         }
     }
 
@@ -398,6 +402,7 @@ namespace ROWM.Controllers
 
         public IEnumerable<OwnerDto> Owners { get; set; }
         public IEnumerable<ContactLogDto> ContactsLog { get; set; }
+        public IEnumerable<DocumentHeader> Documents { get; set; }
 
         internal ParcelGraph( Parcel p)
         {
@@ -415,6 +420,7 @@ namespace ROWM.Controllers
 
             Owners = p.Owners.Select( ox => new OwnerDto(ox.Owner));
             ContactsLog =  p.ContactsLog.Select( cx => new ContactLogDto(cx));
+            Documents = p.Documents.Select(dx => new DocumentHeader(dx));
         }
     }
     #endregion

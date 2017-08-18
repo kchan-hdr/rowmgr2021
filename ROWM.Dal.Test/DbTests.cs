@@ -18,6 +18,14 @@ namespace ROWM.Dal.Test
             Assert.IsTrue(n >= 0);
         }
 
+        [TestMethod]
+        public void Simple_Document_Get()
+        {
+            var c = new ROWM_Context();
+            var d = c.Documents.Find(Guid.Parse("B84A2A09-8A83-E711-80DD-000D3A3645F7"));
+            Assert.IsNotNull(d);
+            Assert.IsNotNull(d.Content);
+        }
 
         [TestMethod]
         public void Seed()

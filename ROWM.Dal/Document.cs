@@ -18,6 +18,10 @@ namespace ROWM.Dal
         public string DocumentType { get; set; }
         [StringLength(int.MaxValue)]
         public string Title { get; set; }
+        [StringLength(500)]
+        public string SourceFilename { get; set; }
+        [StringLength(100)]
+        public string ContentType { get; set; }
 
         public byte[] Content { get; set; }
         [StringLength(int.MaxValue)]

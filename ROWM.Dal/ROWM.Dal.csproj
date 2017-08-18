@@ -77,6 +77,14 @@
     <Compile Include="Migrations\201708171910057_documents title.Designer.cs">
       <DependentUpon>201708171910057_documents title.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201708172033056_document content-type.cs" />
+    <Compile Include="Migrations\201708172033056_document content-type.Designer.cs">
+      <DependentUpon>201708172033056_document content-type.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201708172216519_fix document filename.cs" />
+    <Compile Include="Migrations\201708172216519_fix document filename.Designer.cs">
+      <DependentUpon>201708172216519_fix document filename.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Owner.cs" />
     <Compile Include="OwnerRepository.cs" />
@@ -103,6 +111,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201708171910057_documents title.resx">
       <DependentUpon>201708171910057_documents title.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201708172033056_document content-type.resx">
+      <DependentUpon>201708172033056_document content-type.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201708172216519_fix document filename.resx">
+      <DependentUpon>201708172216519_fix document filename.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

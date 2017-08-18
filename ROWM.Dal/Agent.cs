@@ -18,7 +18,7 @@ namespace ROWM.Dal
         public string AgentName { get; set; }
 
         public virtual ICollection<ContactLog> Logs { get; set; }
-
+        public virtual ICollection<Document> Documents { get; set; }
 
         // audit
         [Required]

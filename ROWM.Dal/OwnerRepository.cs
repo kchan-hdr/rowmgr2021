@@ -39,6 +39,7 @@ namespace ROWM.Dal
                 //.Include(ox => ox.ContactLogs.Select(ocx => ocx.ContactAgent))
                 .Include(ox => ox.Contacts)
                 .Include(ox => ox.Contacts.Select( ocx => ocx.ContactsLog))
+                .Include(ox => ox.Documents)
                 .FirstOrDefaultAsync(ox => ox.OwnerId == uid);
         }
 
@@ -47,6 +48,7 @@ namespace ROWM.Dal
             return await _ctx.Owners
                 .Include(ox => ox.Contacts)
                 .Include(ox => ox.Contacts.Select(ocx => ocx.ContactsLog))
+                .Include(ox => ox.Documents)
                 .Where(ox => ox.PartyName.Contains(name)).ToArrayAsync();
         }
 
@@ -56,6 +58,7 @@ namespace ROWM.Dal
                 .Include(px => px.Owners)
                 .Include(px => px.Owners.Select( ox => ox.Owner.ContactLogs))
                 .Include(px => px.ContactsLog)
+                .Include(ox => ox.Documents)
                 .FirstOrDefaultAsync(px => px.ParcelId == pid);
         }
 
@@ -204,9 +207,49 @@ namespace ROWM.Dal
 
             return o;
         }
+        #region documents
+        public Document GetDocument(Guid id) => _ctx.Documents.Find(id);
+
+        public async Task<Document> UpdateDocument(Document d)
+        {
+            if (_ctx.Entry(d).State == System.Data.Entity.EntityState.Deleted)
+                _ctx.Entry(d).State = System.Data.Entity.EntityState.Modified;
+
+            try
+            {
+                var touched = await _ctx.SaveChangesAsync();
+                return d;
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Document> Store(string title, string document_t, string content_t, string fname, byte[] content)
+        {
+            var d = _ctx.Documents.Create();
+            d.Content = content;
+            d.Title = title;
+            d.DocumentType = document_t;
+            d.SourceFilename = fname;
+            d.ContentType = content_t;
+            d.Created = DateTimeOffset.Now;
+
+            _ctx.Documents.Add(d);
+
+            var touched = await _ctx.SaveChangesAsync();
+
+            return d;
+        }
+        #endregion
         #region row agents
         public async Task<Agent> GetAgent(string name) => await _ctx.Agents.FirstOrDefaultAsync(ax => ax.AgentName.Equals(name, StringComparison.CurrentCultureIgnoreCase));
-        public async Task<IEnumerable<Agent>> GetAgents() => await _ctx.Agents.AsNoTracking().ToArrayAsync();
+        public async Task<IEnumerable<Agent>> GetAgents() =>
+            await _ctx.Agents.AsNoTracking()
+                .Include(ax => ax.Logs)
+                .Include(ax => ax.Documents)
+                .ToArrayAsync();
          
         #endregion
         #region helpers

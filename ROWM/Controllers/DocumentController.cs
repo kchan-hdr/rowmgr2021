@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 
 namespace ROWM.Controllers
 {
+    [Produces("application/json")]
     public class DocumentController : Controller
     {
         static readonly string _APP_NAME = "ROWM";
@@ -28,6 +29,41 @@ namespace ROWM.Controllers
             _repo = r;
         }
         #endregion
+
+        [HttpGet("api/documents/{docId:Guid}/info")]
+        public DocumentInfo GetDocument(Guid docId) => new DocumentInfo( _repo.GetDocument(docId));
+
+        [HttpPut("api/documents/{docId:Guid}/info", Name="UpdateDocuMeta")]
+        [ProducesResponseType(typeof(DocumentInfo), 202)]
+        public async Task<IActionResult> UpdateDocument(Guid docId, [FromBody] DocumentInfo info)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var d = _repo.GetDocument(docId);
+            d.ApprovedDate = info.ApprovedDate;
+            d.ClientSignatureDate = info.ClientSignatureDate;
+            d.ClientTrackingNumber = info.ClientTrackingNumber;
+            d.DeliveredDate = info.DeliveredDate;
+            d.QCDate = info.QCDate;
+            d.ReceivedDate = info.ReceivedDate;
+            d.ReceivedFromClientDate = info.ReceivedFromClientDate;
+            d.ReceivedFromOwnerDate = info.ReceivedFromOwnerDate;
+            d.RowmTrackingNumber = info.RowmTrackingNumber;
+            d.SentDate = info.SentDate;
+            d.SignedDate = info.SignedDate;
+
+            d.LastModified = DateTimeOffset.Now;
+
+            return CreatedAtRoute("UpdateDocuMeta", new DocumentInfo(await _repo.UpdateDocument(d)));
+        }
+
+        [HttpGet("api/documents/{docId:Guid}")]
+        public IActionResult GetFile(Guid docId)
+        {
+            var v = _repo.GetDocument(docId);
+            return File(v.Content, v.ContentType ?? "application/pdf");
+        }
 
         // Get the default form options so that we can use them to set the default limits for
         // request body data
@@ -50,13 +86,17 @@ namespace ROWM.Controllers
                 return BadRequest($"Expected a multipart request, but got {Request.ContentType}");
             }
 
+            var myParcel = await _repo.GetParcel(pid);
 
             // Used to accumulate all the form url encoded key value pairs in the 
             // request.
             var formAccumulator = new KeyValueAccumulator();
 
             string targetFilePath = null;
+            string sourceFilename = null;
+            string sourceContentType = null;
 
+            // files
 
             var boundary = MultipartRequestHelper.GetBoundary(
                 MediaTypeHeaderValue.Parse(Request.ContentType),
@@ -80,6 +120,8 @@ namespace ROWM.Controllers
                             await section.Body.CopyToAsync(targetStream);
                             // _logger.LogInformation($"Copied the uploaded file '{targetFilePath}'");
                         }
+                        sourceContentType = section.ContentType;
+                        sourceFilename = contentDisposition.FileName;
                     }
                     else if (MultipartRequestHelper.HasFormDataContentDisposition(contentDisposition))
                     {
@@ -119,6 +161,7 @@ namespace ROWM.Controllers
                 section = await reader.ReadNextSectionAsync();
             }
 
+
             // Bind form data to a model
             var header = new DocumentHeader();
             var formValueProvider = new FormValueProvider(
@@ -137,11 +180,22 @@ namespace ROWM.Controllers
                 }
             }
 
+            var bb = System.IO.File.ReadAllBytes(targetFilePath);
+            var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, bb);
+
+            var agent = await _repo.GetAgent(header.AgentName);
+            d.Agents.Add(agent);    // this is really bad form. TODO::::
+
+            myParcel.Documents.Add(d);
+            await _repo.UpdateParcel(myParcel);
+
+            header.DocumentId = d.DocumentId;
+
             return Json(header);
         }
 
 
-
+        #region helpers
         private static Encoding GetEncoding(MultipartSection section)
         {
             MediaTypeHeaderValue mediaType;
@@ -157,40 +211,83 @@ namespace ROWM.Controllers
 
             return mediaType.Encoding;
         }
+        #endregion
     }
 
-
+    #region doc header
     public class DocumentHeader
     {
         public string DocumentType { get; set; }
         public string DocumentTitle { get; set; }
         public string AgentName { get; set; }
+        public Guid DocumentId { get; set; }
+
+        /// <summary>
+        /// default ctor
+        /// </summary>
+        public DocumentHeader() { }
+
+        internal DocumentHeader(Document d)
+        {
+            DocumentId = d.DocumentId;
+            DocumentType = d.DocumentType;
+            DocumentTitle = d.Title;
+        }
     }
 
-    /*
-    public class User
+    public class DocumentInfo
     {
-        [Required(ErrorMessage = "Name is required")]
-        [MinLength(5, ErrorMessage = "Name of the user must be at least 5 characters long.")]
-        public string Name { get; set; }
+        public Guid DocumentId { get; set; }
 
-        [Required(ErrorMessage = "Age is required")]
-        [Range(18, 45, ErrorMessage = "Age must be between 18 and 45 (inclusive)")]
-        public int Age { get; set; }
+        public string DocumentType { get; set; }
+        public string Title { get; set; }
+        public string ContentType { get; set; } 
 
-        [Required(ErrorMessage = "Zipcode is required")]
-        public int Zipcode { get; set; }
+        // denormalized tracking
+        public bool TitleInFile { get; set; }
+        public DateTimeOffset? ReceivedDate { get; set; }
+        public DateTimeOffset? QCDate { get; set; }     // ready for QC
+        public DateTimeOffset? ApprovedDate { get; set; }   // QC approved
+        public DateTimeOffset? SentDate { get; set; } // sent to owner
+        public string RowmTrackingNumber { get; set; }
+        public DateTimeOffset? DeliveredDate { get; set; } // deliver to owner
+        public DateTimeOffset? SignedDate { get; set; } // owner signed
+        public DateTimeOffset? ReceivedFromOwnerDate { get; set; }
+        public string ClientTrackingNumber { get; set; }
+        public DateTimeOffset? ClientSignatureDate { get; set; } // signed by client
+        public DateTimeOffset? ReceivedFromClientDate { get; set; } // received from client
+
+        public string SharePointUrl { get; set; }
+        public string BlobId { get; set; }
+
+        /// <summary>
+        /// default ctor
+        /// </summary>
+        public DocumentInfo() { }
+
+        internal DocumentInfo( Document d)
+        {
+            DocumentId = d.DocumentId;
+            DocumentType = d.DocumentType;
+            Title = d.Title;
+            ContentType = d.ContentType;
+
+            ReceivedDate = d.ReceivedDate;
+            QCDate = d.QCDate;
+            ApprovedDate = d.ApprovedDate;
+            SentDate = d.SentDate;
+            DeliveredDate = d.DeliveredDate;
+            SignedDate = d.SignedDate;
+            ReceivedFromOwnerDate = d.ReceivedFromOwnerDate;
+            ClientSignatureDate = d.ClientSignatureDate;
+            ReceivedFromClientDate = d.ReceivedFromClientDate;
+
+            RowmTrackingNumber = d.RowmTrackingNumber;
+            ClientTrackingNumber = d.ClientTrackingNumber;
+
+            SharePointUrl = d.SharePointUrl;
+            BlobId = d.AzureBlobId;
+        }
     }
-
-    public class UploadedData
-    {
-        public string Name { get; set; }
-
-        public int Age { get; set; }
-
-        public int Zipcode { get; set; }
-
-        public string FilePath { get; set; }
-    }
-    */
+    #endregion
 }
