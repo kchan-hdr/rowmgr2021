@@ -63,6 +63,7 @@ namespace ROWM.Controllers
                 OwnerHomePhone = info.OwnerHomePhone,
 
                 IsPrimaryContact = info.IsPrimaryContact,
+                Representation = info.Relations,
 
                 Created = dt,
                 LastModified = dt,
@@ -97,6 +98,7 @@ namespace ROWM.Controllers
             c.OwnerHomePhone = info.OwnerHomePhone;
 
             c.IsPrimaryContact = info.IsPrimaryContact;
+            c.Representation = info.Relations;
 
             c.LastModified = dt;
             c.ModifiedBy = _APP_NAME;
@@ -131,6 +133,9 @@ namespace ROWM.Controllers
             p.InitialOfferAmount = offer.Amount;
             p.InitialOfferNotes = offer.Notes;
 
+            p.LastModified = DateTimeOffset.Now;
+            p.ModifiedBy = _APP_NAME;
+
             return Ok(new ParcelGraph(await _repo.UpdateParcel(p)));
         }
 
@@ -146,6 +151,9 @@ namespace ROWM.Controllers
             p.FinalOffer = offer.OfferDate;
             p.FinalOfferAmount = offer.Amount;
             p.FinalOfferNotes = offer.Notes;
+
+            p.LastModified = DateTimeOffset.Now;
+            p.ModifiedBy = _APP_NAME;
 
             return Json(new ParcelGraph(await _repo.UpdateParcel(p)));
         }
@@ -163,25 +171,10 @@ namespace ROWM.Controllers
             var p = await _repo.GetParcel(pid);
             var a = await _repo.GetAgent(logRequest.AgentName);
 
-            ContactLog.Channel contactType = ContactLog.Channel.Research;
-            if (!string.IsNullOrWhiteSpace(logRequest.Channel))
-            {
-                switch (logRequest.Channel.ToLower())
-                {
-                    case "email": contactType = ContactLog.Channel.Email; break;
-                    case "in-person": contactType = ContactLog.Channel.InPerson; break;
-                    case "letter": contactType = ContactLog.Channel.Letter; break;
-                    case "notes-to-file": contactType = ContactLog.Channel.NotesToFile; break;
-                    case "phone": contactType = ContactLog.Channel.Phone; break;
-                    case "text-message": contactType = ContactLog.Channel.TextMessage; break;
-                    default: contactType = ContactLog.Channel.Email; break;
-                }
-            }
-
             var l = new ContactLog
             {
                 ContactAgent = a,
-                ContactChannel = contactType,
+                ContactChannel = logRequest.Channel,
                 ProjectPhase = logRequest.Phase,
                 DateAdded = logRequest.DateAdded,
                 Title = logRequest.Title,
@@ -248,6 +241,7 @@ namespace ROWM.Controllers
         public string OwnerHomePhone { get; set; } = "";
 
         public bool IsPrimaryContact { get; set; } = false;
+        public string Relations { get; set; } = "";
     }
     #endregion
     #region offer dto
@@ -294,7 +288,7 @@ namespace ROWM.Controllers
         {
             AgentName = log.ContactAgent?.AgentName ?? "";
             DateAdded = log.DateAdded;
-            ContactType = Enum.GetName(typeof(ContactLog.Channel), log.ContactChannel);
+            ContactType = log.ContactChannel;
 
             ParcelIds = log.Parcels.Select(px => px.ParcelId);
             ContactIds = log.Contacts.Select(cx => new ContactInfoDto(cx));
@@ -317,6 +311,7 @@ namespace ROWM.Controllers
         public string ContactName { get; set; }
         public bool IsPrimary { get; set; }
 
+        public string Relations { get; set; }
 
         public string OwnerFirstName { get; set; }
         public string OwnerLastName { get; set; }
@@ -334,6 +329,7 @@ namespace ROWM.Controllers
             ContactId = c.ContactId;
             ContactName = $"{c.OwnerFirstName ?? ""} {c.OwnerLastName ?? ""}";
             IsPrimary = c.IsPrimaryContact;
+            Relations = c.Representation;
 
             OwnerFirstName = c.OwnerFirstName;
             OwnerLastName = c.OwnerLastName;

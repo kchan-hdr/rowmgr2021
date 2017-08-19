@@ -16,6 +16,9 @@ namespace ROWM.Dal
 
         public bool IsPrimaryContact { get; set; }
 
+        [StringLength(20)]
+        public string Representation { get; set; }      // fk representation
+
         [StringLength(50)]
         public string OwnerFirstName { get; set; }
         [StringLength(50)]

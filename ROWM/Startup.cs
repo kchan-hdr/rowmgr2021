@@ -46,6 +46,7 @@ namespace ROWM
                 o.MultipartBodyLengthLimit = int.MaxValue;
             });
 
+            services.AddScoped<ROWM.Dal.ROWM_Context>();
             services.AddScoped<ROWM.Dal.OwnerRepository>();
 
             services.AddSwaggerGen(c =>

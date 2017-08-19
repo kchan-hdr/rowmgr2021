@@ -215,15 +215,17 @@ namespace ROWM.Dal
             if (_ctx.Entry(d).State == System.Data.Entity.EntityState.Deleted)
                 _ctx.Entry(d).State = System.Data.Entity.EntityState.Modified;
 
-            try
-            {
-                var touched = await _ctx.SaveChangesAsync();
-                return d;
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
+            var a = _ctx.DocumentActivities.Create();
+            a.ParentDocument = d;
+            a.ActivityDate = DateTimeOffset.Now;
+            a.Activity = "Updated Tracking";
+
+            _ctx.DocumentActivities.Add(a);
+
+            if (await WriteDb() <= 0)
+                throw new ApplicationException("document meta-data edit failed");
+
+            return d;
         }
 
         public async Task<Document> Store(string title, string document_t, string content_t, string fname, byte[] content)
@@ -236,9 +238,16 @@ namespace ROWM.Dal
             d.ContentType = content_t;
             d.Created = DateTimeOffset.Now;
 
-            _ctx.Documents.Add(d);
+            var a = _ctx.DocumentActivities.Create();
+            a.ParentDocument = d;
+            a.ActivityDate = DateTimeOffset.Now;
+            a.Activity = "Uploaded";
 
-            var touched = await _ctx.SaveChangesAsync();
+            _ctx.Documents.Add(d);
+            _ctx.DocumentActivities.Add(a);
+
+            if (await WriteDb() <= 0)
+                throw new ApplicationException("document upload failed");
 
             return d;
         }

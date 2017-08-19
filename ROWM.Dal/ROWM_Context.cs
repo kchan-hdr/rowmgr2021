@@ -20,6 +20,11 @@ namespace ROWM.Dal
         public DbSet<DocumentPackage> DocumentPackages { get; set; }
         public DbSet<DocumentTracking> DocumentActivities { get; set; }
 
+        // vocabulary
+        public DbSet<Channel_Master> Channels { get; set; }
+        public DbSet<Purpose_Master> Purposes { get; set; }
+        public DbSet<Representation> Representations { get; set; }
+
         // for seed
         public DbSet<Ownership_import> OwnershipWorking { get; set; }
 

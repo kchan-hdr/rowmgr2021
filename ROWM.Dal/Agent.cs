@@ -20,6 +20,8 @@ namespace ROWM.Dal
         public virtual ICollection<ContactLog> Logs { get; set; }
         public virtual ICollection<Document> Documents { get; set; }
 
+        public bool IsActive { get; set; }
+
         // audit
         [Required]
         public DateTimeOffset Created { get; set; }

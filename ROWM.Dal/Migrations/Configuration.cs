@@ -17,6 +17,55 @@ namespace ROWM.Dal.Migrations
 
         protected override void Seed(ROWM.Dal.ROWM_Context context)
         {
+            context.Purposes.AddOrUpdate(
+                r => r.PurposeCode,
+                new Purpose_Master { PurposeCode = "ROE", Description = "ROE", DisplayOrder = 1, IsActive = true },
+                new Purpose_Master { PurposeCode = "Offer", Description = "Offer", DisplayOrder = 2, IsActive = true },
+                new Purpose_Master { PurposeCode = "Negotiation", Description = "Negotiation", DisplayOrder = 3, IsActive = true }
+            );
+
+            context.Representations.AddOrUpdate(
+                r => r.RelationTypeCode,
+                new Representation { RelationTypeCode = "Self", Description = "Self", DisplayOrder = 1, IsActive = true },
+                new Representation { RelationTypeCode = "Spouse", Description = "Spouse", DisplayOrder = 2, IsActive = true },
+                new Representation { RelationTypeCode = "Child", Description = "Child", DisplayOrder = 3, IsActive = true },
+                new Representation { RelationTypeCode = "Tenant", Description = "Tenant", DisplayOrder = 4, IsActive = true },
+                new Representation { RelationTypeCode = "Attorney", Description = "Attorney", DisplayOrder = 5, IsActive = true },
+                new Representation { RelationTypeCode = "Other", Description = "Other", DisplayOrder = 6, IsActive = true }
+            );
+
+            context.Channels.AddOrUpdate(
+                c => c.ContactTypeCode,
+                new Channel_Master { ContactTypeCode = "Email", Description = "Email", DisplayOrder = 1, IsActive = true },
+                new Channel_Master { ContactTypeCode = "In-Person", Description = "In-Person", DisplayOrder = 2, IsActive = true },
+                new Channel_Master { ContactTypeCode = "Letter", Description = "Letter", DisplayOrder = 3, IsActive = true },
+                new Channel_Master { ContactTypeCode = "Note to File", Description = "Note to File", DisplayOrder = 4, IsActive = true },
+                new Channel_Master { ContactTypeCode = "Phone Call", Description = "Phone Call", DisplayOrder = 5, IsActive = true },
+                new Channel_Master { ContactTypeCode = "Text Message", Description = "Text Message", DisplayOrder = 6, IsActive = true }
+            );
+
+
+            context.Agents.AddOrUpdate(
+                a => a.AgentName,
+                new Agent
+                {
+                    AgentName = "Erin Begier",
+                    IsActive = true,
+                    Created = DateTimeOffset.Now
+                },
+                new Agent
+                {
+                    AgentName = "Amy Borders",
+                    IsActive = true,
+                    Created = DateTimeOffset.Now
+                },
+                new Agent
+                {
+                    AgentName = "Stephen Sykes",
+                    IsActive = true,
+                    Created = DateTimeOffset.Now
+                });
+
             var data = File.ReadAllText(@"c:\ROWM\ROWM.Dal\Sample_Data\parcels.json");
 
             var parcels = JObject.Parse(data);
@@ -78,20 +127,8 @@ namespace ROWM.Dal.Migrations
                 p => p.PartyName,
                 olist.ToArray());
 
-            context.OwnershipWorking.AddOrUpdate( p=> p.PID, orlist.ToArray());
+            context.OwnershipWorking.AddOrUpdate(orlist.ToArray());
 
-            context.Agents.AddOrUpdate(
-                a => a.AgentName,
-                new Agent
-                {
-                    AgentName = "Agent 99",
-                    Created = DateTimeOffset.Now
-                },
-                new Agent
-                {
-                    AgentName = "Erin",
-                    Created = DateTimeOffset.Now
-                });
         }
     }
 }
