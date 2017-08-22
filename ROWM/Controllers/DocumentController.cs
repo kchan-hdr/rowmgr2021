@@ -231,6 +231,7 @@ namespace ROWM.Controllers
             DocumentId = d.DocumentId;
             DocumentType = d.DocumentType;
             DocumentTitle = d.Title;
+            AgentName = d.Agents.FirstOrDefault()?.AgentName ?? "";
         }
     }
 
@@ -270,7 +271,7 @@ namespace ROWM.Controllers
             DocumentType = d.DocumentType;
             Title = d.Title;
             ContentType = d.ContentType;
-
+  
             ReceivedDate = d.ReceivedDate;
             QCDate = d.QCDate;
             ApprovedDate = d.ApprovedDate;

@@ -219,6 +219,7 @@ namespace ROWM.Dal
             a.ParentDocument = d;
             a.ActivityDate = DateTimeOffset.Now;
             a.Activity = "Updated Tracking";
+            a.Agent = d.Agents.FirstOrDefault();        // TODO:
 
             _ctx.DocumentActivities.Add(a);
 
