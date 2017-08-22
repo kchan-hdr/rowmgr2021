@@ -181,10 +181,9 @@ namespace ROWM.Controllers
             }
 
             var bb = System.IO.File.ReadAllBytes(targetFilePath);
-            var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, bb);
-
             var agent = await _repo.GetAgent(header.AgentName);
-            d.Agents.Add(agent);    // this is really bad form. TODO::::
+
+            var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent.AgentId, bb);
 
             myParcel.Documents.Add(d);
             await _repo.UpdateParcel(myParcel);

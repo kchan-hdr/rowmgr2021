@@ -61,6 +61,7 @@
     <Compile Include="ContactLogTests.cs" />
     <Compile Include="CRUDTests.cs" />
     <Compile Include="DbTests.cs" />
+    <Compile Include="DocumentTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -228,7 +228,7 @@ namespace ROWM.Dal
             return d;
         }
 
-        public async Task<Document> Store(string title, string document_t, string content_t, string fname, byte[] content)
+        public async Task<Document> Store(string title, string document_t, string content_t, string fname, Guid agentId, byte[] content)
         {
             var d = _ctx.Documents.Create();
             d.Content = content;
@@ -242,6 +242,7 @@ namespace ROWM.Dal
             a.ParentDocument = d;
             a.ActivityDate = DateTimeOffset.Now;
             a.Activity = "Uploaded";
+            a.AgentId = agentId;
 
             _ctx.Documents.Add(d);
             _ctx.DocumentActivities.Add(a);
