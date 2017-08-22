@@ -184,6 +184,7 @@ namespace ROWM.Controllers
             var agent = await _repo.GetAgent(header.AgentName);
 
             var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent.AgentId, bb);
+            d.Agents.Add(agent);
 
             myParcel.Documents.Add(d);
             await _repo.UpdateParcel(myParcel);
