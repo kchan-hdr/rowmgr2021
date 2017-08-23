@@ -20,7 +20,7 @@ namespace ROWM.Dal
 
         [ForeignKey("ContactAgent")]
         public Guid ContactAgentId { get; set; }
-        public Agent ContactAgent { get; set; }
+        public virtual Agent ContactAgent { get; set; }
 
         [StringLength(20)]
         public string ContactChannel { get; set; }      // fk Channel_Master
