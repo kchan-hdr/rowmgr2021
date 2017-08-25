@@ -164,6 +164,17 @@ namespace ROWM.Dal
             return log;
         }
 
+        public async Task<ContactLog> UpdateContactLog(ContactLog log)
+        {
+            if (_ctx.Entry<ContactLog>(log).State == EntityState.Detached)
+                _ctx.Entry<ContactLog>(log).State = EntityState.Modified;
+
+            if (await WriteDb() <= 0)
+                throw new ApplicationException("update contact log failed");
+
+           return log;
+        }
+
         [Obsolete("use add contactlog")]
         public async Task<Parcel> RecordContact(Parcel p, Agent a, string notes, DateTimeOffset date, string phase)
         {
