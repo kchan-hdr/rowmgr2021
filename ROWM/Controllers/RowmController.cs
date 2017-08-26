@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using ROWM.Dal;
 using System.Diagnostics;
 using System.IO;
+using geographia.ags;
 
 namespace ROWM.Controllers
 {
@@ -168,7 +169,13 @@ namespace ROWM.Controllers
 
             var dt = DateTimeOffset.Now;
 
+            // we have contact. domain values do not match. need to fix.
+            IFeatureUpdate fs = new SunflowerParcel();
+            var t = fs.UpdateFeature(pid, "Contacted");
+
             var p = await _repo.GetParcel(pid);
+            p.ParcelStatus = Parcel.RowStatus.Owner_Contacted;
+
             var a = await _repo.GetAgent(logRequest.AgentName);
 
             var l = new ContactLog
@@ -185,6 +192,8 @@ namespace ROWM.Controllers
             };
 
             var log = await _repo.AddContactLog(logRequest.ParcelIds, logRequest.ContactIds, l);
+            await t;
+
             return Json(new ContactLogDto(log));
         }
         #endregion
