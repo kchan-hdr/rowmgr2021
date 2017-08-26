@@ -213,7 +213,7 @@ namespace ROWM.Controllers
             //l.Parcels = new List<Parcel> { p };
             //l.Contacts = new List<ContactInfo>();
 
-            var log = await _repo.UpdateContactLog(l);
+            var log = await _repo.UpdateContactLog(logRequest.ParcelIds, logRequest.ContactIds, l);
             return Json(new ContactLogDto(log));
         }
         #endregion
