@@ -164,6 +164,75 @@ namespace ROWM.Dal
             return log;
         }
 
+        public async Task<ContactLog> UpdateContactLog(IEnumerable<string> pids, IEnumerable<Guid> cids, ContactLog log)
+        {
+            if (_ctx.Entry<ContactLog>(log).State == EntityState.Detached)
+            {
+                _ctx.Entry<ContactLog>(log).State = EntityState.Modified;
+            }
+
+            var existingPids = log.Parcels.Select(p => p.ParcelId).ToList();
+            var existingCids = log.Contacts.Select(c => c.ContactId).ToList();
+
+            // Find Deleted & added parcels & contacts
+            var deletedPids = existingPids.Except(pids);
+            var newPids = pids.Except(existingPids);
+            var deletedCids = existingCids.Except(cids);
+            var newCids = cids.Except(existingCids);
+
+            // Remove deleted parcels & contacts
+            if (deletedPids != null && deletedPids.Count() > 0)
+            {
+                foreach (var pid in deletedPids)
+                {
+                    var px = await _ctx.Parcels.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
+                    if (px == null)
+                        Trace.TraceWarning($"invalid parcel {pid}");
+                    log.Parcels.Remove(px);
+                }
+            }
+
+            if (deletedCids != null && deletedCids.Count() > 0)
+            {
+                foreach (var cid in deletedCids)
+                {
+                    var cx = await _ctx.Contacts.SingleOrDefaultAsync(oxid => oxid.ContactId.Equals(cid));
+                    if (cx == null)
+                        Trace.TraceWarning($"invalid contact {cid}");
+                    log.Contacts.Remove(cx);
+                }
+            }
+
+            // Add new parcels & contacts
+            if (newPids != null && newPids.Count() > 0)
+            {
+                foreach (var pid in newPids)
+                {
+                    var px = await _ctx.Parcels.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
+                    if (px == null)
+                        Trace.TraceWarning($"invalid parcel {pid}");
+                    log.Parcels.Add(px);
+                }
+            }
+
+            if (newCids != null && newCids.Count() > 0)
+            {
+                foreach (var cid in newCids)
+                {
+                    var cx = await _ctx.Contacts.SingleOrDefaultAsync(oxid => oxid.ContactId.Equals(cid));
+                    if (cx == null)
+                        Trace.TraceWarning($"invalid contact {cid}");
+                    log.Contacts.Add(cx);
+                }
+            }
+
+
+            if (await WriteDb() <= 0)
+                throw new ApplicationException("update contact log failed");
+
+            return log;
+        }
+
         [Obsolete("use add contactlog")]
         public async Task<Parcel> RecordContact(Parcel p, Agent a, string notes, DateTimeOffset date, string phase)
         {

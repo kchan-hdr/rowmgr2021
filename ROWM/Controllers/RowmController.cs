@@ -186,7 +186,9 @@ namespace ROWM.Controllers
                 DateAdded = logRequest.DateAdded,
                 Title = logRequest.Title,
                 Notes = logRequest.Notes,
-                Created = dt, LastModified = dt, ModifiedBy = _APP_NAME,
+                Created = dt,
+                LastModified = dt,
+                ModifiedBy = _APP_NAME,
                 Parcels = new List<Parcel> { p },
                 Contacts = new List<ContactInfo>()
             };
@@ -194,6 +196,33 @@ namespace ROWM.Controllers
             var log = await _repo.AddContactLog(logRequest.ParcelIds, logRequest.ContactIds, l);
             await t;
 
+            return Json(new ContactLogDto(log));
+        }
+        [Route("parcels/{pid}/logs/{lid}"), HttpPost]
+        public async Task<IActionResult> UpdateContactLog(string pid, Guid lid, [FromBody] LogRequest logRequest)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(this.ModelState);
+
+            var dt = DateTimeOffset.Now;
+
+            var p = await _repo.GetParcel(pid);
+            var a = await _repo.GetAgent(logRequest.AgentName);
+            var l = p.ContactsLog.Single(cx => cx.ContactLogId == lid);
+
+            l.ContactAgent = a;
+            l.ContactChannel = logRequest.Channel;
+            l.ProjectPhase = logRequest.Phase;
+            l.DateAdded = logRequest.DateAdded;
+            l.Title = logRequest.Title;
+            l.Notes = logRequest.Notes;
+            //l.Created = dt;
+            l.LastModified = dt;
+            l.ModifiedBy = _APP_NAME;
+            //l.Parcels = new List<Parcel> { p };
+            //l.Contacts = new List<ContactInfo>();
+
+            var log = await _repo.UpdateContactLog(logRequest.ParcelIds, logRequest.ContactIds, l);
             return Json(new ContactLogDto(log));
         }
         #endregion
