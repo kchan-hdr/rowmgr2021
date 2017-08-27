@@ -1,13 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+VisualStudioVersion = 15.0.26730.8
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ROWM", "ROWM\ROWM.csproj", "{31360B6A-20FE-4159-A5F6-081E6126D04A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ROWM", "ROWM\ROWM.csproj", "{31360B6A-20FE-4159-A5F6-081E6126D04A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ROWM.Dal", "ROWM.Dal\ROWM.Dal.csproj", "{B84BA747-F2A6-4804-BE7A-5F76D5ED2826}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ROWM.Dal.Test", "ROWM.Dal.Test\ROWM.Dal.Test.csproj", "{12F6627B-C8AE-4A58-97DA-2F3900316B51}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgsFeatureUpdate", "AgsFeatureUpdate\AgsFeatureUpdate.csproj", "{9EBA766E-DDA1-49BD-845E-ADA468FBC00B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SunflowerParcel.Test", "SunflowerParcel.Test\SunflowerParcel.Test.csproj", "{A2BDF433-4688-4941-86A7-0E57845535AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,8 +31,19 @@ Global
 		{12F6627B-C8AE-4A58-97DA-2F3900316B51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12F6627B-C8AE-4A58-97DA-2F3900316B51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12F6627B-C8AE-4A58-97DA-2F3900316B51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EBA766E-DDA1-49BD-845E-ADA468FBC00B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EBA766E-DDA1-49BD-845E-ADA468FBC00B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EBA766E-DDA1-49BD-845E-ADA468FBC00B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EBA766E-DDA1-49BD-845E-ADA468FBC00B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2BDF433-4688-4941-86A7-0E57845535AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2BDF433-4688-4941-86A7-0E57845535AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2BDF433-4688-4941-86A7-0E57845535AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2BDF433-4688-4941-86A7-0E57845535AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A88049EB-5918-4889-960F-326EA033BE16}
 	EndGlobalSection
 EndGlobal

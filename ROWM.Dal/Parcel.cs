@@ -12,7 +12,7 @@ namespace ROWM.Dal
     [Table("Parcel", Schema = "ROWM")]
     public class Parcel
     {
-        public enum RowStatus { Impacted = 1, Relased }
+        public enum RowStatus { No_Activities = 0, Owner_Contacted, ROE_Obtained, Offer_Made, Easement_Signed, Compensation_Received }
 
         /// <summary>
         /// ID might be the same as APN
