@@ -167,16 +167,18 @@ namespace ROWM.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(this.ModelState);
 
+
             var dt = DateTimeOffset.Now;
 
-            // we have contact. domain values do not match. need to fix.
-            IFeatureUpdate fs = new SunflowerParcel();
-            var t = fs.UpdateFeature(pid, "Contacted");
-
             var p = await _repo.GetParcel(pid);
-            p.ParcelStatus = Parcel.RowStatus.Owner_Contacted;
-
             var a = await _repo.GetAgent(logRequest.AgentName);
+
+            logRequest.ParcelIds.Add(pid);
+            var myParcels = logRequest.ParcelIds.Distinct();
+            if ( ! await RecordParcelFirstContact(myParcels))
+            {
+                Trace.TraceWarning($"AddContactLog:: update feature status for '{pid}' failed");
+            }
 
             var l = new ContactLog
             {
@@ -193,8 +195,7 @@ namespace ROWM.Controllers
                 Contacts = new List<ContactInfo>()
             };
 
-            var log = await _repo.AddContactLog(logRequest.ParcelIds, logRequest.ContactIds, l);
-            await t;
+            var log = await _repo.AddContactLog(myParcels, logRequest.ContactIds, l);
 
             return Json(new ContactLogDto(log));
         }
@@ -225,6 +226,37 @@ namespace ROWM.Controllers
             var log = await _repo.UpdateContactLog(logRequest.ParcelIds, logRequest.ContactIds, l);
             return Json(new ContactLogDto(log));
         }
+        #region contact status helper
+        /// <summary>
+        /// update db and feature to Owner_Contacted, if was No_Activities
+        /// </summary>
+        /// <remarks>group all parcelIds into a single ags rest call</remarks>
+        /// <param name="parcelIds"></param>
+        /// <returns></returns>
+        async Task<bool> RecordParcelFirstContact(IEnumerable<string> parcelIds)
+        {
+            var good = true;
+            foreach( var pid in parcelIds)
+            {
+                var p = await _repo.GetParcel(pid);
+                if (p.ParcelStatus == Parcel.RowStatus.No_Activities)
+                {
+                    p.ParcelStatus = Parcel.RowStatus.Owner_Contacted;
+
+                    IFeatureUpdate fs = new SunflowerParcel();
+                    // we have contact. domain values do not match. need to fix.
+                    if (!await fs.UpdateFeature(p.ParcelId, "Contacted"))
+                    {
+                        good = false;
+                        Trace.TraceWarning($"update failed 'pid'");
+                    }
+                }
+            }
+
+            return good;
+        }
+        #endregion
+
         #endregion
         #region agents
         [Route("agents"), HttpGet]
