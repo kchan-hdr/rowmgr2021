@@ -82,6 +82,12 @@ namespace ROWM.Dal.Migrations
                     ParcelId = parcel["PID"].Value<string>(),
                     SitusAddress = parcel["Situs_Address"].Value<string>(),
                     Acreage = parcel["Acres"].Value<double>(),
+                    InitialEasementOffer = new Compensation(),
+                    InitialOptionOffer = new Compensation(),
+                    InitialROEOffer = new Compensation(),
+                    FinalEasementOffer = new Compensation(),
+                    FinalOptionOffer = new Compensation(),
+                    FinalROEOffer = new Compensation()
                 };
 
                 // owners
