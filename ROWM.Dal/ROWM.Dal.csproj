@@ -90,6 +90,10 @@
     <Compile Include="Migrations\201708190447140_lookup tables.Designer.cs">
       <DependentUpon>201708190447140_lookup tables.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201708301915081_compensation types.cs" />
+    <Compile Include="Migrations\201708301915081_compensation types.Designer.cs">
+      <DependentUpon>201708301915081_compensation types.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Owner.cs" />
     <Compile Include="OwnerRepository.cs" />
@@ -127,6 +131,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201708190447140_lookup tables.resx">
       <DependentUpon>201708190447140_lookup tables.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201708301915081_compensation types.resx">
+      <DependentUpon>201708301915081_compensation types.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -110,10 +110,8 @@ namespace ROWM.Controllers
         #endregion
         #region parcel
         [Route("parcels"), HttpGet]
-        public IEnumerable<string> GetAllParcels()
-        {
-            return _repo.GetParcels();
-        }
+        public IEnumerable<string> GetAllParcels() => _repo.GetParcels();
+        
 
         [Route("parcels/{pid}"), HttpGet]
         public async Task<ParcelGraph> GetParcel(string pid)
@@ -128,11 +126,29 @@ namespace ROWM.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var p = await _repo.GetParcel(pid);
+            var offer_t = offer.OfferType?.Trim().ToLower() ?? "";
 
-            p.InitialOffer = offer.OfferDate;
-            p.InitialOfferAmount = offer.Amount;
-            p.InitialOfferNotes = offer.Notes;
+            var p = await _repo.GetParcel(pid);
+            switch( offer_t)
+            {
+                case "roe":
+                    p.InitialROEOffer.OfferDate = offer.OfferDate;
+                    p.InitialROEOffer.OfferAmount = offer.Amount;
+                    p.InitialROEOffer.OfferNotes = offer.Notes;
+                    break;
+                case "option":
+                    p.InitialOptionOffer.OfferDate = offer.OfferDate;
+                    p.InitialOptionOffer.OfferAmount = offer.Amount;
+                    p.InitialOptionOffer.OfferNotes = offer.Notes;
+                    break;
+                case "easement":
+                    p.InitialEasementOffer.OfferDate = offer.OfferDate;
+                    p.InitialEasementOffer.OfferAmount = offer.Amount;
+                    p.InitialEasementOffer.OfferNotes = offer.Notes;
+                    break;
+                default:
+                    return BadRequest($"Unknown offer type '{offer_t}'");
+            }
 
             p.LastModified = DateTimeOffset.Now;
             p.ModifiedBy = _APP_NAME;
@@ -147,11 +163,30 @@ namespace ROWM.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            var offer_t = offer.OfferType?.Trim().ToLower() ?? "";
+
             var p = await _repo.GetParcel(pid);
 
-            p.FinalOffer = offer.OfferDate;
-            p.FinalOfferAmount = offer.Amount;
-            p.FinalOfferNotes = offer.Notes;
+            switch (offer_t)
+            {
+                case "roe":
+                    p.FinalROEOffer.OfferDate = offer.OfferDate;
+                    p.FinalROEOffer.OfferAmount = offer.Amount;
+                    p.FinalROEOffer.OfferNotes = offer.Notes;
+                    break;
+                case "option":
+                    p.FinalOptionOffer.OfferDate = offer.OfferDate;
+                    p.FinalOptionOffer.OfferAmount = offer.Amount;
+                    p.FinalOptionOffer.OfferNotes = offer.Notes;
+                    break;
+                case "easement":
+                    p.FinalEasementOffer.OfferDate = offer.OfferDate;
+                    p.FinalEasementOffer.OfferAmount = offer.Amount;
+                    p.FinalEasementOffer.OfferNotes = offer.Notes;
+                    break;
+                default:
+                    return BadRequest($"Unknown offer type '{offer_t}'");
+            }
 
             p.LastModified = DateTimeOffset.Now;
             p.ModifiedBy = _APP_NAME;
@@ -274,7 +309,8 @@ namespace ROWM.Controllers
             return new StatisticsDto
             {
                 NumberOfOwners = s.nOwners,
-                NumberOfParcels = s.nParcels
+                NumberOfParcels = s.nParcels,
+                ParcelStatus = await _repo.SnapshotParcelStatus()
             };
         }
         #endregion
@@ -317,6 +353,7 @@ namespace ROWM.Controllers
     #region offer dto
     public class OfferRequest
     {
+        public string OfferType { get; set; }   // ROE, Option, or Easement
         public DateTimeOffset OfferDate { get; set; }
         public double Amount { get; set; }
         public string Notes { get; set; }
@@ -327,7 +364,11 @@ namespace ROWM.Controllers
     {
         public int NumberOfParcels { get; set; }
         public int NumberOfOwners { get; set; }
+
+        public IEnumerable<OwnerRepository.SubTotal> ParcelStatus { get; set; }
+        public IEnumerable<OwnerRepository.SubTotal> Compensations { get; set; }
     }
+
     public class AgentDto
     {
         public Guid AgentId { get; set; }
@@ -458,13 +499,13 @@ namespace ROWM.Controllers
         public string SitusAddress { get; set; }
         public double Acreage { get; set; }
 
-        public DateTimeOffset FinalOffer { get; set; }
-        public double FinalOfferAmount { get; set; }
-        public string FinalOfferNotes { get; set; }
+        public Compensation InitialROEOffer { get; set; }
+        public Compensation FinalROEOffer { get; set; }
+        public Compensation InitialOptionOffer { get; set; }
+        public Compensation FinalOptionOffer { get; set; }
+        public Compensation InitialEasementOffer { get; set; }
+        public Compensation FinalEasementOffer { get; set; }
 
-        public DateTimeOffset InitialOffer { get; set; }
-        public double InitialOfferAmount { get; set; }
-        public string InitialOfferNotes { get; set; }
 
         public IEnumerable<OwnerDto> Owners { get; set; }
         public IEnumerable<ContactLogDto> ContactsLog { get; set; }
@@ -477,12 +518,12 @@ namespace ROWM.Controllers
             SitusAddress = p.SitusAddress;
             
             Acreage = p.Acreage;
-            FinalOffer = p.FinalOffer;
-            FinalOfferAmount = p.FinalOfferAmount;
-            FinalOfferNotes = p.FinalOfferNotes;
-            InitialOffer = p.InitialOffer;
-            InitialOfferAmount = p.InitialOfferAmount;
-            InitialOfferNotes = p.InitialOfferNotes;
+            InitialROEOffer = p.InitialROEOffer;
+            FinalROEOffer = p.FinalROEOffer;
+            InitialOptionOffer = p.InitialOptionOffer;
+            FinalOptionOffer = p.FinalOptionOffer;
+            InitialEasementOffer = p.InitialEasementOffer;
+            FinalEasementOffer = p.FinalEasementOffer;
 
             Owners = p.Owners.Select( ox => new OwnerDto(ox.Owner));
             ContactsLog =  p.ContactsLog.Select( cx => new ContactLogDto(cx));

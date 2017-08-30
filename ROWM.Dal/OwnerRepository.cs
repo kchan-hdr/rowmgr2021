@@ -23,7 +23,8 @@ namespace ROWM.Dal
         }
         #endregion
 
-        public async Task<( int nParcels, int nOwners)> Snapshot()
+        #region statistics
+        public async Task<(int nParcels, int nOwners)> Snapshot()
         {
             var np = await _ctx.Parcels.CountAsync();
             var no = await _ctx.Owners.CountAsync();
@@ -31,6 +32,28 @@ namespace ROWM.Dal
             return (np, no);
         }
 
+        public async Task<IEnumerable<SubTotal>> SnapshotParcelStatus()
+        {
+            var q = await (from p in _ctx.Parcels
+                     group p by p.ParcelStatus into psg
+                     select new { k = psg.Key, c = psg.Count() }).ToArrayAsync();
+
+            var list = new List<SubTotal>();
+            foreach (var psg in q)
+            {
+                list.Add(new SubTotal { Title = Enum.GetName(typeof(Parcel.RowStatus), psg.k), Count = psg.c });
+            }
+
+            return list;
+        }
+        #region dto
+        public class SubTotal
+        {
+            public string Title { get; set; }
+            public int Count { get; set; }
+        }
+        #endregion
+        #endregion
         public async Task<Owner> GetOwner(Guid uid)
         {
             return await _ctx.Owners

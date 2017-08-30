@@ -37,15 +37,17 @@ namespace ROWM.Dal
 
         public virtual ICollection<Document> Documents { get; set; }
 
-        // initial offer date
-        public DateTimeOffset InitialOffer { get; set; }
-        public Double InitialOfferAmount { get; set; }
-        public string InitialOfferNotes { get; set; }
+        // roe 
+        public Compensation InitialROEOffer { get; set; }
+        public Compensation FinalROEOffer { get; set; }
 
-        // final offer date
-        public DateTimeOffset FinalOffer { get; set; }
-        public Double FinalOfferAmount { get; set; }
-        public string FinalOfferNotes { get; set; }
+        // Option
+        public Compensation InitialOptionOffer { get; set; }
+        public Compensation FinalOptionOffer { get; set; }
+
+        // Easement
+        public Compensation InitialEasementOffer { get; set; }
+        public Compensation FinalEasementOffer { get; set; }
 
         // audit
         [Required]
@@ -53,5 +55,13 @@ namespace ROWM.Dal
         public DateTimeOffset LastModified { get; set; }
         [StringLength(50)]
         public string ModifiedBy { get; set; }
+    }
+
+    [ComplexType]
+    public class Compensation
+    {
+        public DateTimeOffset OfferDate { get; set; }
+        public Double OfferAmount { get; set; }
+        public string OfferNotes { get; set; }
     }
 }
