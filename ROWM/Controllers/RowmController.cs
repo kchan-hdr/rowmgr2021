@@ -483,11 +483,25 @@ namespace ROWM.Controllers
         public string SitusAddress { get; set; }
         public bool IsPrimaryOwner { get; set; }
 
+        public Compensation InitialROEOffer { get; set; }
+        public Compensation FinalROEOffer { get; set; }
+        public Compensation InitialOptionOffer { get; set; }
+        public Compensation FinalOptionOffer { get; set; }
+        public Compensation InitialEasementOffer { get; set; }
+        public Compensation FinalEasementOffer { get; set; }
+
         internal ParcelHeaderDto(Ownership o)
         {
             ParcelId = o.ParcelId;
             SitusAddress = o.Parcel.SitusAddress;
             IsPrimaryOwner = o.Ownership_t == Ownership.OwnershipType.Primary;
+
+            InitialEasementOffer = o.Parcel.InitialEasementOffer;
+            InitialOptionOffer = o.Parcel.InitialOptionOffer;
+            InitialROEOffer = o.Parcel.InitialROEOffer;
+            FinalEasementOffer = o.Parcel.FinalEasementOffer;
+            FinalOptionOffer = o.Parcel.FinalOptionOffer;
+            FinalROEOffer = o.Parcel.FinalROEOffer;
         }
     }
     #endregion
