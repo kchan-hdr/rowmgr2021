@@ -29,5 +29,6 @@ namespace ROWM.Dal
         public DbSet<Ownership_import> OwnershipWorking { get; set; }
 
         public ROWM_Context() : base(DbConnection.GetConnectionString()) { }
+        public ROWM_Context(string c) : base(c) { }
     }
 }

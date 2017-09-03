@@ -45392,7 +45392,7 @@ var DataServices = function () {
     return DataServices;
 }();
 // private services
-DataServices._baseUrl = "https://rowm-mezzy.azurewebsites.net/api";
+DataServices._baseUrl = "/api";
 module.exports = DataServices;
 
 /***/ }),

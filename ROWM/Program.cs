@@ -15,7 +15,7 @@ namespace ROWM
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
-                .UseStartup<Startup>()
+                .UseStartup(System.Reflection.Assembly.GetExecutingAssembly().FullName)
                 .UseApplicationInsights()
                 .Build();
 
