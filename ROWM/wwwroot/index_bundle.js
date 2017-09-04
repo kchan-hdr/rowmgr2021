@@ -44776,7 +44776,7 @@ var MapArea = function (_super) {
                 });
                 // https://gis05s.hdrgateway.com/arcgis/rest/services/California/SunFlower_Parcels_FS/FeatureServer
                 var parcelLay = new FeatureLayer({
-                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/SunFlower_Parcels_FS/FeatureServer",
+                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/Sunflower_Parcel_Stg_FS/FeatureServer",
                     outFields: ["*"]
                 });
                 parcelLay.popupTemplate = {
@@ -45392,7 +45392,7 @@ var DataServices = function () {
     return DataServices;
 }();
 // private services
-DataServices._baseUrl = "https://rowm-mezzy.azurewebsites.net/api";
+DataServices._baseUrl = "/api";
 module.exports = DataServices;
 
 /***/ }),

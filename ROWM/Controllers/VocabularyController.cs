@@ -22,7 +22,10 @@ namespace ROWM.Controllers
             var purposes = _Context.Purposes.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
             var rels = _Context.Representations.Where(r => r.IsActive).OrderBy(r => r.DisplayOrder);
 
-            return new Vocabulary(agents,channels,purposes,rels);
+            var pStatus = _Context.ParcelStatus.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
+            var rStatus = _Context.RoeStatus.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
+
+            return new Vocabulary(agents,channels,purposes,rels, pStatus, rStatus);
         }
 
         public class Lookup
@@ -38,13 +41,24 @@ namespace ROWM.Controllers
             public IEnumerable<Lookup> Channels { get; set; }
             public IEnumerable<Lookup> Purposes { get; set; }
             public IEnumerable<Lookup> RelationTypes { get; set; }
+            public IEnumerable<Lookup> ParcelStatus { get; set; }
+            public IEnumerable<Lookup> RoeStatus { get; set; }
 
-            internal Vocabulary(IEnumerable<Agent> agents, IEnumerable<Channel_Master> channels, IEnumerable<Purpose_Master> purposes, IEnumerable<Representation> rels)
+            internal Vocabulary(
+                IEnumerable<Agent> agents, 
+                IEnumerable<Channel_Master> channels, 
+                IEnumerable<Purpose_Master> purposes, 
+                IEnumerable<Representation> rels,
+                IEnumerable<ParcelStatus_Master> p,
+                IEnumerable<RoeStatus_Master> r)
             {
                 Agents = agents.Select(a => new Lookup { Code = a.AgentId.ToString(), Description = a.AgentName });
                 Channels = channels.Select(c => new Lookup { Code = c.ContactTypeCode, Description = c.Description, DisplayOrder = c.DisplayOrder });
                 Purposes = purposes.Select(c => new Lookup { Code = c.PurposeCode, Description = c.Description, DisplayOrder = c.DisplayOrder });
                 RelationTypes = rels.Select(c => new Lookup { Code = c.RelationTypeCode, Description = c.Description, DisplayOrder = c.DisplayOrder });
+
+                ParcelStatus = p.Select(c => new Lookup { Code = c.Code, Description = c.Description, DisplayOrder = c.DisplayOrder });
+                RoeStatus = r.Select(c => new Lookup { Code = c.Code, DisplayOrder = c.DisplayOrder, Description = c.Description });
             }
         }
     }
