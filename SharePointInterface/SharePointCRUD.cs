@@ -29,14 +29,29 @@ namespace SharePointInterface
             Folder docFolder = EnsureAndGetTargetFolder(_ctx, parcelFolders, targetPath);
             
             // Check if Doc exists
-
-            bool _docExists = false;
+            bool _docExists = DocExists(docFolder, docName);
+            if (!_docExists)
+            {
+                _docExists = InsertDoc(docFolder, docName, docBytes);
+            }
             return _docExists;
         }
 
         // Doc Exists
+        public bool DocExists(Folder folder, string docName)
+        {
+            // Check if Doc exists
+            bool _docExists = false;
+            return _docExists;
+        }
 
         // Insert Doc
+        public bool InsertDoc(Folder folder, string docName, byte[] docBytes)
+        {
+            // Check if Doc exists
+            bool _docExists = false;
+            return _docExists;
+        }
 
         /// <summary>
         /// Will ensure nested folder creation if folders in folderPath don't exist.
