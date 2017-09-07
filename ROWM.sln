@@ -15,6 +15,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SunflowerParcel.Test", "Sun
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharePointInterface", "SharePointInterface\SharePointInterface.csproj", "{1F998EDB-3A5D-4F61-A1E8-62B6AFBEA99B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharePointInterface.Test", "SharePointInterface.Test\SharePointInterface.Test.csproj", "{C31D42F1-DC7F-4C90-83C8-DE81BA5C3AA8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1F998EDB-3A5D-4F61-A1E8-62B6AFBEA99B} = {1F998EDB-3A5D-4F61-A1E8-62B6AFBEA99B}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +50,10 @@ Global
 		{1F998EDB-3A5D-4F61-A1E8-62B6AFBEA99B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F998EDB-3A5D-4F61-A1E8-62B6AFBEA99B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F998EDB-3A5D-4F61-A1E8-62B6AFBEA99B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C31D42F1-DC7F-4C90-83C8-DE81BA5C3AA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C31D42F1-DC7F-4C90-83C8-DE81BA5C3AA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C31D42F1-DC7F-4C90-83C8-DE81BA5C3AA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C31D42F1-DC7F-4C90-83C8-DE81BA5C3AA8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -9,13 +9,13 @@ using OfficeDevPnP.Core;
 
 namespace SharePointInterface
 {
-    class SharePointCRUD
+    public class SharePointCRUD
     {
         private ClientContext _ctx;
         private string _parcelsFolderName;
         private string _siteUrl;
 
-        public SharePointCRUD ()
+        public SharePointCRUD (string _appId, string _appSecret)
         {
             _parcelsFolderName = "4.3 Parcels";
             _siteUrl = "https://hdroneview.sharepoint.com/SF-CH-TS";
@@ -29,8 +29,9 @@ namespace SharePointInterface
             // Method using AppID
             // Using OfficeDevPnp.Core
             // https://github.com/SharePoint/PnP-Sites-Core/blob/master/Core/README.md
-            string _appId = "APPID";
-            string _appSecret = "SECRET";
+            //string _appId = "APPID";
+            //string _appSecret = "SECRET";
+
             AuthenticationManager authManager = new AuthenticationManager();
             _ctx = authManager.GetAppOnlyAuthenticatedContext(_siteUrl, _appId, _appSecret);
         }
@@ -53,111 +54,38 @@ namespace SharePointInterface
             return title;
         }
 
-        // List Parcels
-        public void GetFolders(string folderName)
+        // List Parcel Folders
+        public Folder GetFolder(string folderName)
         {
             Web web = _ctx.Web;
             List list = web.Lists.GetByTitle("Documents");
-            string parcelsFolderName = "Documents/4.0 ROW/4.3 Parcels";
+            string baseFolderName = "Documents/4.0 ROW/4.3 Parcels";
             string targetFolderPath = "Documents/4.0 ROW/4.3 Parcels/" + folderName;
             string folderTemplate = "Documents/4.0 ROW/4.3 Parcels/_Parcel No_LO Name";
             List <string> pathList = new List<string> { "4.0 ROW", "4.3 Parcels", folderName };
-            Folder folder = web.GetFolderByServerRelativeUrl(parcelsFolderName);
+            Folder baseFolder = web.GetFolderByServerRelativeUrl(baseFolderName);
             _ctx.Load(web);
             _ctx.Load(list);
-            _ctx.Load(folder);
+            _ctx.Load(baseFolder);
             _ctx.ExecuteQuery();
 
-            Console.WriteLine("Folder contents: {0}", folder.ItemCount);
-
-            if (folder.FolderExists(folderName))
+            if (baseFolder.FolderExists(folderName))
             {
-                Console.WriteLine("whoo-hoo");
-            } else
-            {
+                Console.WriteLine("Folder {0} exists in {1}", folderName, baseFolderName);
+            } else {
                 //EnsureAndGetTargetFolder(_ctx, list, pathList);
-                PasteFolder(folderTemplate, "Documents", parcelsFolderName, "Documents", folderName);
+                CopyPasteFolder(folderTemplate, "Documents", baseFolderName, "Documents", folderName);
             }
 
-            //_ctx.Load(list);
-            //_ctx.Load(list.RootFolder);
-            //_ctx.Load(list.RootFolder.Folders);
-            //_ctx.Load(list.RootFolder.Files);
-            //_ctx.ExecuteQuery();
-            //FolderCollection fcol = list.RootFolder.Folders;
-            //List<string> lstFile = new List<string>();
-            //foreach (Folder f in fcol)
-            //{
-            //    if (f.Name == folderName)
-            //    {
-            //        //_ctx.Load(f.Files);
-            //        //_ctx.ExecuteQuery();
-            //        //FileCollection fileCol = f.Files;
-            //        //foreach (File file in fileCol)
-            //        //{
-            //        //    lstFile.Add(file.Name);
-            //        //}
+            Folder newFolder = web.GetFolderByServerRelativeUrl(targetFolderPath);
+            _ctx.Load(newFolder);
+            _ctx.ExecuteQuery();
 
-            //        Console.WriteLine("Found {1}", folderName);
-            //    }
-            //}
+            return newFolder;
         }
 
-        public bool PasteFolder(string source, string sourceListName, string target, string targetListName, string targetFolderName)
-        {
-            bool isFolderPasted = false;
-            try
-            {
-                using (var context = _ctx)
-                {
-                    //context.Credentials = credentials;     
-                    var currentWeb = context.Web;
-                    var addFoldername = targetFolderName;
-                    var sourceFolder = currentWeb.GetFolderByServerRelativeUrl(source);
-                    context.Load(sourceFolder.Folders);
-                    context.Load(sourceFolder.Files);
-                    context.ExecuteQuery();
-                    Folder newfolder;
 
-                    try
-                    {
-                        newfolder = currentWeb.GetFolderByServerRelativeUrl(target);
-                        context.Load(newfolder);
-                        context.ExecuteQuery();
-                    }
-                    catch
-                    {
-                        target = target.Replace("/", string.Empty).Trim();
-                        var list = currentWeb.Lists.GetByTitle(target);
-                        newfolder = list.RootFolder;
-                        context.Load(newfolder);
-                        context.ExecuteQuery();
-                    }
-
-                    var currentFolder = newfolder.Folders.Add(addFoldername);
-                    context.Load(currentFolder);
-                    context.Load(currentFolder.Folders);
-                    context.Load(currentFolder.Files);
-                    context.ExecuteQuery();
-
-                    foreach (var file in sourceFolder.Files)
-                    {
-                        file.CopyTo(currentFolder.ServerRelativeUrl + "/" + file.Name, true);
-                        context.ExecuteQuery();
-                    }
-                    foreach (var cFolder in sourceFolder.Folders)
-                    {
-                        PasteFolder(cFolder.ServerRelativeUrl, sourceListName, currentFolder.ServerRelativeUrl, targetListName, cFolder.Name);
-                    }
-                    isFolderPasted = true;
-                }
-            }
-            catch (Exception ex)
-            {
-            }
-            return isFolderPasted;
-        }
-        // List Parcels
+        // List All Lists
         public ListCollection ListAllLists()
         {
             // Get folder list
@@ -256,6 +184,70 @@ namespace SharePointInterface
                 returnFolder = currentFolder;
             }
             return returnFolder;
+        }
+
+        /// <summary>
+        /// Recursively copy and paste nested folders creation if folders in target folderPath don't exist.
+        /// </summary>
+        /// <param name="source">Source Folder Path</param>
+        /// <param name="sourceListName">Source Document Library SharePoint List Object</param>
+        /// <param name="target">Target Folder Path</param>
+        /// <param name="targetListName">Targe Document Libarary SharePoint List Object</param>
+        /// <param name="targetFolderName">Target Base Folder Name</param>
+        /// <returns>bool success</returns>
+        public bool CopyPasteFolder(string source, string sourceListName, string target, string targetListName, string targetFolderName)
+        {
+            bool isFolderPasted = false;
+            try
+            {
+                using (var context = _ctx)
+                {
+                    //context.Credentials = credentials;     
+                    var currentWeb = context.Web;
+                    var addFoldername = targetFolderName;
+                    var sourceFolder = currentWeb.GetFolderByServerRelativeUrl(source);
+                    context.Load(sourceFolder.Folders);
+                    context.Load(sourceFolder.Files);
+                    context.ExecuteQuery();
+                    Folder newfolder;
+
+                    try
+                    {
+                        newfolder = currentWeb.GetFolderByServerRelativeUrl(target);
+                        context.Load(newfolder);
+                        context.ExecuteQuery();
+                    }
+                    catch
+                    {
+                        target = target.Replace("/", string.Empty).Trim();
+                        var list = currentWeb.Lists.GetByTitle(target);
+                        newfolder = list.RootFolder;
+                        context.Load(newfolder);
+                        context.ExecuteQuery();
+                    }
+
+                    var currentFolder = newfolder.Folders.Add(addFoldername);
+                    context.Load(currentFolder);
+                    context.Load(currentFolder.Folders);
+                    context.Load(currentFolder.Files);
+                    context.ExecuteQuery();
+
+                    foreach (var file in sourceFolder.Files)
+                    {
+                        file.CopyTo(currentFolder.ServerRelativeUrl + "/" + file.Name, true);
+                        context.ExecuteQuery();
+                    }
+                    foreach (var cFolder in sourceFolder.Folders)
+                    {
+                        CopyPasteFolder(cFolder.ServerRelativeUrl, sourceListName, currentFolder.ServerRelativeUrl, targetListName, cFolder.Name);
+                    }
+                    isFolderPasted = true;
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+            return isFolderPasted;
         }
     }
 }
