@@ -13,12 +13,27 @@ namespace SharePointInterface
     {
         private ClientContext _ctx;
         private string _parcelsFolderName;
+        private string _parcelsFolderTemplate;
         private string _siteUrl;
+        private Dictionary<string, string> _docTypes;
 
-        public SharePointCRUD (string _appId, string _appSecret)
+        public SharePointCRUD (string _appId, string _appSecret, Dictionary<string,string> docTypes = null)
         {
-            _parcelsFolderName = "4.3 Parcels";
+            _parcelsFolderName = "4.0 ROW/4.3 Parcels";
             _siteUrl = "https://hdroneview.sharepoint.com/SF-CH-TS";
+            _parcelsFolderTemplate = "Documents/4.0 ROW/4.3 Parcels/_Parcel No_LO Name";
+            if (docTypes == null)
+            {
+                _docTypes = new Dictionary<string, string>();
+                _docTypes.Add("0", "4.3.1 ROE/1 ROE Working");
+                _docTypes.Add("1", "4.3.1 ROE/2 ROE QC");
+                _docTypes.Add("2", "4.3.1 ROE/3 Final Sent to LO");
+                _docTypes.Add("3", "4.3.1 ROE/4 Signed");
+
+            } else
+            {
+                _docTypes = docTypes;
+            }
 
             // Method using Sharepoint Credentials
             //_ctx = new ClientContext(_siteUrl);
@@ -55,14 +70,22 @@ namespace SharePointInterface
         }
 
         // List Parcel Folders
-        public Folder GetFolder(string folderName)
+        public Folder GetOrCreateFolder(string folderName, string baseFolderName = "", string folderTemplate = "")
         {
+            if (String.IsNullOrWhiteSpace(baseFolderName))
+            {
+                baseFolderName = "Documents/" + _parcelsFolderName;
+            }
+            if (String.IsNullOrWhiteSpace(folderTemplate))
+            {
+                folderTemplate = _parcelsFolderTemplate;
+            }
+
             Web web = _ctx.Web;
             List list = web.Lists.GetByTitle("Documents");
-            string baseFolderName = "Documents/4.0 ROW/4.3 Parcels";
-            string targetFolderPath = "Documents/4.0 ROW/4.3 Parcels/" + folderName;
-            string folderTemplate = "Documents/4.0 ROW/4.3 Parcels/_Parcel No_LO Name";
-            List <string> pathList = new List<string> { "4.0 ROW", "4.3 Parcels", folderName };
+
+            string targetFolderPath = String.Format("{0}/{1}", baseFolderName, folderName);
+            //List <string> pathList = new List<string> { "4.0 ROW", "4.3 Parcels", folderName };
             Folder baseFolder = web.GetFolderByServerRelativeUrl(baseFolderName);
             _ctx.Load(web);
             _ctx.Load(list);
@@ -99,30 +122,64 @@ namespace SharePointInterface
         }
 
         // Upload Parcel Doc
-        public bool UploadParcelDoc(string pid, string docType, string docName, byte[] docBytes)
+        public bool UploadParcelDoc(string pid, string docType, string docName, byte[] docBytes, string baseFolderName = "")
         {
+            if (String.IsNullOrWhiteSpace(baseFolderName))
+            {
+                baseFolderName = _parcelsFolderName;
+            }
+
             // Get Parcel folder list
             Web web = _ctx.Web;
-            List parcelFolders = web.Lists.GetByTitle(_parcelsFolderName);
+            List parcelFolders = web.Lists.GetByTitle("Documents");
+
+            // Get Parcel Folder Name
+            string parcelFolderName = GetParcelFolderName(pid);
+
+            // Ensure parcel folder structure exists
+            Folder parcelFolder = GetOrCreateFolder(parcelFolderName);
 
             // Check if Parcel & Doc Type Folder Exists
-            List<string> targetPath = new List<string>() { pid, docType };
+            List<string> targetPath = GetDocTargetPath(baseFolderName, parcelFolderName, docType);
             Folder docFolder = EnsureAndGetTargetFolder(_ctx, parcelFolders, targetPath);
             
             // Check if Doc exists
-            bool _docExists = DocExists(docFolder, docName);
-            if (!_docExists)
+            bool docExists = DocExists(docFolder, docName);
+            if (!docExists)
             {
-                _docExists = InsertDoc(docFolder, docName, docBytes);
+                docExists = InsertDoc(docFolder, docName, docBytes);
             }
-            return _docExists;
+            return docExists;
+        }
+
+        public string GetParcelFolderName(string pid)
+        {
+            // Change to lookup if necessary
+            return pid;
+        }
+
+        public List<string> GetDocTargetPath(string baseFolderName, string parcelFolderName, string docType)
+        {
+            string doctypePath = docType;
+
+            // Lookup doctype path
+            if (_docTypes.TryGetValue(docType, out string val))
+            {
+                doctypePath = val;
+            }
+
+            doctypePath = String.Format("{0}/{1}/{2}", baseFolderName, parcelFolderName, doctypePath);
+            return doctypePath.Split('/').ToList();
         }
 
         // Doc Exists
         public bool DocExists(Folder folder, string docName)
         {
-            // Check if Doc exists
             bool _docExists = false;
+            // Check if Doc exists
+            File doc = folder.GetFile(docName);
+            _docExists = (doc != null);
+
             return _docExists;
         }
 
@@ -131,6 +188,34 @@ namespace SharePointInterface
         {
             // Check if Doc exists
             bool _docExists = false;
+
+            try
+            {
+                var info = new FileCreationInformation
+                {
+                    Content = docBytes,
+                    Overwrite = false,
+                    Url = String.Format("{0}/{1}", folder.ServerRelativeUrl, docName),
+                };
+
+                File file = folder.Files.Add(info);
+                folder.Update();
+                _ctx.Load(file, f => f.ListItemAllFields);
+                _ctx.ExecuteQuery();
+                _ctx.Load(file);
+
+                ListItem item = file.ListItemAllFields;
+                item["Title"] = "Title";
+                item.Update();
+                _ctx.ExecuteQuery();
+
+                _docExists = true;
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("Uploading Doc Failed: {0}", e.Message);
+            }
+    
             return _docExists;
         }
 
