@@ -80,5 +80,14 @@ namespace SharePointInterface.Test
             bool docExists = spCRUD.UploadParcelDoc("Test", "0", "test2.txt", bytes);
             Assert.IsTrue(docExists);
         }
+
+        [TestMethod, TestCategory("SharePointCRUD")]
+        public void GetParcelDoc()
+        {
+            SharePointCRUD spCRUD = new SharePointCRUD(_appId, _appSecret);
+            System.IO.Stream docStream = spCRUD.GetParcelDoc("Test", "0", "test2.txt");
+            Assert.IsNotNull(docStream);
+        }
+
     }
 }

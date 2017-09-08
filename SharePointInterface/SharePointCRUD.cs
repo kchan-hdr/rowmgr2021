@@ -152,6 +152,35 @@ namespace SharePointInterface
             return docExists;
         }
 
+        public System.IO.Stream GetParcelDoc(string pid, string docType, string docName, string baseFolderName = "")
+        {
+            if (String.IsNullOrWhiteSpace(baseFolderName))
+            {
+                baseFolderName = _parcelsFolderName;
+            }
+
+            // Get Parcel folder list
+            Web web = _ctx.Web;
+            List parcelFolders = web.Lists.GetByTitle("Documents");
+
+            // Get Parcel Folder Name
+            string parcelFolderName = GetParcelFolderName(pid);
+
+            // Ensure parcel folder structure exists
+            Folder parcelFolder = GetOrCreateFolder(parcelFolderName);
+
+            // Check if Parcel & Doc Type Folder Exists
+            List<string> targetPath = GetDocTargetPath(baseFolderName, parcelFolderName, docType);
+            Folder docFolder = EnsureAndGetTargetFolder(_ctx, parcelFolders, targetPath);
+
+            File doc = docFolder.GetFile(docName);
+            _ctx.Load(doc);
+            ClientResult<System.IO.Stream> fileStream = doc.OpenBinaryStream();
+            _ctx.ExecuteQuery();
+
+            return fileStream.Value;
+        }
+
         public string GetParcelFolderName(string pid)
         {
             // Change to lookup if necessary
