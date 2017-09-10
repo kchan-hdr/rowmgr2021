@@ -450,6 +450,7 @@ namespace ROWM.Controllers
     }
     public class ContactLogDto
     {
+        public Guid ContactLogId { get; set; }
         public IEnumerable<string> ParcelIds { get; set; }
         public IEnumerable<ContactInfoDto> ContactIds { get; set; }
         public DateTimeOffset DateAdded { get; set; }
@@ -461,6 +462,7 @@ namespace ROWM.Controllers
 
         internal ContactLogDto(ContactLog log)
         {
+            ContactLogId = log.ContactLogId;
             AgentName = log.ContactAgent?.AgentName ?? "";
             DateAdded = log.DateAdded;
             ContactType = log.ContactChannel;
