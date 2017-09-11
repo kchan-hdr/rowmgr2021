@@ -11,6 +11,7 @@ using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Http.Features;
+using geographia.ags;
 
 namespace ROWM
 {
@@ -53,6 +54,8 @@ namespace ROWM
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
+            services.AddSingleton<Controllers.ParcelStatusHelper>();
+            services.AddScoped<IFeatureUpdate, SunflowerParcel>();
 
             services.AddSwaggerGen(c =>
             {

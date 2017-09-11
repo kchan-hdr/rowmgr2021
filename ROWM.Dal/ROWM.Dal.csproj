@@ -94,6 +94,14 @@
     <Compile Include="Migrations\201708301915081_compensation types.Designer.cs">
       <DependentUpon>201708301915081_compensation types.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201709032212074_roe status.cs" />
+    <Compile Include="Migrations\201709032212074_roe status.Designer.cs">
+      <DependentUpon>201709032212074_roe status.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201709032218353_roe status.cs" />
+    <Compile Include="Migrations\201709032218353_roe status.Designer.cs">
+      <DependentUpon>201709032218353_roe status.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Owner.cs" />
     <Compile Include="OwnerRepository.cs" />
@@ -104,6 +112,7 @@
     <Compile Include="Purpose_Master.cs" />
     <Compile Include="Representation.cs" />
     <Compile Include="ROWM_Context.cs" />
+    <Compile Include="Status_Master.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -134,6 +143,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201708301915081_compensation types.resx">
       <DependentUpon>201708301915081_compensation types.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201709032212074_roe status.resx">
+      <DependentUpon>201709032212074_roe status.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201709032218353_roe status.resx">
+      <DependentUpon>201709032218353_roe status.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

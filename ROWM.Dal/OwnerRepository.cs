@@ -41,11 +41,19 @@ namespace ROWM.Dal
             var list = new List<SubTotal>();
             foreach (var psg in q)
             {
-                list.Add(new SubTotal { Title = Enum.GetName(typeof(Parcel.RowStatus), psg.k), Count = psg.c });
+                list.Add(new SubTotal { Title = psg.k.Code, Count = psg.c });
             }
 
             return list;
         }
+
+        public async Task<IEnumerable<SubTotal>> SnapshotRoeStatus()
+        {
+            return await (from p in _ctx.Parcels
+             group p by p.RoeStatusCode into psg
+             select new SubTotal { Title = psg.Key, Count = psg.Count() }).ToArrayAsync();
+        }
+
         #region dto
         public class SubTotal
         {
@@ -193,7 +201,7 @@ namespace ROWM.Dal
             {
                 _ctx.Entry<ContactLog>(log).State = EntityState.Modified;
             }
-
+            /*
             var existingPids = log.Parcels.Select(p => p.ParcelId).ToList();
             var existingCids = log.Contacts.Select(c => c.ContactId).ToList();
 
@@ -225,7 +233,7 @@ namespace ROWM.Dal
                     log.Contacts.Remove(cx);
                 }
             }
-
+            
             // Add new parcels & contacts
             if (newPids != null && newPids.Count() > 0)
             {
@@ -248,7 +256,7 @@ namespace ROWM.Dal
                     log.Contacts.Add(cx);
                 }
             }
-
+            */
 
             if (await WriteDb() <= 0)
                 throw new ApplicationException("update contact log failed");
@@ -366,6 +374,7 @@ namespace ROWM.Dal
                 }
                 catch ( Exception e )
                 {
+                    Trace.TraceError(e.Message);
                     throw;
                 }
             }

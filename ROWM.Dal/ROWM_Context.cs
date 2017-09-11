@@ -25,6 +25,9 @@ namespace ROWM.Dal
         public DbSet<Purpose_Master> Purposes { get; set; }
         public DbSet<Representation> Representations { get; set; }
 
+        public DbSet<ParcelStatus_Master> ParcelStatus { get; set; }
+        public DbSet<RoeStatus_Master> RoeStatus { get; set; }
+
         // for seed
         public DbSet<Ownership_import> OwnershipWorking { get; set; }
 

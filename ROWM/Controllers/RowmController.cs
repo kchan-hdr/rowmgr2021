@@ -19,10 +19,14 @@ namespace ROWM.Controllers
 
         #region ctor
         OwnerRepository _repo;
+        readonly ParcelStatusHelper _statusHelper;
+        readonly IFeatureUpdate _featureUpdate;
 
-        public RowmController(OwnerRepository r)
+        public RowmController(OwnerRepository r, ParcelStatusHelper h, IFeatureUpdate f)
         {
             _repo = r;
+            _statusHelper = h;
+            _featureUpdate = f;
         }
         #endregion
         #region owner
@@ -194,6 +198,65 @@ namespace ROWM.Controllers
             return Json(new ParcelGraph(await _repo.UpdateParcel(p)));
         }
         #endregion
+        #region parcel status
+        [HttpPut("parcels/{pid}/status/{statusCode}")]
+        public async Task<ParcelGraph> UpdateStatus(string pid, string statusCode)
+        {
+            var p = await _repo.GetParcel(pid);
+
+            List<Task> tks = new List<Task>();
+
+            try
+            {
+                var dv = _statusHelper.GetDomainValue(statusCode);
+                tks.Add( _featureUpdate.UpdateFeature(pid, dv));
+            }
+            catch( InvalidOperationException)
+            {
+                Trace.TraceWarning($"bad parcel status domain {statusCode}");
+            }
+
+            p.ParcelStatusCode = statusCode;
+            p.LastModified = DateTimeOffset.Now;
+            p.ModifiedBy = _APP_NAME;
+
+            tks.Add(_repo.UpdateParcel(p).ContinueWith( d => p = d.Result));
+
+            // p = await _repo.UpdateParcel(p);
+            await Task.WhenAll(tks);
+
+            return new ParcelGraph(p);
+        }
+        #endregion
+        #region roe status
+        [HttpPut("parcels/{pid}/roe/{statusCode}")]
+        public async Task<ParcelGraph> UpdateRoeStatus(string pid, string statusCode)
+        {
+            var p = await _repo.GetParcel(pid);
+
+            List<Task> tks = new List<Task>();
+
+            try
+            {
+
+                var dv = _statusHelper.GetRoeDomainValue(statusCode);
+                tks.Add( _featureUpdate.UpdateFeatureRoe(pid, dv));
+            }
+            catch( InvalidOperationException )
+            {
+                Trace.TraceWarning($"bad roe status domain {statusCode}");
+            }
+            p.RoeStatusCode = statusCode;
+            p.LastModified = DateTimeOffset.Now;
+            p.ModifiedBy = _APP_NAME;
+
+            tks.Add( _repo.UpdateParcel(p));
+
+            await Task.WhenAll(tks);
+
+            return new ParcelGraph(p);
+        }
+        #endregion
         #endregion
         #region logs
         [Route("parcels/{pid}/logs"), HttpPost]
@@ -274,13 +337,14 @@ namespace ROWM.Controllers
             foreach( var pid in parcelIds)
             {
                 var p = await _repo.GetParcel(pid);
-                if (p.ParcelStatus == Parcel.RowStatus.No_Activities)
+                if ( ParcelStatusHelper.HasNoContact(p))
                 {
-                    p.ParcelStatus = Parcel.RowStatus.Owner_Contacted;
+                    p.ParcelStatusCode = "Owner_Contacted";
+                    //p.ParcelStatus = Parcel.RowStatus.Owner_Contacted;
 
-                    IFeatureUpdate fs = new SunflowerParcel();
+                    // IFeatureUpdate fs = new SunflowerParcel();
                     // we have contact. domain values do not match. need to fix.
-                    if (!await fs.UpdateFeature(p.ParcelId, "Contacted"))
+                    if (!await _featureUpdate.UpdateFeature(p.ParcelId, 1))
                     {
                         good = false;
                         Trace.TraceWarning($"update failed 'pid'");
@@ -386,6 +450,7 @@ namespace ROWM.Controllers
     }
     public class ContactLogDto
     {
+        public Guid ContactLogId { get; set; }
         public IEnumerable<string> ParcelIds { get; set; }
         public IEnumerable<ContactInfoDto> ContactIds { get; set; }
         public DateTimeOffset DateAdded { get; set; }
@@ -397,6 +462,7 @@ namespace ROWM.Controllers
 
         internal ContactLogDto(ContactLog log)
         {
+            ContactLogId = log.ContactLogId;
             AgentName = log.ContactAgent?.AgentName ?? "";
             DateAdded = log.DateAdded;
             ContactType = log.ContactChannel;
@@ -509,7 +575,9 @@ namespace ROWM.Controllers
     public class ParcelGraph
     {
         public string ParcelId { get; set; }
-        public string ParcelStatus { get; set; }
+        public string ParcelStatusCode { get; set; }
+        public string ParcelStatus => this.ParcelStatusCode;        // to be removed
+        public string RoeStatusCode { get; set; }
         public string SitusAddress { get; set; }
         public double Acreage { get; set; }
 
@@ -528,7 +596,9 @@ namespace ROWM.Controllers
         internal ParcelGraph( Parcel p)
         {
             ParcelId = p.ParcelId;
-            ParcelStatus = Enum.GetName(typeof(Parcel.RowStatus), p.ParcelStatus);
+            ParcelStatusCode = p.ParcelStatusCode;
+            //ParcelStatus = Enum.GetName(typeof(Parcel.RowStatus), p.ParcelStatus);
+            RoeStatusCode = p.RoeStatusCode;
             SitusAddress = p.SitusAddress;
             
             Acreage = p.Acreage;

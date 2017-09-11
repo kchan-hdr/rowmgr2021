@@ -8,6 +8,7 @@ namespace geographia.ags
 {
     public interface IFeatureUpdate
     {
-        Task<bool> UpdateFeature(string parcelId, string status);
+        Task<bool> UpdateFeature(string parcelId, int status);
+        Task<bool> UpdateFeatureRoe(string parcelId, int status);
     }
 }
