@@ -14,10 +14,13 @@ namespace ROWM.Controllers
     {
         #region ctor
         readonly OwnerRepository _repo;
-        readonly SunflowerParcel _fs = new SunflowerParcel();       // DI soon
-        public ManagerController(OwnerRepository r)
+        readonly SunflowerParcel _fs;
+        readonly ParcelStatusHelper _parser;
+        public ManagerController(OwnerRepository r, ParcelStatusHelper p, IFeatureUpdate f)
         {
             _repo = r;
+            _parser = p;
+            _fs = (SunflowerParcel)f;
         }
         #endregion
 
@@ -26,19 +29,22 @@ namespace ROWM.Controllers
         /// Shouldn't have to do this too often. Since we're the master.
         /// </summary>
         /// <returns></returns>
-        [HttpGet("agsSync")]
+        [HttpGet("agsSync"), Obsolete()]
         public async Task<IEnumerable<(string parcel, string status)>> Sync()
         {
             var parcels = await _fs.GetAllParcels();
 
             foreach (var parcel in parcels)
             {
-                var p = await _repo.GetParcel(parcel.ParcelId);
-                var s = Parse(parcel.ParcelStatus);
-                if (p.ParcelStatus != s)
+                if (int.TryParse(parcel.ParcelStatus, out var s))
                 {
-                    p.ParcelStatus = s;
-                    await _repo.UpdateParcel(p);
+                    var p = await _repo.GetParcel(parcel.ParcelId);
+                    var sc = _parser.ParseDomainValue(s);
+                    if (p.ParcelStatusCode != sc)
+                    {
+                        p.ParcelStatusCode = sc;
+                        await _repo.UpdateParcel(p);
+                    }
                 }
             }
 
@@ -56,7 +62,7 @@ namespace ROWM.Controllers
                 3 -  Offer Made
                 4 – Easement Signed
                 5 – Compensation Received
-         */
+
         static Parcel.RowStatus Parse(string agsStatus)
         {
             switch (agsStatus)
@@ -68,6 +74,7 @@ namespace ROWM.Controllers
                     return Parcel.RowStatus.No_Activities;
             }
         }
+        */
         #endregion
-}
+    }
 }

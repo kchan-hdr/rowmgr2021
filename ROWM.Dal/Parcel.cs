@@ -12,8 +12,6 @@ namespace ROWM.Dal
     [Table("Parcel", Schema = "ROWM")]
     public class Parcel
     {
-        public enum RowStatus { No_Activities = 0, Owner_Contacted, ROE_Obtained, Offer_Made, Easement_Signed, Compensation_Received }
-
         /// <summary>
         /// ID might be the same as APN
         /// </summary>
@@ -23,7 +21,13 @@ namespace ROWM.Dal
         [StringLength(800)]
         public string SitusAddress { get; set; }
 
-        public RowStatus ParcelStatus { get; set; }
+        [ForeignKey("ParcelStatus"), StringLength(20)]
+        public string ParcelStatusCode { get; set; }
+        public virtual ParcelStatus_Master ParcelStatus { get; set; }
+
+        [ForeignKey("RoeStatus"), StringLength(20)]
+        public string RoeStatusCode { get; set; }
+        public virtual RoeStatus_Master RoeStatus { get; set; }
 
         public double Acreage { get; set; }
 

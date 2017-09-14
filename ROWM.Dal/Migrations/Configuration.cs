@@ -44,6 +44,26 @@ namespace ROWM.Dal.Migrations
                 new Channel_Master { ContactTypeCode = "Text Message", Description = "Text Message", DisplayOrder = 6, IsActive = true }
             );
 
+            context.ParcelStatus.AddOrUpdate(
+                c => c.Code,
+                new ParcelStatus_Master { Code = "No_Activity", Description = "No Activity", DomainValue = 0, DisplayOrder = 0, IsActive = true },
+                new ParcelStatus_Master { Code = "Owner_Contacted", Description = "Owner Contacted", DomainValue = 1, DisplayOrder = 1, IsActive = true },
+                new ParcelStatus_Master { Code = "ROE_Obtained", Description = "ROE Obtained", DomainValue = 2, DisplayOrder = 2, IsActive = true },
+                new ParcelStatus_Master { Code = "Offer_Made", Description = "Offer Made", DomainValue = 3, DisplayOrder = 3, IsActive = true },
+                new ParcelStatus_Master { Code = "Easement_Signed", Description = "Easement Signed", DomainValue = 4, DisplayOrder = 4, IsActive = true },
+                new ParcelStatus_Master { Code = "Compensation_Check_Cut", Description = "Compensation Check Cut", DomainValue = 5, DisplayOrder = 5, IsActive = true },
+                new ParcelStatus_Master { Code = "Documents_Recorded", Description = "Documents Recorded", DomainValue = 6, DisplayOrder = 6, IsActive = true },
+                new ParcelStatus_Master { Code = "Compensation_Received_by_Owner", Description = "Compensation Received by Owner", DomainValue = 7, DisplayOrder = 7, IsActive = true }
+            );
+
+            context.RoeStatus.AddOrUpdate(
+                c => c.Code,
+                new RoeStatus_Master { Code = "No_Activity", Description = "No Activity", DomainValue = 0, DisplayOrder = 0, IsActive = true },
+                new RoeStatus_Master { Code = "ROE_In_Progress", Description = "ROE In Progress", DomainValue = 1, DisplayOrder = 1, IsActive = true },
+                new RoeStatus_Master { Code = "ROE_Obtained", Description = "ROE Obtained", DomainValue = 2, DisplayOrder = 2, IsActive = true },
+                new RoeStatus_Master { Code = "ROE_with_Conditions", Description = "ROE With Conditions", DomainValue = 3, DisplayOrder = 3, IsActive = true },
+                new RoeStatus_Master { Code = "No_Access", Description = "No Access", DomainValue = 4, DisplayOrder = 4, IsActive = true }
+            );
 
             context.Agents.AddOrUpdate(
                 a => a.AgentName,
