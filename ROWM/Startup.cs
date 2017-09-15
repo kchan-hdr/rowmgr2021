@@ -12,6 +12,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Http.Features;
 using geographia.ags;
+using SharePointInterface;
 
 namespace ROWM
 {
@@ -24,6 +25,10 @@ namespace ROWM
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
+            if (env.IsDevelopment())
+            {
+                builder.AddUserSecrets<Startup>();
+            }
             Configuration = builder.Build();
         }
 
@@ -51,6 +56,7 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddSingleton<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, SunflowerParcel>();
+            services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
             services.AddSwaggerGen(c =>
             {

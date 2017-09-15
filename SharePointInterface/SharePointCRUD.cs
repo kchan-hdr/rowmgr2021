@@ -9,7 +9,21 @@ using OfficeDevPnP.Core;
 
 namespace SharePointInterface
 {
-    public class SharePointCRUD
+    public interface ISharePointCRUD
+    {
+        string GetSiteTitle();
+        Folder GetOrCreateFolder(string folderName, string baseFolderName, string folderTemplate);
+        ListCollection ListAllLists();
+        bool UploadParcelDoc(string pid, string docType, string docName, byte[] docBytes, string baseFolderName);
+        System.IO.Stream GetParcelDoc(string pid, string docType, string docName, string baseFolderName);
+        string GetParcelFolderName(string pid);
+        List<string> GetDocTargetPath(string baseFolderName, string parcelFolderName, string docType);
+        bool DocExists(Folder folder, string docName);
+        bool InsertDoc(Folder folder, string docName, byte[] docBytes);
+        bool CopyPasteFolder(string source, string sourceListName, string target, string targetListName, string targetFolderName);
+    }
+
+    public class SharePointCRUD : ISharePointCRUD
     {
         private ClientContext _ctx;
         private string _parcelsFolderName;
@@ -17,7 +31,7 @@ namespace SharePointInterface
         private string _siteUrl;
         private Dictionary<string, string> _docTypes;
 
-        public SharePointCRUD (string _appId, string _appSecret, Dictionary<string,string> docTypes = null)
+        public SharePointCRUD (string _appId = null, string _appSecret = null, Dictionary<string,string> docTypes = null)
         {
             _parcelsFolderName = "4.0 ROW/4.3 Parcels";
             _siteUrl = "https://hdroneview.sharepoint.com/SF-CH-TS";
@@ -35,19 +49,26 @@ namespace SharePointInterface
                 _docTypes = docTypes;
             }
 
-            // Method using Sharepoint Credentials
-            //_ctx = new ClientContext(_siteUrl);
-            //var passWord = new SecureString();
-            //foreach (char c in "pwd".ToCharArray()) passWord.AppendChar(c);
-            //_ctx.Credentials = new SharePointOnlineCredentials("<sharepoint_user>@hdrinc.com", passWord);
+            if (_appId == null || _appSecret == null )
+            {
+                _appId = "a6fad0e8-3e1f-42eb-89f2-6cb8e1dcb329";
+                _appSecret = "FMMJTzMMkP8CZOsL1IP3JvSoVWAOrF90zGxKVmUc2tc=";
 
-            // Method using AppID
-            // Using OfficeDevPnp.Core
-            // https://github.com/SharePoint/PnP-Sites-Core/blob/master/Core/README.md
-            //string _appId = "APPID";
-            //string _appSecret = "SECRET";
+            }
 
-            AuthenticationManager authManager = new AuthenticationManager();
+    // Method using Sharepoint Credentials
+    //_ctx = new ClientContext(_siteUrl);
+    //var passWord = new SecureString();
+    //foreach (char c in "pwd".ToCharArray()) passWord.AppendChar(c);
+    //_ctx.Credentials = new SharePointOnlineCredentials("<sharepoint_user>@hdrinc.com", passWord);
+
+    // Method using AppID
+    // Using OfficeDevPnp.Core
+    // https://github.com/SharePoint/PnP-Sites-Core/blob/master/Core/README.md
+    //string _appId = "APPID";
+    //string _appSecret = "SECRET";
+
+    AuthenticationManager authManager = new AuthenticationManager();
             _ctx = authManager.GetAppOnlyAuthenticatedContext(_siteUrl, _appId, _appSecret);
         }
 
@@ -124,6 +145,7 @@ namespace SharePointInterface
         // Upload Parcel Doc
         public bool UploadParcelDoc(string pid, string docType, string docName, byte[] docBytes, string baseFolderName = "")
         {
+
             if (String.IsNullOrWhiteSpace(baseFolderName))
             {
                 baseFolderName = _parcelsFolderName;
@@ -138,6 +160,7 @@ namespace SharePointInterface
 
             // Ensure parcel folder structure exists
             Folder parcelFolder = GetOrCreateFolder(parcelFolderName);
+
 
             // Check if Parcel & Doc Type Folder Exists
             List<string> targetPath = GetDocTargetPath(baseFolderName, parcelFolderName, docType);
@@ -184,6 +207,11 @@ namespace SharePointInterface
         public string GetParcelFolderName(string pid)
         {
             // Change to lookup if necessary
+
+            // remove sharepoint reserved chars
+            // https://support.microsoft.com/en-us/help/2933738/restrictions-and-limitations-when-you-sync-sharepoint-libraries-to-you
+            // ~, \, /, :, *, ?, ", <, >, | , # , %
+            // 400 Char length limit
             return pid;
         }
 
@@ -191,6 +219,10 @@ namespace SharePointInterface
         {
             string doctypePath = docType;
 
+            if (string.IsNullOrWhiteSpace(docType))
+            {
+                docType = _docTypes.Keys.First<string>();
+            }
             // Lookup doctype path
             if (_docTypes.TryGetValue(docType, out string val))
             {

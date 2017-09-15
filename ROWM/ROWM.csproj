@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
     <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
+    <UserSecretsId>4e6ae26c-e0fb-4704-956e-f3b98b5888da</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.1.3" />
@@ -14,6 +15,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.2" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="1.1.2" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="1.1.1" />
@@ -28,6 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AgsFeatureUpdate\AgsFeatureUpdate.csproj" />
     <ProjectReference Include="..\ROWM.Dal\ROWM.Dal.csproj" />
+    <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj" />
   </ItemGroup>
 
 </Project>

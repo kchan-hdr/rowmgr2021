@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SharePointInterface;
 
 namespace ROWM.Controllers
 {
@@ -20,13 +21,15 @@ namespace ROWM.Controllers
     public class DocumentController : Controller
     {
         static readonly string _APP_NAME = "ROWM";
+        private readonly ISharePointCRUD _sharePointCRUD; 
 
         #region ctor
         OwnerRepository _repo;
 
-        public DocumentController(OwnerRepository r)
+        public DocumentController(OwnerRepository r, ISharePointCRUD sp)
         {
             _repo = r;
+            _sharePointCRUD = sp;
         }
         #endregion
 
@@ -161,9 +164,11 @@ namespace ROWM.Controllers
                 section = await reader.ReadNextSectionAsync();
             }
 
+            var bb = System.IO.File.ReadAllBytes(targetFilePath);
 
             // Bind form data to a model
             var header = new DocumentHeader();
+            /*
             var formValueProvider = new FormValueProvider(
                 BindingSource.Form,
                 new FormCollection(formAccumulator.GetResults()),
@@ -179,8 +184,8 @@ namespace ROWM.Controllers
                     return BadRequest(ModelState);
                 }
             }
+            
 
-            var bb = System.IO.File.ReadAllBytes(targetFilePath);
             var agent = await _repo.GetAgent(header.AgentName);
 
             var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent.AgentId, bb);
@@ -190,6 +195,12 @@ namespace ROWM.Controllers
             await _repo.UpdateParcel(myParcel);
 
             header.DocumentId = d.DocumentId;
+
+            _sharePointCRUD.UploadParcelDoc(pid, header.DocumentType, sourceFilename, bb, null);
+
+ *             */
+            sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename);
+            _sharePointCRUD.UploadParcelDoc(pid, null, sourceFilename, bb, null);
 
             return Json(header);
         }
