@@ -260,7 +260,7 @@ namespace SharePointInterface
         {
             string doctypePath = docType;
 
-            if (string.IsNullOrWhiteSpace(docType))
+            if (string.IsNullOrWhiteSpace(docType) || !_docTypes.ContainsKey(docType))
             {
                 //docType = _docTypes.Keys.First<string>();
                 docType = "Other";
@@ -269,7 +269,7 @@ namespace SharePointInterface
             if (_docTypes.TryGetValue(docType, out string val))
             {
                 doctypePath = val;
-            }
+            } 
 
             doctypePath = String.Format("{0}/{1}/{2}", baseFolderName, parcelFolderName, doctypePath);
             return doctypePath.Split('/').ToList();
