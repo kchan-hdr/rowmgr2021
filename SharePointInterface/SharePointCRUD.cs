@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Security;
 using Microsoft.SharePoint.Client;
 using OfficeDevPnP.Core;
+using System.Text.RegularExpressions;
 
 namespace SharePointInterface
 {
@@ -39,7 +40,7 @@ namespace SharePointInterface
             if (docTypes == null)
             {
                 _docTypes = new Dictionary<string, string>();
-                _docTypes.Add("Other", "Other");
+                _docTypes.Add("Other", "4.3.7 Reference");
                 _docTypes.Add("ROE Package Original", "4.3.1 ROE/3 Final Sent to LO");
                 _docTypes.Add("ROE Package Updated", "4.3.1 ROE/3 Final Sent to LO");
                 _docTypes.Add("ROE Package Received by Owner", "4.3.1 ROE/4 Signed");
@@ -245,7 +246,13 @@ namespace SharePointInterface
             // remove sharepoint reserved chars
             // https://support.microsoft.com/en-us/help/2933738/restrictions-and-limitations-when-you-sync-sharepoint-libraries-to-you
             // ~, \, /, :, *, ?, ", <, >, | , # , %
+            pid = CleanInput(pid);
+
             // 400 Char length limit
+            if (pid.Length > 400)
+            {
+                pid = pid.Substring(0, 400);
+            }
             return pid;
         }
 
@@ -255,7 +262,8 @@ namespace SharePointInterface
 
             if (string.IsNullOrWhiteSpace(docType))
             {
-                docType = _docTypes.Keys.First<string>();
+                //docType = _docTypes.Keys.First<string>();
+                docType = "Other";
             }
             // Lookup doctype path
             if (_docTypes.TryGetValue(docType, out string val))
@@ -428,6 +436,23 @@ namespace SharePointInterface
             {
             }
             return isFolderPasted;
+        }
+
+        static string CleanInput(string strIn)
+        {
+            // Replace invalid characters with empty strings.
+            // ~, \, /, :, *, ?, ", <, >, | , # , %
+            try
+            {
+                return Regex.Replace(strIn, @"[^,\w\s\.@-]", "",
+                                     RegexOptions.None, TimeSpan.FromSeconds(1.5));
+            }
+            // If we timeout when replacing invalid characters, 
+            // we should return Empty.
+            catch (RegexMatchTimeoutException)
+            {
+                return String.Empty;
+            }
         }
     }
 }

@@ -168,7 +168,7 @@ namespace ROWM.Controllers
 
             // Bind form data to a model
             var header = new DocumentHeader();
-            /*
+
             var formValueProvider = new FormValueProvider(
                 BindingSource.Form,
                 new FormCollection(formAccumulator.GetResults()),
@@ -196,12 +196,19 @@ namespace ROWM.Controllers
 
             header.DocumentId = d.DocumentId;
 
-            _sharePointCRUD.UploadParcelDoc(pid, header.DocumentType, sourceFilename, bb, null);
 
- *             */
             sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename);
-            _sharePointCRUD.UploadParcelDoc(pid, null, sourceFilename, bb, null);
-
+            Ownership primaryOwner = myParcel.Owners.First<Ownership>(o => o.Ownership_t == Ownership.OwnershipType.Primary);
+            string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
+            try
+            {
+                _sharePointCRUD.UploadParcelDoc(parcelName, header.DocumentType, sourceFilename, bb, null);
+            }
+            catch (Exception e)
+            { 
+                // TODO: Return error to user?
+                Console.WriteLine("Error uploading document {0} type {1} to Sharepoint for {2}", sourceFilename, header.DocumentType, parcelName);
+            }
             return Json(header);
         }
 
