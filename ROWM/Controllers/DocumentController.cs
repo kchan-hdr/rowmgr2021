@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SharePointInterface;
 
 namespace ROWM.Controllers
 {
@@ -20,13 +21,15 @@ namespace ROWM.Controllers
     public class DocumentController : Controller
     {
         static readonly string _APP_NAME = "ROWM";
+        private readonly ISharePointCRUD _sharePointCRUD; 
 
         #region ctor
         OwnerRepository _repo;
 
-        public DocumentController(OwnerRepository r)
+        public DocumentController(OwnerRepository r, ISharePointCRUD sp)
         {
             _repo = r;
+            _sharePointCRUD = sp;
         }
         #endregion
 
@@ -161,9 +164,11 @@ namespace ROWM.Controllers
                 section = await reader.ReadNextSectionAsync();
             }
 
+            var bb = System.IO.File.ReadAllBytes(targetFilePath);
 
             // Bind form data to a model
             var header = new DocumentHeader();
+
             var formValueProvider = new FormValueProvider(
                 BindingSource.Form,
                 new FormCollection(formAccumulator.GetResults()),
@@ -179,8 +184,8 @@ namespace ROWM.Controllers
                     return BadRequest(ModelState);
                 }
             }
+            
 
-            var bb = System.IO.File.ReadAllBytes(targetFilePath);
             var agent = await _repo.GetAgent(header.AgentName);
 
             var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent.AgentId, bb);
@@ -191,6 +196,19 @@ namespace ROWM.Controllers
 
             header.DocumentId = d.DocumentId;
 
+
+            sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename);
+            Ownership primaryOwner = myParcel.Owners.First<Ownership>(o => o.Ownership_t == Ownership.OwnershipType.Primary);
+            string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
+            try
+            {
+                _sharePointCRUD.UploadParcelDoc(parcelName, header.DocumentType, sourceFilename, bb, null);
+            }
+            catch (Exception e)
+            { 
+                // TODO: Return error to user?
+                Console.WriteLine("Error uploading document {0} type {1} to Sharepoint for {2}", sourceFilename, header.DocumentType, parcelName);
+            }
             return Json(header);
         }
 
