@@ -374,7 +374,8 @@ namespace ROWM.Controllers
             {
                 NumberOfOwners = s.nOwners,
                 NumberOfParcels = s.nParcels,
-                ParcelStatus = await _repo.SnapshotParcelStatus()
+                ParcelStatus = await _repo.SnapshotParcelStatus(),
+                RoeStatus = await _repo.SnapshotRoeStatus()
             };
         }
         #endregion
@@ -430,6 +431,7 @@ namespace ROWM.Controllers
         public int NumberOfOwners { get; set; }
 
         public IEnumerable<OwnerRepository.SubTotal> ParcelStatus { get; set; }
+        public IEnumerable<OwnerRepository.SubTotal> RoeStatus { get; set; }
         public IEnumerable<OwnerRepository.SubTotal> Compensations { get; set; }
     }
 
