@@ -55,7 +55,9 @@ namespace ROWM
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddSingleton<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, SunflowerParcel>();
+            services.AddScoped<IFeatureUpdate, SunflowerParcel>( fac => 
+                new SunflowerParcel("https://gis05s.hdrgateway.com/arcgis/rest/services/California/SunFlower_Parcels_FS/FeatureServer") 
+            );
 
             services.AddSwaggerGen(c =>
             {
