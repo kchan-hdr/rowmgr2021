@@ -11,6 +11,7 @@ using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Http.Features;
+using geographia.ags;
 
 namespace ROWM
 {
@@ -53,6 +54,10 @@ namespace ROWM
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
+            services.AddSingleton<Controllers.ParcelStatusHelper>();
+            services.AddScoped<IFeatureUpdate, SunflowerParcel>( fac => 
+                new SunflowerParcel("https://gis05s.hdrgateway.com/arcgis/rest/services/California/SunFlower_Parcels_FS/FeatureServer") 
+            );
 
             services.AddSwaggerGen(c =>
             {
