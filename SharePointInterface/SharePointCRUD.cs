@@ -256,7 +256,32 @@ namespace SharePointInterface
             return pid;
         }
 
-        public List<string> GetDocTargetPath(string baseFolderName, string parcelFolderName, string docType)
+        public string GetParcelFolderURL(string pid, string baseFolderName = "")
+        {
+            string parcelFolderURL = null;
+
+            if (String.IsNullOrWhiteSpace(baseFolderName))
+            {
+                baseFolderName = "Documents/" + _parcelsFolderName;
+            }
+
+            Web web = _ctx.Web;
+            Folder baseFolder = web.GetFolderByServerRelativeUrl(baseFolderName);
+            _ctx.Load(web);
+            _ctx.Load(baseFolder);
+            _ctx.ExecuteQuery();
+
+            pid = GetParcelFolderName(pid);
+            if (baseFolder.FolderExists(pid))
+            {
+                parcelFolderURL = String.Format("{0}/{1}/{2}", _siteUrl, baseFolderName, pid);
+                parcelFolderURL = System.Uri.EscapeUriString(parcelFolderURL);
+            }
+
+            return parcelFolderURL;
+        }
+
+            public List<string> GetDocTargetPath(string baseFolderName, string parcelFolderName, string docType)
         {
             string doctypePath = docType;
 

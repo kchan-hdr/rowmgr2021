@@ -89,5 +89,16 @@ namespace SharePointInterface.Test
             Assert.IsNotNull(docStream);
         }
 
+        [TestMethod, TestCategory("SharePointCRUD")]
+        public void GetParcelFolderURL()
+        {
+            SharePointCRUD spCRUD = new SharePointCRUD(_appId, _appSecret);
+            string expected = "https://hdroneview.sharepoint.com/SF-CH-TS/Documents/4.0%20ROW/4.3%20Parcels/055150000000100C%20MOONEY,%20PATRICIA%20D%20TRUST";
+            // Ending illegal sharepoint Characters removed
+            string actual = spCRUD.GetParcelFolderURL("055150000000100C MOONEY, PATRICIA D TRUST/&?#<>+"); 
+            Assert.AreEqual(expected, actual);
+            actual = spCRUD.GetParcelFolderURL("Folder that doesn't exist returns null");
+            Assert.AreEqual(null, actual);
+        }
     }
 }
