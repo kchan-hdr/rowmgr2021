@@ -309,10 +309,10 @@ namespace ROWM.Controllers
             var a = await _repo.GetAgent(logRequest.AgentName);
             var l = p.ContactsLog.Single(cx => cx.ContactLogId == lid);
 
-            l.ContactAgent = a;
-            l.ContactChannel = logRequest.Channel;
-            l.ProjectPhase = logRequest.Phase;
-            l.DateAdded = logRequest.DateAdded;
+            //l.ContactAgent = a;
+            //l.ContactChannel = logRequest.Channel;
+            //l.ProjectPhase = logRequest.Phase;
+            //l.DateAdded = logRequest.DateAdded;
             l.Title = logRequest.Title;
             l.Notes = logRequest.Notes;
             //l.Created = dt;
