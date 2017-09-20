@@ -22,7 +22,7 @@ namespace geographia.ags
 
         public async Task<IEnumerable<Status_dto>> GetAllParcels()
         {
-            var req = $"{_URL}/{_LAYERID}/query?f=json&where=OBJECTID is not null&returnGeometry=false&returnIdsOnly=false&outFields=OBJECTID,PID,ParcelStatus,ROE_Status";
+            var req = $"{_URL}/{_LAYERID}/query?f=json&where=OBJECTID is not null&returnGeometry=false&returnIdsOnly=false&outFields=OBJECTID,PID,ParcelStatus,ROE_Status,Documents";
             var r = await GetAll<Status_dto>(req, (arr) =>
             {
                 var list = new List<Status_dto>();
@@ -34,6 +34,7 @@ namespace geographia.ags
                     s.ParcelId = f["attributes"].Value<string>("PID");
                     s.ParcelStatus = f["attributes"].Value<string>("ParcelStatus");
                     s.RoeStatus = f["attributes"].Value<string>("ROE_Status");
+                    s.Documents = f["attributes"].Value<string>("Documents");
                     list.Add(s);
                 }
 
@@ -95,11 +96,37 @@ namespace geographia.ags
             return await base.Update(_LAYERID, reqContent);
         }
 
+        public async Task<bool> UpdateDocumentURL(string parcelId, Documents_Req doc_req)
+        {
+            if (string.IsNullOrWhiteSpace(parcelId))
+                throw new ArgumentNullException(nameof(parcelId));
+
+            var u = new UpdateFeatureDoc[]
+            {
+                new UpdateFeatureDoc
+                {
+                    attributes = doc_req
+                }
+            };
+
+            var req = JsonConvert.SerializeObject(u);
+            req = Uri.EscapeDataString(req);
+            req = $"features={req}&f=json&gdbVersion=&rollbackOnFailure=true";
+            var reqContent = new StringContent(req);
+            reqContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
+
+            return await base.Update(_LAYERID, reqContent);
+        }
         async Task<bool> IFeatureUpdate.UpdateFeature(string parcelId, int status) => await this.Update(parcelId, status);
         async Task<bool> IFeatureUpdate.UpdateFeatureRoe(string parcelId, int status)
         {
             var oid = await Find(0, $"PID='{parcelId}'");
             return await this.Update2(parcelId, new Status_Req { OBJECTID = oid, ROE_Status = status });
+        }
+        async Task<bool> IFeatureUpdate.UpdateFeatureDocuments(string parcelId, string documentsUrl)
+        {
+            var oid = await Find(0, $"PID='{parcelId}'");
+            return await this.UpdateDocumentURL(parcelId, new Documents_Req { OBJECTID = oid, Documents = documentsUrl });
         }
 
         #region request
@@ -122,6 +149,18 @@ namespace geographia.ags
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public int? ROE_Status { get; set; }
         }
+
+        public class Documents_Req
+        {
+            public int OBJECTID { get; set; }
+            [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+            public string Documents { get; set; }
+        }
+
+        public class UpdateFeatureDoc
+        {
+            public Documents_Req attributes { get; set; }
+        }
         #endregion
 
         #region dto
@@ -131,6 +170,7 @@ namespace geographia.ags
             public string ParcelId { get; set; }
             public string ParcelStatus { get; set; }
             public string RoeStatus { get; set; }
+            public string Documents { get; set; }
         }
         #endregion
     }

@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SharePointInterface;
+using geographia.ags;
 
 namespace ROWM.Controllers
 {
@@ -25,11 +26,14 @@ namespace ROWM.Controllers
 
         #region ctor
         OwnerRepository _repo;
+        readonly IFeatureUpdate _featureUpdate;
 
-        public DocumentController(OwnerRepository r, ISharePointCRUD sp)
+        public DocumentController(OwnerRepository r, ISharePointCRUD sp, IFeatureUpdate f)
         {
             _repo = r;
             _sharePointCRUD = sp;
+            _featureUpdate = f;
+
         }
         #endregion
 
@@ -168,7 +172,7 @@ namespace ROWM.Controllers
 
             // Bind form data to a model
             var header = new DocumentHeader();
-
+            
             var formValueProvider = new FormValueProvider(
                 BindingSource.Form,
                 new FormCollection(formAccumulator.GetResults()),
@@ -196,13 +200,16 @@ namespace ROWM.Controllers
 
             header.DocumentId = d.DocumentId;
 
-
             sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename);
             Ownership primaryOwner = myParcel.Owners.First<Ownership>(o => o.Ownership_t == Ownership.OwnershipType.Primary);
             string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
             try
             {
+
+                //_sharePointCRUD.UploadParcelDoc(parcelName, "Other", sourceFilename, bb, null);
                 _sharePointCRUD.UploadParcelDoc(parcelName, header.DocumentType, sourceFilename, bb, null);
+                string parcelDocUrl = _sharePointCRUD.GetParcelFolderURL(parcelName, null);
+                bool success = await _featureUpdate.UpdateFeatureDocuments(pid, parcelDocUrl);
             }
             catch (Exception e)
             { 
