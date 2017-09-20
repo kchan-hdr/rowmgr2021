@@ -22,6 +22,7 @@ namespace SharePointInterface
         bool DocExists(Folder folder, string docName);
         bool InsertDoc(Folder folder, string docName, byte[] docBytes);
         bool CopyPasteFolder(string source, string sourceListName, string target, string targetListName, string targetFolderName);
+        string GetParcelFolderURL(string pid, string baseFolderName);
     }
 
     public class SharePointCRUD : ISharePointCRUD

@@ -92,5 +92,31 @@ namespace geographia.ags.Test
                 var good = await c.UpdateStatus(_test, _test_status);
             }
         }
+
+        /*
+        [TestMethod, TestCategory("AGS - destructive")]
+        public async Task ParcelDocumentsUpdate()
+        {
+            var _test = "055150000000100C";
+            var _test_doc_url = "https://hdroneview.sharepoint.com/SF-CH-TS/Documents/4.0%20ROW/4.3%20Parcels/055150000000100C%20MOONEY,%20PATRICIA%20D%20TRUST";
+
+            using (var ctx = new ROWM_Context())
+            {
+                var d = new DocumentController(
+                    new OwnerRepository(),
+                    new SharePointCRUD(),
+                    new SunflowerParcel());
+                
+                // Test Document upload
+                // TODO - how to get DocType, file etc in http request context for testing?
+                var good = await d.Upload(_test);
+            }
+            
+            // check
+            var parcels = await fs_raw.GetAllParcels();
+            var px = parcels.Single(p => p.ParcelId == _test);
+            Assert.AreEqual(_test_doc_url, px.Documents);
+        }
+        */
     }
 }
