@@ -22,6 +22,7 @@ namespace SharePointInterface
         bool DocExists(Folder folder, string docName);
         bool InsertDoc(Folder folder, string docName, byte[] docBytes);
         bool CopyPasteFolder(string source, string sourceListName, string target, string targetListName, string targetFolderName);
+        string GetParcelFolderURL(string pid, string baseFolderName);
     }
 
     public class SharePointCRUD : ISharePointCRUD
@@ -200,7 +201,11 @@ namespace SharePointInterface
             // Check if Parcel & Doc Type Folder Exists
             List<string> targetPath = GetDocTargetPath(baseFolderName, parcelFolderName, docType);
             Folder docFolder = EnsureAndGetTargetFolder(_ctx, parcelFolders, targetPath);
-            
+
+            if (string.IsNullOrWhiteSpace(docName))
+                docName = "Unkonwn";
+            docName = System.IO.Path.GetFileName(docName);
+
             // Check if Doc exists
             bool docExists = DocExists(docFolder, docName);
             if (!docExists)
@@ -256,7 +261,32 @@ namespace SharePointInterface
             return pid;
         }
 
-        public List<string> GetDocTargetPath(string baseFolderName, string parcelFolderName, string docType)
+        public string GetParcelFolderURL(string pid, string baseFolderName = "")
+        {
+            string parcelFolderURL = null;
+
+            if (String.IsNullOrWhiteSpace(baseFolderName))
+            {
+                baseFolderName = "Documents/" + _parcelsFolderName;
+            }
+
+            Web web = _ctx.Web;
+            Folder baseFolder = web.GetFolderByServerRelativeUrl(baseFolderName);
+            _ctx.Load(web);
+            _ctx.Load(baseFolder);
+            _ctx.ExecuteQuery();
+
+            pid = GetParcelFolderName(pid);
+            if (baseFolder.FolderExists(pid))
+            {
+                parcelFolderURL = String.Format("{0}/{1}/{2}", _siteUrl, baseFolderName, pid);
+                parcelFolderURL = System.Uri.EscapeUriString(parcelFolderURL);
+            }
+
+            return parcelFolderURL;
+        }
+
+            public List<string> GetDocTargetPath(string baseFolderName, string parcelFolderName, string docType)
         {
             string doctypePath = docType;
 
