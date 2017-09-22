@@ -324,25 +324,30 @@ namespace SharePointInterface
 
             try
             {
-                var info = new FileCreationInformation
+                using (System.IO.Stream ms = new System.IO.MemoryStream(docBytes))
                 {
-                    Content = docBytes,
-                    Overwrite = false,
-                    Url = String.Format("{0}/{1}", folder.ServerRelativeUrl, docName),
-                };
+                    var info = new FileCreationInformation
+                    {
+                        // Content = docBytes,
+                        ContentStream = ms,
+                        Overwrite = false,
+                        Url = String.Format("{0}/{1}", folder.ServerRelativeUrl, docName),
+                    };
 
-                File file = folder.Files.Add(info);
-                folder.Update();
-                _ctx.Load(file, f => f.ListItemAllFields);
-                _ctx.ExecuteQuery();
-                _ctx.Load(file);
+                    File file = folder.Files.Add(info);
 
-                ListItem item = file.ListItemAllFields;
-                item["Title"] = "Title";
-                item.Update();
-                _ctx.ExecuteQuery();
+                    folder.Update();
+                    _ctx.Load(file, f => f.ListItemAllFields);
+                    _ctx.ExecuteQuery();
+                    _ctx.Load(file);
 
-                _docExists = true;
+                    ListItem item = file.ListItemAllFields;
+                    item["Title"] = "Title";
+                    item.Update();
+                    _ctx.ExecuteQuery();
+
+                    _docExists = true;
+                }
             }
             catch(Exception e)
             {
