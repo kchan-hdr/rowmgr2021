@@ -201,7 +201,11 @@ namespace SharePointInterface
             // Check if Parcel & Doc Type Folder Exists
             List<string> targetPath = GetDocTargetPath(baseFolderName, parcelFolderName, docType);
             Folder docFolder = EnsureAndGetTargetFolder(_ctx, parcelFolders, targetPath);
-            
+
+            if (string.IsNullOrWhiteSpace(docName))
+                docName = "Unkonwn";
+            docName = System.IO.Path.GetFileName(docName);
+
             // Check if Doc exists
             bool docExists = DocExists(docFolder, docName);
             if (!docExists)
