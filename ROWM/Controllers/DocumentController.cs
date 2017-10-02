@@ -172,7 +172,7 @@ namespace ROWM.Controllers
 
             // Bind form data to a model
             var header = new DocumentHeader();
-            
+
             var formValueProvider = new FormValueProvider(
                 BindingSource.Form,
                 new FormCollection(formAccumulator.GetResults()),
@@ -188,7 +188,7 @@ namespace ROWM.Controllers
                     return BadRequest(ModelState);
                 }
             }
-            
+
 
             var agent = await _repo.GetAgent(header.AgentName);
 
@@ -212,10 +212,159 @@ namespace ROWM.Controllers
                 bool success = await _featureUpdate.UpdateFeatureDocuments(pid, parcelDocUrl);
             }
             catch (Exception e)
-            { 
+            {
                 // TODO: Return error to user?
                 Console.WriteLine("Error uploading document {0} type {1} to Sharepoint for {2}", sourceFilename, header.DocumentType, parcelName);
             }
+            return Json(header);
+        }
+
+        // 1. Disable the form value model binding here to take control of handling 
+        //    potentially large files.
+        // 2. Typically antiforgery tokens are sent in request body, but since we 
+        //    do not want to read the request body early, the tokens are made to be 
+        //    sent via headers. The antiforgery token filter first looks for tokens
+        //    in the request header and then falls back to reading the body.
+        [Route("api/addDocument"), HttpPost]
+        [DisableFormValueModelBinding]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> addDocument()
+        {
+            if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
+            {
+                return BadRequest($"Expected a multipart request, but got {Request.ContentType}");
+            }
+
+            // Used to accumulate all the form url encoded key value pairs in the 
+            // request.
+            var formAccumulator = new KeyValueAccumulator();
+
+            string targetFilePath = null;
+            string sourceFilename = null;
+            string sourceContentType = null;
+
+            // files
+
+            var boundary = MultipartRequestHelper.GetBoundary(
+                MediaTypeHeaderValue.Parse(Request.ContentType),
+                _defaultFormOptions.MultipartBoundaryLengthLimit);
+
+            var reader = new MultipartReader(boundary, HttpContext.Request.Body);
+
+            var section = await reader.ReadNextSectionAsync();
+            while (section != null)
+            {
+                ContentDispositionHeaderValue contentDisposition;
+                var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out contentDisposition);
+
+                if (hasContentDispositionHeader)
+                {
+                    if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
+                    {
+                        targetFilePath = Path.GetTempFileName();
+                        using (var targetStream = System.IO.File.Create(targetFilePath))
+                        {
+                            await section.Body.CopyToAsync(targetStream);
+                            // _logger.LogInformation($"Copied the uploaded file '{targetFilePath}'");
+                        }
+                        sourceContentType = section.ContentType;
+                        sourceFilename = contentDisposition.FileName;
+                    }
+                    else if (MultipartRequestHelper.HasFormDataContentDisposition(contentDisposition))
+                    {
+                        // Content-Disposition: form-data; name="key"
+                        //
+                        // value
+
+                        // Do not limit the key name length here because the 
+                        // multipart headers length limit is already in effect.
+                        var key = HeaderUtilities.RemoveQuotes(contentDisposition.Name);
+                        var encoding = GetEncoding(section);
+                        using (var streamReader = new StreamReader(
+                            section.Body,
+                            encoding,
+                            detectEncodingFromByteOrderMarks: true,
+                            bufferSize: 1024,
+                            leaveOpen: true))
+                        {
+                            // The value length limit is enforced by MultipartBodyLengthLimit
+                            var value = await streamReader.ReadToEndAsync();
+                            if (String.Equals(value, "undefined", StringComparison.OrdinalIgnoreCase))
+                            {
+                                value = String.Empty;
+                            }
+                            formAccumulator.Append(key, value);
+
+                            if (formAccumulator.ValueCount > _defaultFormOptions.ValueCountLimit)
+                            {
+                                throw new InvalidDataException($"Form key count limit {_defaultFormOptions.ValueCountLimit} exceeded.");
+                            }
+                        }
+                    }
+                }
+
+                // Drains any remaining section body that has not been consumed and
+                // reads the headers for the next section.
+                section = await reader.ReadNextSectionAsync();
+            }
+
+            var bb = System.IO.File.ReadAllBytes(targetFilePath);
+
+            // Bind form data to a model
+            var header = new DocumentHeader();
+
+            var formValueProvider = new FormValueProvider(
+                BindingSource.Form,
+                new FormCollection(formAccumulator.GetResults()),
+                CultureInfo.CurrentCulture);
+
+            var bindingSuccessful = await TryUpdateModelAsync(header, prefix: "",
+                valueProvider: formValueProvider);
+
+            if (!bindingSuccessful)
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+            }
+
+
+            var agent = await _repo.GetAgent(header.AgentName);
+
+            // Store Document
+            var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent.AgentId, bb);
+            d.Agents.Add(agent);
+
+            // Add document to parcels
+            var myParcels = header.ParcelIds.Distinct();
+
+            foreach (string pid in myParcels)
+            {
+                var myParcel = await _repo.GetParcel(pid);
+                myParcel.Documents.Add(d);
+                await _repo.UpdateParcel(myParcel);
+
+                header.DocumentId = d.DocumentId;
+
+                sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename);
+                Ownership primaryOwner = myParcel.Owners.First<Ownership>(o => o.Ownership_t == Ownership.OwnershipType.Primary);
+                string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
+                try
+                {
+
+                    //_sharePointCRUD.UploadParcelDoc(parcelName, "Other", sourceFilename, bb, null);
+                    _sharePointCRUD.UploadParcelDoc(parcelName, header.DocumentType, sourceFilename, bb, null);
+                    string parcelDocUrl = _sharePointCRUD.GetParcelFolderURL(parcelName, null);
+                    bool success = await _featureUpdate.UpdateFeatureDocuments(pid, parcelDocUrl);
+                }
+                catch (Exception e)
+                {
+                    // TODO: Return error to user?
+                    Console.WriteLine("Error uploading document {0} type {1} to Sharepoint for {2}", sourceFilename, header.DocumentType, parcelName);
+                }
+            }
+
             return Json(header);
         }
 
@@ -246,6 +395,7 @@ namespace ROWM.Controllers
         public string DocumentTitle { get; set; }
         public string AgentName { get; set; }
         public Guid DocumentId { get; set; }
+        public List<string> ParcelIds { get; set; }
 
         /// <summary>
         /// default ctor
