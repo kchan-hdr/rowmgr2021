@@ -15,6 +15,9 @@ namespace ROWM.Dal.Migrations
             AutomaticMigrationsEnabled = false;
         }
 
+        /*
+         * stop running seed
+         * 
         protected override void Seed(ROWM.Dal.ROWM_Context context)
         {
             context.Purposes.AddOrUpdate(
@@ -156,5 +159,9 @@ namespace ROWM.Dal.Migrations
             context.OwnershipWorking.AddOrUpdate(orlist.ToArray());
 
         }
+        *
+        */ 
+
+
     }
 }

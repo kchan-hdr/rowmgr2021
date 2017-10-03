@@ -24,17 +24,22 @@ namespace ROWM.Dal
         #endregion
 
         #region statistics
+        IQueryable<Parcel> ActiveParcels() => _ctx.Parcels.Where(px => px.IsActive);
+
         public async Task<(int nParcels, int nOwners)> Snapshot()
         {
-            var np = await _ctx.Parcels.CountAsync();
-            var no = await _ctx.Owners.CountAsync();
+            var actives = ActiveParcels();
+            var np = await actives.CountAsync(px => px.IsActive);
+
+            var owners = actives.SelectMany(px => px.Owners.Select(ox => ox.OwnerId));
+            var no = await owners.Distinct().CountAsync();
 
             return (np, no);
         }
 
         public async Task<IEnumerable<SubTotal>> SnapshotParcelStatus()
         {
-            var q = await (from p in _ctx.Parcels
+            var q = await (from p in ActiveParcels()
                      group p by p.ParcelStatus into psg
                      select new { k = psg.Key, c = psg.Count() }).ToArrayAsync();
 
@@ -49,7 +54,7 @@ namespace ROWM.Dal
 
         public async Task<IEnumerable<SubTotal>> SnapshotRoeStatus()
         {
-            return await (from p in _ctx.Parcels
+            return await (from p in ActiveParcels()
              group p by p.RoeStatusCode into psg
              select new SubTotal { Title = psg.Key, Count = psg.Count() }).ToArrayAsync();
         }

@@ -102,6 +102,10 @@
     <Compile Include="Migrations\201709032218353_roe status.Designer.cs">
       <DependentUpon>201709032218353_roe status.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201710030123091_add non-active bit.cs" />
+    <Compile Include="Migrations\201710030123091_add non-active bit.Designer.cs">
+      <DependentUpon>201710030123091_add non-active bit.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Owner.cs" />
     <Compile Include="OwnerRepository.cs" />
@@ -149,6 +153,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201709032218353_roe status.resx">
       <DependentUpon>201709032218353_roe status.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201710030123091_add non-active bit.resx">
+      <DependentUpon>201710030123091_add non-active bit.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
