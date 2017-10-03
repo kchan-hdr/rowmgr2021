@@ -21,6 +21,8 @@ namespace ROWM.Dal
         [StringLength(800)]
         public string SitusAddress { get; set; }
 
+        public bool IsActive { get; set; }
+
         [ForeignKey("ParcelStatus"), StringLength(20)]
         public string ParcelStatusCode { get; set; }
         public virtual ParcelStatus_Master ParcelStatus { get; set; }

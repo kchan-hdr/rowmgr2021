@@ -536,7 +536,7 @@ namespace ROWM.Controllers
         {
             OwnerId = o.OwnerId;
             PartyName = o.PartyName;
-            OwnedParcel = o.OwnParcel.Select(ox=> new ParcelHeaderDto(ox));
+            OwnedParcel = o.OwnParcel.Where(ox=>ox.Parcel.IsActive).Select(ox=> new ParcelHeaderDto(ox));
             Contacts = o.Contacts.Select(cx => new ContactInfoDto(cx));
             ContactLogs = o.Contacts
                 .Where( cx => cx.ContactsLog != null )
