@@ -447,7 +447,7 @@ namespace ROWM.Controllers
             AgentId = a.AgentId;
             AgentName = a.AgentName;
             ContactsLog = a.Logs.Select(cx => new ContactLogDto(cx));
-            Documents = a.Documents.Select(dx => new DocumentHeader(dx));
+            // Documents = a.Documents.Select(dx => new DocumentHeader(dx));
         }
     }
     public class ContactLogDto

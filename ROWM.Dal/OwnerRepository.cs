@@ -166,6 +166,33 @@ namespace ROWM.Dal
             return c;
         }
 
+        public IEnumerable<Ownership> GetContacts() => _ctx.Parcels.Where(p => p.IsActive).SelectMany(p => p.Owners);
+
+        public IEnumerable<ContactLog> GetLogs() =>_ctx.ContactLogs.Where(c => c.Parcels.Any(p => p.IsActive));
+        public async Task<IEnumerable<DocHead>> GetDocs()
+        {
+            try
+            {
+                // for performance
+                var qstr = "SELECT d.DocumentId, d.Title, d.ReceivedDate, d.SentDate, pd.Parcel_ParcelId FROM dbo.ParcelDocuments pd INNER JOIN Rowm.Document d on pd.Document_DocumentId = d.DocumentId INNER JOIN Rowm.Parcel p ON pd.Parcel_ParcelId = p.ParcelId where p.IsActive = 1";
+                var q = _ctx.Database.SqlQuery<DocHead>(qstr);
+
+                return await q.ToListAsync();
+            }
+            catch ( Exception e)
+            {
+                throw;
+            }
+        }
+
+        public class DocHead
+        {
+            public Guid DocumentId { get; set; }
+            public string Title { get; set; }
+            public DateTimeOffset? ReceivedDate { get; set; }
+            public DateTimeOffset? SentDate { get; set; }
+            public string Parcel_ParcelId { get; set; }
+        }
         public async Task<ContactLog> AddContactLog(IEnumerable<string> pids, IEnumerable<Guid> cids, ContactLog log)
         {
             var dt = DateTimeOffset.Now;
@@ -364,7 +391,7 @@ namespace ROWM.Dal
         public async Task<IEnumerable<Agent>> GetAgents() =>
             await _ctx.Agents.AsNoTracking()
                 .Include(ax => ax.Logs)
-                .Include(ax => ax.Documents)
+                // .Include(ax => ax.Documents)
                 .ToArrayAsync();
          
         #endregion
