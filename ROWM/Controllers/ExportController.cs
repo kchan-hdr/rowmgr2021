@@ -98,6 +98,48 @@ namespace ROWM.Controllers
                 return BadRequest($"not supported export '{f}'");
 
             var contacts = this._repo.GetContacts();
+
+            var q = from o in contacts
+                    group o by o.OwnerId into og
+                    select og;
+
+            var cc = q.SelectMany(og => ContactExport2.Export(og));
+
+            if (cc.Count() <= 0)
+                return NoContent();
+
+            using (var s = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(s))
+                {
+                    writer.WriteLine(ContactExport2.Header());
+
+                    foreach (var l in cc.OrderBy(cx => cx.PartyName)
+                                        .ThenByDescending(cx => cx.IsPrimary)
+                                        .ThenBy(cx => cx.LastName)
+                                        .Select(ccx => ccx.ToString()))
+                        writer.WriteLine(l);
+
+                    writer.Close();
+                }
+
+                return File(s.GetBuffer(), "text/csv", "contacts.csv");
+            }
+        }
+
+        /// <summary>
+        /// support excel only
+        /// </summary>
+        /// <param name="f"></param>
+        /// <returns></returns>
+        [HttpGet("export/contacts_i")]
+        public IActionResult ExportContactByParcel(string f)
+        {
+            if ("excel" != f)
+                return BadRequest($"not supported export '{f}'");
+
+            var contacts = this._repo.GetContacts();
+
             var cc = contacts.SelectMany(cx => ContactExport.Export(cx));
             if (cc.Count() <= 0)
                 return NoContent();
@@ -161,6 +203,55 @@ namespace ROWM.Controllers
                 var n = Notes.Replace('"', '\'');
                 return $"=\"{ParcelId}\",{ParcelStatusCode},{RoeStatusCode},\"{ContactName}\",{DateAdded.Date.ToShortDateString()},{ContactChannel},{ProjectPhase},\"{Title}\",\"{n}\",{AgentName}";
             }
+        }
+
+        public class ContactExport2
+        {
+            public string[] ParcelId { get; set; }
+
+
+            public string PartyName { get; set; }
+            public bool IsPrimary { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+            public string Email { get; set; }
+            public string CellPhone { get; set; }
+            public string HomePhone { get; set; }
+            public string StreetAddress { get; set; }
+            public string State { get; set; }
+            public string ZIP { get; set; }
+            public string Representation { get; set; }
+
+            public static IEnumerable<ContactExport2> Export(IGrouping<Guid, Ownership> og)
+            {
+                var relatedParcels = og.Select(p => p.ParcelId).OrderBy(p => p).ToArray<string>();
+
+                var ox = og.First();
+                return ox.Owner.Contacts.Select(cx =>  new ContactExport2
+                {
+                    PartyName = ox.Owner.PartyName,
+                    IsPrimary = cx.IsPrimaryContact,
+                    FirstName = cx.OwnerFirstName,
+                    LastName = cx.OwnerLastName,
+                    Email = cx.OwnerEmail,
+                    CellPhone = cx.OwnerCellPhone,
+                    HomePhone = cx.OwnerHomePhone,
+                    StreetAddress = cx.OwnerStreetAddress,
+                    State = cx.OwnerState,
+                    ZIP = cx.OwnerZIP,
+                    Representation = cx.Representation,
+                    ParcelId = relatedParcels
+                });
+            }
+
+            string RelatedParcels =>
+                string.Join(",", this.ParcelId.Select(p=> $"=\"{p}\""));
+
+            public static string Header() =>
+                "Owner,Is Primary Contact,First Name,Last Name,Email,Cell Phone,Phone,Street Address,State,ZIP,Representation";
+
+            public override string ToString() =>
+                $"\"{PartyName}\",{IsPrimary},{FirstName},{LastName},{Email},{CellPhone},{HomePhone},\"{StreetAddress}\",{State},{ZIP},{Representation},{RelatedParcels}";
         }
 
         public class ContactExport
