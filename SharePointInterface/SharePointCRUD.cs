@@ -27,6 +27,9 @@ namespace SharePointInterface
 
     public class SharePointCRUD : ISharePointCRUD
     {
+        // staging URL to move to app config
+        static readonly string _STAGING_SITE_URL = "https://hdroneview.sharepoint.com/row_dev";
+
         private ClientContext _ctx;
         private string _parcelsFolderName;
         private string _parcelsFolderTemplate;
@@ -36,7 +39,7 @@ namespace SharePointInterface
         public SharePointCRUD (string _appId = null, string _appSecret = null, Dictionary<string,string> docTypes = null)
         {
             _parcelsFolderName = "4.0 ROW/4.3 Parcels";
-            _siteUrl = "https://hdroneview.sharepoint.com/SF-CH-TS";
+            _siteUrl = _STAGING_SITE_URL; //  "https://hdroneview.sharepoint.com/SF-CH-TS";
             _parcelsFolderTemplate = "Documents/4.0 ROW/4.3 Parcels/_Parcel No_LO Name";
             if (docTypes == null)
             {
@@ -85,10 +88,23 @@ namespace SharePointInterface
                 _docTypes = docTypes;
             }
 
+            /*
+             * STAGING---
+             * 
+             * The app identifier has been successfully created.
+            Client Id:  	26589ee5-16ef-4444-9143-cfea08cba1cc
+            Client Secret:  	B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=
+            Title:  	rowm_staging
+            App Domain:  	rowm_staging.hdrinc.com
+            Redirect URI:  	https://rowm_staging.hdrinc.com
+             */
+
             if (_appId == null || _appSecret == null )
             {
-                _appId = "a6fad0e8-3e1f-42eb-89f2-6cb8e1dcb329";
-                _appSecret = "FMMJTzMMkP8CZOsL1IP3JvSoVWAOrF90zGxKVmUc2tc=";
+                //_appId = "a6fad0e8-3e1f-42eb-89f2-6cb8e1dcb329";
+                //_appSecret = "FMMJTzMMkP8CZOsL1IP3JvSoVWAOrF90zGxKVmUc2tc=";
+                _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc";
+                _appSecret = "B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=";
 
             }
 
