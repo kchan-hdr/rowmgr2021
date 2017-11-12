@@ -30,7 +30,7 @@ namespace ROWM.Dal.Test
             Assert.IsNotNull(ps);
             Assert.AreNotEqual(0, ps.Count());
 
-            foreach( var p in ps )
+            foreach (var p in ps)
             {
                 Trace.WriteLine(p);
             }
@@ -42,10 +42,47 @@ namespace ROWM.Dal.Test
             Assert.IsNotNull(parcel.Owners);
 
             Trace.WriteLine($"parcel {parcel.ParcelId}");
-            foreach( var o in parcel.Owners)
+            foreach (var o in parcel.Owners)
             {
                 Trace.WriteLine(o.Owner.PartyName);
             }
+        }
+
+        [TestMethod]
+        public async Task Simple_Parcel_Speed()
+        {
+            var ctx = new ROWM_Context();
+            var repo = new OwnerRepository(ctx);
+            var repo2 = new ParcelRepository(ctx);
+            var ps = repo.GetParcels();
+            Assert.IsNotNull(ps);
+            Assert.AreNotEqual(0, ps.Count());
+
+            var watch = new Stopwatch();
+            watch.Start();
+
+            foreach( var p in ps)
+            {
+                var parcel = repo2.GetParcel(p);
+                Assert.IsNotNull(parcel);
+                Assert.AreEqual(p, parcel.ParcelId);
+                Assert.IsNotNull(parcel.Owners);
+            }
+
+            watch.Stop();
+            Trace.TraceInformation($"elapse {watch.ElapsedMilliseconds}");
+
+            watch.Restart();
+            foreach (var p in ps)
+            {
+                var parcel = await repo.GetParcel(p);
+                Assert.IsNotNull(parcel);
+                Assert.AreEqual(p, parcel.ParcelId);
+                Assert.IsNotNull(parcel.Owners);
+            }
+
+            watch.Stop();
+            Trace.TraceInformation($"elapse {watch.ElapsedMilliseconds}");
         }
     }
 }
