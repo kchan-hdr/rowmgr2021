@@ -94,6 +94,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DocTypes_Tests.cs" />
     <Compile Include="SharePointCRUDTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -104,6 +105,10 @@
     <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj">
       <Project>{1f998edb-3a5d-4f61-a1e8-62b6afbea99b}</Project>
       <Name>SharePointInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharePointUtil_Sunflower\SharePointUtil_Sunflower.csproj">
+      <Project>{20759891-df1a-4e84-8762-d8a61bf9ec54}</Project>
+      <Name>SharePointUtil_Sunflower</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

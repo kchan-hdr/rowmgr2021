@@ -46,6 +46,9 @@ namespace ROWM.Dal
         public DateTimeOffset? ClientSignatureDate { get; set; } // signed by client
         public DateTimeOffset? ReceivedFromClientDate { get; set; } // received from client
 
+        public DateTimeOffset? DateRecorded { get; set; }
+        public string CheckNo { get; set; }
+
         public virtual ICollection<Agent> Agents { get; set; }
         public virtual ICollection<Owner> Owners { get; set; }
         public virtual ICollection<Parcel> Parcel { get; set; }

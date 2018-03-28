@@ -59,6 +59,8 @@ namespace ROWM.Controllers
             d.RowmTrackingNumber = info.RowmTrackingNumber;
             d.SentDate = info.SentDate;
             d.SignedDate = info.SignedDate;
+            d.DateRecorded = info.DateRecorded;
+            d.CheckNo = info.CheckNo;
 
             d.LastModified = DateTimeOffset.Now;
 
@@ -407,7 +409,7 @@ namespace ROWM.Controllers
             DocumentId = d.DocumentId;
             DocumentType = d.DocumentType;
             DocumentTitle = d.Title;
-            AgentName = d.Agents.FirstOrDefault()?.AgentName ?? "";
+            //AgentName = d.Agents.FirstOrDefault()?.AgentName ?? "";
         }
     }
 
@@ -432,6 +434,8 @@ namespace ROWM.Controllers
         public string ClientTrackingNumber { get; set; }
         public DateTimeOffset? ClientSignatureDate { get; set; } // signed by client
         public DateTimeOffset? ReceivedFromClientDate { get; set; } // received from client
+        public DateTimeOffset? DateRecorded { get; set; }
+        public string CheckNo { get; set; }
 
         public string SharePointUrl { get; set; }
         public string BlobId { get; set; }
@@ -457,9 +461,11 @@ namespace ROWM.Controllers
             ReceivedFromOwnerDate = d.ReceivedFromOwnerDate;
             ClientSignatureDate = d.ClientSignatureDate;
             ReceivedFromClientDate = d.ReceivedFromClientDate;
+            DateRecorded = d.DateRecorded;
 
             RowmTrackingNumber = d.RowmTrackingNumber;
             ClientTrackingNumber = d.ClientTrackingNumber;
+            CheckNo = d.CheckNo;
 
             SharePointUrl = d.SharePointUrl;
             BlobId = d.AzureBlobId;

@@ -31,6 +31,7 @@
     <ProjectReference Include="..\AgsFeatureUpdate\AgsFeatureUpdate.csproj" />
     <ProjectReference Include="..\ROWM.Dal\ROWM.Dal.csproj" />
     <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj" />
+    <ProjectReference Include="..\SharePointUtil_Sunflower\SharePointUtil_Sunflower.csproj" />
   </ItemGroup>
 
 </Project>

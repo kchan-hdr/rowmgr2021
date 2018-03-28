@@ -9,8 +9,8 @@ namespace SharePointInterface.Test
     {
         //private string _appId = "AppID";
         //private string _appSecret = "AppSecret";
-        private string _appId = "a6fad0e8-3e1f-42eb-89f2-6cb8e1dcb329";
-        private string _appSecret = "FMMJTzMMkP8CZOsL1IP3JvSoVWAOrF90zGxKVmUc2tc=";
+        private string _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc"; // for ../row_dev/...
+        private string _appSecret = "7T2/B1ZNHMw2EE90USqdVf8mMTfAze0LAjkT7ni7V7w=";
 
         [TestMethod, TestCategory("SharePointCRUD")]
         public void GetTitle()

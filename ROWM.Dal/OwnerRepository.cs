@@ -90,13 +90,30 @@ namespace ROWM.Dal
 
         public async Task<Parcel> GetParcel(string pid)
         {
-            return await _ctx.Parcels
+            var p = await _ctx.Parcels
                 .Include(px => px.Owners)
                 .Include(px => px.Owners.Select( ox => ox.Owner.ContactLogs))
                 .Include(px => px.ContactsLog)
-                .Include(ox => ox.Documents)
+                // .Include(ox => ox.Documents)
                 .FirstOrDefaultAsync(px => px.ParcelId == pid);
+
+
+            return p;
         }
+        public async Task<List<Document>> GetDocumentsForParcel(string pid)
+        {
+            var q = _ctx.Database.SqlQuery<DocumentH>("SELECT d.DocumentId, d.DocumentType, d.title FROM dbo.ParcelDocuments pd INNER JOIN rowm.Document d on pd.document_documentid = d.documentid WHERE pd.parcel_parcelId = @pid", new System.Data.SqlClient.SqlParameter("@pid", pid));
+            var ds = await q.ToListAsync();
+            return ds.Select(dx => new Document { Title = dx.Title, DocumentId = dx.DocumentId, DocumentType = dx.DocumentType }).ToList();
+        }
+        #region Db dto
+        public class DocumentH
+        {
+            public Guid DocumentId { get; set; }
+            public string DocumentType { get; set; }
+            public string Title { get; set; }
+        }
+        #endregion
 
         public IEnumerable<string> GetParcels() => _ctx.Parcels.AsNoTracking().Select(px => px.ParcelId);
 
