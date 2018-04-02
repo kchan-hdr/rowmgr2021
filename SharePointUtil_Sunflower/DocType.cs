@@ -38,6 +38,8 @@ namespace com.hdr.Rowm.Sunflower
 
             _docTypes.Add(new DocType("Other", "4.3.7 Reference", 1, false));
 
+            _docTypes.Add(new DocType("Title Report", "4.3.7 Reference", ++line, true));
+
             _docTypes.Add(new DocType("ROE Package Original", "4.3.1 ROE/3 Final Sent to LO", ++line));
             _docTypes.Add(new DocType("ROE Package Updated", "4.3.1 ROE/3 Final Sent to LO", ++line));
             _docTypes.Add(new DocType("ROE Package Received by Owner", "4.3.1 ROE/4 Signed", ++line));

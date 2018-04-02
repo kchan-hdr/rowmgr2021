@@ -106,5 +106,14 @@ namespace SharePointInterface.Test
             foreach (var dt in t)
                 Trace.WriteLine(dt);
         }
+
+        [TestMethod, TestCategory("Doc Types")]
+        public void Confirm_Title_Report_In_Options()
+        {
+            var t = com.hdr.Rowm.Sunflower.DocType.Types;
+            var title = t.SingleOrDefault(dt => dt.DocTypeName.Equals("Title Report"));
+            Assert.IsNotNull(title);
+            Assert.IsTrue(title.IsDisplayed);
+        }
     }
 }
