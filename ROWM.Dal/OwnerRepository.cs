@@ -405,6 +405,8 @@ namespace ROWM.Dal
         #endregion
         #region row agents
         public async Task<Agent> GetAgent(string name) => await _ctx.Agents.FirstOrDefaultAsync(ax => ax.AgentName.Equals(name, StringComparison.CurrentCultureIgnoreCase));
+        public async Task<Agent> GetDefaultAgent() => await _ctx.Agents.FirstOrDefaultAsync(ax => ax.AgentName.Equals("DEFAULT"));
+
         public async Task<IEnumerable<Agent>> GetAgents() =>
             await _ctx.Agents.AsNoTracking()
                 .Include(ax => ax.Logs)

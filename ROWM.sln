@@ -22,6 +22,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharePointInterface.Test", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharePointUtil_Sunflower", "SharePointUtil_Sunflower\SharePointUtil_Sunflower.csproj", "{20759891-DF1A-4E84-8762-D8A61BF9EC54}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelExport", "ExcelExport\ExcelExport.csproj", "{04C417C5-B978-42AA-A648-FE51EA68670C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelExport.Test", "ExcelExport.Test\ExcelExport.Test.csproj", "{5AFDF246-5B5A-4F37-A04E-536281668C17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +64,14 @@ Global
 		{20759891-DF1A-4E84-8762-D8A61BF9EC54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20759891-DF1A-4E84-8762-D8A61BF9EC54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20759891-DF1A-4E84-8762-D8A61BF9EC54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04C417C5-B978-42AA-A648-FE51EA68670C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04C417C5-B978-42AA-A648-FE51EA68670C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04C417C5-B978-42AA-A648-FE51EA68670C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04C417C5-B978-42AA-A648-FE51EA68670C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AFDF246-5B5A-4F37-A04E-536281668C17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AFDF246-5B5A-4F37-A04E-536281668C17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AFDF246-5B5A-4F37-A04E-536281668C17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AFDF246-5B5A-4F37-A04E-536281668C17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -95,11 +95,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DocTypes_Tests.cs" />
+    <Compile Include="ProductionSharePointTests.cs" />
     <Compile Include="SharePointCRUDTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Content Include="testdata\logs.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj">
