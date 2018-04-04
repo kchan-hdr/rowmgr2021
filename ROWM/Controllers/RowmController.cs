@@ -363,7 +363,7 @@ namespace ROWM.Controllers
         public async Task<IEnumerable<AgentDto>> GetAgents()
         {
             var a = await _repo.GetAgents();
-            return a.Select( ax => new AgentDto(ax));
+            return a.Where(ax => ax.IsActive).Select(ax => new AgentDto(ax));
         }
         #endregion
         #region statistics

@@ -54,6 +54,11 @@ namespace ROWM
             });
 
             services.AddScoped<ROWM.Dal.ROWM_Context>();
+            services.AddScoped<com.hdr.Rowm.Export.RowmEntities>(fac =>
+            {
+               return new com.hdr.Rowm.Export.RowmEntities(ROWM.Dal.DbConnection.GetConnectionString());
+            });
+
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddSingleton<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, SunflowerParcel>();
@@ -64,9 +69,9 @@ namespace ROWM
                 c.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info { Title = "ROW Manager", Version = "v1" });
             });
             services.ConfigureSwaggerGen(o =>
-           {
+            {
                o.OperationFilter<FileOperation>();
-           });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -104,3 +109,4 @@ namespace ROWM
         }
     }
 }
+

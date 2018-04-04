@@ -58,7 +58,7 @@ namespace ROWM.Controllers
         [HttpGet("export/documents")]
         public async Task<IActionResult> ExportDocumentg(string f)
         {
-            const string DOCUMENT_HEADER = "Parcel Id,Title,Date Sent,Date Received,Document ID";
+            const string DOCUMENT_HEADER = "Parcel Id,Title,Content Type,Date Sent,Date Delivered,Client Tracking Number,Date Received,Date Signed,Check No,Date Recorded,Document ID";
 
             if ("excel" != f)
                 return BadRequest($"not supported export '{f}'");
@@ -68,7 +68,7 @@ namespace ROWM.Controllers
                 return NoContent();
 
             var lines = d.OrderBy(dh => dh.Parcel_ParcelId)
-                .Select(dh => $"=\"{dh.Parcel_ParcelId}\",{dh.Title},{dh.SentDate?.Date.ToShortDateString() ?? ""},{dh.ReceivedDate?.Date.ToShortDateString() ?? ""},{dh.DocumentId}");
+                .Select(dh => $"=\"{dh.Parcel_ParcelId}\",{dh.Title},{dh.ContentType},{dh.SentDate?.Date.ToShortDateString() ?? ""},{dh.DeliveredDate?.Date.ToShortDateString() ?? ""},{dh.ClientTrackingNumber},{dh.ReceivedDate?.Date.ToShortDateString() ?? ""},{dh.SignedDate?.Date.ToShortDateString() ?? ""},{dh.CheckNo},{dh.DateRecorded?.Date.ToShortDateString() ?? ""},{dh.DocumentId}");
 
             using (var s = new MemoryStream())
             {

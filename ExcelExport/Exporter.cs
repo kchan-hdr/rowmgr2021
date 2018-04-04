@@ -13,10 +13,11 @@ namespace ExcelExport
 
     public class Exporter
     {
-        WorkbookPart bookPart;
-        Sheets sheets;
+        protected string reportname = "Unknown";
+        protected WorkbookPart bookPart;
+        protected Sheets sheets;
 
-        public byte[] Export()
+        virtual public byte[] Export()
         {
             var path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             path = Path.ChangeExtension(path, "xlsx");
@@ -25,13 +26,15 @@ namespace ExcelExport
             bookPart.Workbook = new Workbook();
             sheets = doc.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
 
-            WriteCoverPage(1, "Cover Page");
+            WriteCoverPage(1, reportname);
+            Write(2);
 
             doc.Close();
             var b = File.ReadAllBytes(path);
             File.Delete(path);
             return b;
         }
+        virtual protected void Write(uint pageId) { }
 
         #region implementation
         void WriteCoverPage(uint id, string name)
@@ -54,18 +57,18 @@ namespace ExcelExport
         #region helpers
         static SpreadsheetDocument MakeDoc(string path) => SpreadsheetDocument.Create(path, SpreadsheetDocumentType.Workbook);
 
-        static Cell WriteNumber(Row row, string c, string text) => WriteCell(row, c, text, CellValues.Number);
-        static Cell WriteTrueFalse(Row row, string c, string text) => WriteCell(row, c, text, CellValues.Boolean);
-        static Cell WriteText(Row row, string c, string text) => WriteCell(row, c, text, CellValues.String);
+        static protected Cell WriteNumber(Row row, string c, string text) => WriteCell(row, c, text, CellValues.Number);
+        static protected Cell WriteTrueFalse(Row row, string c, string text) => WriteCell(row, c, text, CellValues.Boolean);
+        static protected Cell WriteText(Row row, string c, string text) => WriteCell(row, c, text, CellValues.String);
 
-        static Cell WriteCell(Row row, string c, string text, CellValues cell_t)
+        static protected Cell WriteCell(Row row, string c, string text, CellValues cell_t)
         {
             var cell = InsertCell(row, c);
             cell.DataType = cell_t;
             cell.CellValue = new CellValue(text);
             return cell;
         }
-        static Cell InsertCell(Row row, string c)
+        static protected Cell InsertCell(Row row, string c)
         {
             var myRange = $"{c}{row.RowIndex}";
             Cell cell;
@@ -94,7 +97,7 @@ namespace ExcelExport
             return cell;
         }
 
-        static Row InsertRow(uint r, SheetData d)
+        static protected Row InsertRow(uint r, SheetData d)
         {
             Row row;
             if ( d.Elements<Row>().Where( rx=> rx.RowIndex==r).Count() <= 0)

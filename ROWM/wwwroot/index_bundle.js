@@ -41809,6 +41809,46 @@ var StatsPanel = function (_React$Component) {
                             this.props.roeArray[4]
                         )
                     )
+                ),
+                React.createElement(
+                    "p",
+                    null,
+                    React.createElement(
+                        "h2",
+                        null,
+                        "Exports"
+                    ),
+                    React.createElement(
+                        "ul",
+                        null,
+                        React.createElement(
+                            "li",
+                            null,
+                            React.createElement(
+                                "a",
+                                { href: "/export/contactlogs?f=excel", download: true },
+                                "Contact Log"
+                            )
+                        ),
+                        React.createElement(
+                            "li",
+                            null,
+                            React.createElement(
+                                "a",
+                                { href: "/export/documents?f=excel", download: true },
+                                "Documents List"
+                            )
+                        ),
+                        React.createElement(
+                            "li",
+                            null,
+                            React.createElement(
+                                "a",
+                                { href: "/export/contacts?f=excel", download: true },
+                                "Contacts List"
+                            )
+                        )
+                    )
                 )
             );
         }
@@ -54781,7 +54821,7 @@ var MapArea = function (_super) {
                 });
                 // https://gis05s.hdrgateway.com/arcgis/rest/services/California/SunFlower_Parcels_FS/FeatureServer
                 var parcelLay = new FeatureLayer({
-                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/SunFlower_Parcels_FS/FeatureServer/0",
+                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/Sunflower_Parcel_Stg_FS/FeatureServer/0",
                     outFields: ["*"]
                 });
                 parcelLay.popupTemplate = {
@@ -54793,7 +54833,7 @@ var MapArea = function (_super) {
                 };
                 // https://gis05s.hdrgateway.com/arcgis/rest/services/California/Sunflower_ROW_ParcelStatus/MapServer
                 var lay = new MapImageLayer({
-                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/Sunflower_ROW_ParcelStatus/MapServer"
+                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/Sunflower_ROW_ParcelStatus_Stg/MapServer"
                 });
                 m.add(lay);
                 m.add(parcelLay);

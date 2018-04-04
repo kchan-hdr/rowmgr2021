@@ -29,6 +29,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AgsFeatureUpdate\AgsFeatureUpdate.csproj" />
+    <ProjectReference Include="..\ExcelExport\ExcelExport.csproj" />
+    <ProjectReference Include="..\Export.Dal\Export.Dal.csproj" />
     <ProjectReference Include="..\ROWM.Dal\ROWM.Dal.csproj" />
     <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj" />
     <ProjectReference Include="..\SharePointUtil_Sunflower\SharePointUtil_Sunflower.csproj" />

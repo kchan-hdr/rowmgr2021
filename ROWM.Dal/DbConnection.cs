@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ROWM.Dal
 {
-    internal class DbConnection
+    public class DbConnection
     {
         internal static readonly SqlConnectionStringBuilder _CONN = new SqlConnectionStringBuilder
         {
@@ -36,7 +36,7 @@ namespace ROWM.Dal
             ApplicationName = "ROWM"
         };
 
-        internal static string GetConnectionString() => _CONN.ConnectionString;
+        public static string GetConnectionString() => _CONN.ConnectionString;
 
         internal static SqlConnection GetConnection() => new SqlConnection(GetConnectionString());
     }

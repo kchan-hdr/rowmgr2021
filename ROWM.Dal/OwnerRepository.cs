@@ -191,7 +191,7 @@ namespace ROWM.Dal
             try
             {
                 // for performance
-                var qstr = "SELECT d.DocumentId, d.Title, d.ReceivedDate, d.SentDate, pd.Parcel_ParcelId FROM dbo.ParcelDocuments pd INNER JOIN Rowm.Document d on pd.Document_DocumentId = d.DocumentId INNER JOIN Rowm.Parcel p ON pd.Parcel_ParcelId = p.ParcelId where p.IsActive = 1";
+                var qstr = "SELECT d.DocumentId, d.Title, d.ContentType, d.ReceivedDate, d.SentDate, d.DeliveredDate, d.SignedDate, d.DateRecorded, d.ClientTrackingNumber, d.CheckNo, pd.Parcel_ParcelId FROM dbo.ParcelDocuments pd INNER JOIN Rowm.Document d on pd.Document_DocumentId = d.DocumentId INNER JOIN Rowm.Parcel p ON pd.Parcel_ParcelId = p.ParcelId where p.IsActive = 1";
                 var q = _ctx.Database.SqlQuery<DocHead>(qstr);
 
                 return await q.ToListAsync();
@@ -206,8 +206,14 @@ namespace ROWM.Dal
         {
             public Guid DocumentId { get; set; }
             public string Title { get; set; }
+            public string ContentType { get; set; }
             public DateTimeOffset? ReceivedDate { get; set; }
             public DateTimeOffset? SentDate { get; set; }
+            public DateTimeOffset? DeliveredDate { get; set; }
+            public DateTimeOffset? SignedDate { get; set; }
+            public DateTimeOffset? DateRecorded { get; set; }
+            public string ClientTrackingNumber { get; set; }
+            public string CheckNo { get; set; }
             public string Parcel_ParcelId { get; set; }
         }
         public async Task<ContactLog> AddContactLog(IEnumerable<string> pids, IEnumerable<Guid> cids, ContactLog log)
