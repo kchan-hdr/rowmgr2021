@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.SharePoint.Client;
+using System.Diagnostics;
 
 namespace SharePointInterface.Test
 {
@@ -9,8 +10,10 @@ namespace SharePointInterface.Test
     {
         //private string _appId = "AppID";
         //private string _appSecret = "AppSecret";
-        private string _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc"; // for ../row_dev/...
-        private string _appSecret = "7T2/B1ZNHMw2EE90USqdVf8mMTfAze0LAjkT7ni7V7w=";
+        //private string _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc"; // for ../row_dev/...
+        //private string _appSecret = "7T2/B1ZNHMw2EE90USqdVf8mMTfAze0LAjkT7ni7V7w=";
+        string _appId = "3dff29b2-ae04-4ad4-8149-eb703d62b16f";
+        string _appSecret = "bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=";
 
         [TestMethod, TestCategory("SharePointCRUD")]
         public void GetTitle()
@@ -26,6 +29,11 @@ namespace SharePointInterface.Test
             SharePointCRUD spCRUD = new SharePointCRUD(); //  _appId, _appSecret);
             ListCollection lists = spCRUD.ListAllLists();
             Assert.AreNotEqual(0, lists.Count);
+
+            foreach( var l in lists)
+            {
+                Trace.WriteLine(l.Title);
+            }
         }
 
         [TestMethod, TestCategory("SharePointCRUD")]
@@ -41,7 +49,7 @@ namespace SharePointInterface.Test
         {
             SharePointCRUD spCRUD = new SharePointCRUD(); //  _appId, _appSecret);
             Folder folder = spCRUD.GetOrCreateFolder("Test");
-            bool docExists = spCRUD.DocExists(folder, "test.txt");
+            bool docExists = spCRUD.DocExists(folder, "test2.txt");
             Assert.IsTrue(docExists);
         }
 
@@ -67,13 +75,15 @@ namespace SharePointInterface.Test
             SharePointCRUD spCRUD = new SharePointCRUD(); // _appId, _appSecret);
             var docPath = spCRUD.GetDocTargetPath("", "Test", "0");
             Console.WriteLine(docPath.ToString());
-            Assert.AreEqual(4, docPath.Count);
+            Assert.AreEqual(3, docPath.Count);
         }
 
         [TestMethod, TestCategory("SharePointCRUD")]
         public void UploadParcelDoc()
         {
-            string fileName = @"C:\Users\cpyle\Documents\Sunflower\test2.txt";
+            //string fileName = @"C:\Users\cpyle\Documents\Sunflower\test2.txt";
+            string fileName = @"testdata\logs.csv";
+            fileName = @"testdata\test2.txt";
 
             SharePointCRUD spCRUD = new SharePointCRUD(); // _appId, _appSecret);
             byte[] bytes = System.IO.File.ReadAllBytes(fileName);

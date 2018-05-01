@@ -18,5 +18,23 @@ namespace ROWM2.Dal.Test
 
             Trace.WriteLine(n);
         }
+
+        [TestMethod, TestCategory("DAL")]
+        public void Simple_Database_First_Insert()
+        {
+            var c = new ROWM_Context(DbConnection.GetConnectionString());
+
+            var l = c.ContactLog.Create();
+            l.Agent = c.Agent.First();
+            l.Created = DateTime.UtcNow;
+            c.ContactLog.Add(l);
+            var touched = c.SaveChanges();
+
+            Assert.AreNotEqual(Guid.Empty, l.ContactLogId);
+
+            // clean up
+            c.ContactLog.Remove(l);
+            touched = c.SaveChanges();
+        }
     }
 }
