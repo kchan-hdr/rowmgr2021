@@ -5,6 +5,13 @@
     <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
     <UserSecretsId>4e6ae26c-e0fb-4704-956e-f3b98b5888da</UserSecretsId>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Properties\PublishProfiles\ROWM - FTP.pubxml" />
+    <None Remove="Properties\PublishProfiles\ROWM - Web Deploy.pubxml" />
+    <None Remove="Properties\PublishProfiles\ROWM-mezzy - Web Deploy.pubxml" />
+    <None Remove="Properties\PublishProfiles\rowmgr2 - Web Deploy.pubxml" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.1.3" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0" />
@@ -31,9 +38,11 @@
     <ProjectReference Include="..\AgsFeatureUpdate\AgsFeatureUpdate.csproj" />
     <ProjectReference Include="..\ExcelExport\ExcelExport.csproj" />
     <ProjectReference Include="..\Export.Dal\Export.Dal.csproj" />
-    <ProjectReference Include="..\ROWM.Dal\ROWM.Dal.csproj" />
+    <ProjectReference Include="..\ROWM2.Dal\ROWM2.Dal.csproj" />
     <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj" />
-    <ProjectReference Include="..\SharePointUtil_Sunflower\SharePointUtil_Sunflower.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
 
 </Project>

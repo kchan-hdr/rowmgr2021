@@ -1,5 +1,4 @@
-﻿using com.hdr.Rowm.Sunflower;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ROWM.Dal;
 using System;
 using System.Collections.Generic;
@@ -18,13 +17,13 @@ namespace ROWM.Controllers
         [HttpGet("api/vocabulary")]
         public Vocabulary Get()
         {
-            var agents = _Context.Agents.Where(a => a.IsActive);
-            var channels = _Context.Channels.Where(c => c.IsActive).OrderBy(c => c.DisplayOrder);
-            var purposes = _Context.Purposes.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
-            var rels = _Context.Representations.Where(r => r.IsActive).OrderBy(r => r.DisplayOrder);
+            var agents = _Context.Agent.Where(a => a.IsActive);
+            var channels = _Context.Contact_Channel.Where(c => c.IsActive).OrderBy(c => c.DisplayOrder);
+            var purposes = _Context.Contact_Purpose.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
+            var rels = _Context.Repesentation_Type.Where(r => r.IsActive).OrderBy(r => r.DisplayOrder);
 
-            var pStatus = _Context.ParcelStatus.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
-            var rStatus = _Context.RoeStatus.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
+            var pStatus = _Context.Parcel_Status.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
+            var rStatus = _Context.Roe_Status.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
 
             return new Vocabulary(agents,channels,purposes,rels, pStatus, rStatus);
         }
@@ -50,11 +49,11 @@ namespace ROWM.Controllers
 
             internal Vocabulary(
                 IEnumerable<Agent> agents, 
-                IEnumerable<Channel_Master> channels, 
-                IEnumerable<Purpose_Master> purposes, 
-                IEnumerable<Representation> rels,
-                IEnumerable<ParcelStatus_Master> p,
-                IEnumerable<RoeStatus_Master> r)
+                IEnumerable<Contact_Channel> channels, 
+                IEnumerable<Contact_Purpose> purposes, 
+                IEnumerable<Repesentation_Type> rels,
+                IEnumerable<Parcel_Status> p,
+                IEnumerable<Roe_Status> r)
             {
                 Agents = agents.Select(a => new Lookup { Code = a.AgentId.ToString(), Description = a.AgentName });
                 Channels = channels.Select(c => new Lookup { Code = c.ContactTypeCode, Description = c.Description, DisplayOrder = c.DisplayOrder });

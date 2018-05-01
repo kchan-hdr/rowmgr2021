@@ -13,7 +13,6 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Http.Features;
 using geographia.ags;
 using SharePointInterface;
-using com.hdr.Rowm.Sunflower;
 
 namespace ROWM
 {
@@ -53,7 +52,10 @@ namespace ROWM
                 o.MultipartBodyLengthLimit = int.MaxValue;
             });
 
-            services.AddScoped<ROWM.Dal.ROWM_Context>();
+            services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
+            {
+               return new ROWM.Dal.ROWM_Context(ROWM.Dal.DbConnection.GetConnectionString());
+            });
             services.AddScoped<com.hdr.Rowm.Export.RowmEntities>(fac =>
             {
                return new com.hdr.Rowm.Export.RowmEntities(ROWM.Dal.DbConnection.GetConnectionString());

@@ -1,0 +1,1450 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="ROWM.Dal.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Agent">
+          <Key>
+            <PropertyRef Name="AgentId" />
+          </Key>
+          <Property Name="AgentId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="AgentName" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Contact_Channel">
+          <Key>
+            <PropertyRef Name="ContactTypeCode" />
+          </Key>
+          <Property Name="ContactTypeCode" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="DisplayOrder" Type="int" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Contact_Purpose">
+          <Key>
+            <PropertyRef Name="PurposeCode" />
+          </Key>
+          <Property Name="PurposeCode" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="DisplayOrder" Type="int" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ContactInfo">
+          <Key>
+            <PropertyRef Name="ContactId" />
+          </Key>
+          <Property Name="ContactId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="IsPrimaryContact" Type="bit" Nullable="false" />
+          <Property Name="OwnerFirstName" Type="nvarchar" MaxLength="50" />
+          <Property Name="OwnerLastName" Type="nvarchar" MaxLength="50" />
+          <Property Name="OwnerStreetAddress" Type="nvarchar" MaxLength="400" />
+          <Property Name="OwnerCity" Type="nvarchar" MaxLength="100" />
+          <Property Name="OwnerState" Type="nvarchar" MaxLength="20" />
+          <Property Name="OwnerZIP" Type="nvarchar" MaxLength="10" />
+          <Property Name="OwnerEmail" Type="nvarchar" MaxLength="256" />
+          <Property Name="OwnerHomePhone" Type="nvarchar(max)" />
+          <Property Name="OwnerCellPhone" Type="nvarchar(max)" />
+          <Property Name="OwnerWorkPhone" Type="nvarchar(max)" />
+          <Property Name="ContactOwnerId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastModified" Type="datetimeoffset" Precision="7" />
+          <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
+          <Property Name="Representation" Type="nvarchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ContactInfoContactLogs">
+          <Key>
+            <PropertyRef Name="ContactInfo_ContactId" />
+            <PropertyRef Name="ContactLog_ContactLogId" />
+          </Key>
+          <Property Name="ContactInfo_ContactId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ContactLog_ContactLogId" Type="uniqueidentifier" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ContactLog">
+          <Key>
+            <PropertyRef Name="ContactLogId" />
+          </Key>
+          <Property Name="ContactLogId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="DateAdded" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ContactAgentId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ContactChannel" Type="nvarchar" MaxLength="20" />
+          <Property Name="ProjectPhase" Type="nvarchar" MaxLength="20" />
+          <Property Name="Title" Type="nvarchar" MaxLength="200" />
+          <Property Name="Notes" Type="nvarchar(max)" />
+          <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
+          <Property Name="Owner_OwnerId" Type="uniqueidentifier" />
+        </EntityType>
+        <EntityType Name="Document">
+          <Key>
+            <PropertyRef Name="DocumentId" />
+          </Key>
+          <Property Name="DocumentId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="DocumentType" Type="nvarchar" MaxLength="50" />
+          <Property Name="Content" Type="varbinary(max)" />
+          <Property Name="SharePointUrl" Type="nvarchar(max)" />
+          <Property Name="AzureBlobId" Type="nvarchar(max)" />
+          <Property Name="TitleInFile" Type="bit" Nullable="false" />
+          <Property Name="ReceivedDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="QCDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="ApprovedDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="SentDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="RowmTrackingNumber" Type="nvarchar" MaxLength="100" />
+          <Property Name="DeliveredDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="SignedDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="ReceivedFromOwnerDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="ClientTrackingNumber" Type="nvarchar" MaxLength="100" />
+          <Property Name="ClientSignatureDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="ReceivedFromClientDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
+          <Property Name="DocumentPackage_PackageId" Type="uniqueidentifier" />
+          <Property Name="Title" Type="nvarchar(max)" />
+          <Property Name="ContentType" Type="nvarchar" MaxLength="100" />
+          <Property Name="SourceFilename" Type="nvarchar" MaxLength="500" />
+          <Property Name="DateRecorded" Type="datetimeoffset" Precision="7" />
+          <Property Name="CheckNo" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="Document_Type">
+          <Key>
+            <PropertyRef Name="DocTypeName" />
+          </Key>
+          <Property Name="DocTypeName" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="FolderPath" Type="nvarchar" MaxLength="400" />
+          <Property Name="DisplayOrder" Type="int" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DocumentActivity">
+          <Key>
+            <PropertyRef Name="ActivityId" />
+          </Key>
+          <Property Name="ActivityId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ActivityDate" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="Activity" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="ActivityNotes" Type="nvarchar(max)" />
+          <Property Name="ParentDocumentId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ChildDocumentId" Type="uniqueidentifier" />
+          <Property Name="AgentId" Type="uniqueidentifier" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DocumentAgents">
+          <Key>
+            <PropertyRef Name="Document_DocumentId" />
+            <PropertyRef Name="Agent_AgentId" />
+          </Key>
+          <Property Name="Document_DocumentId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Agent_AgentId" Type="uniqueidentifier" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DocumentPackage">
+          <Key>
+            <PropertyRef Name="PackageId" />
+          </Key>
+          <Property Name="PackageId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="PackageName" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Owner">
+          <Key>
+            <PropertyRef Name="OwnerId" />
+          </Key>
+          <Property Name="OwnerId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="PartyName" Type="nvarchar" MaxLength="200" />
+          <Property Name="OwnerType" Type="nvarchar" MaxLength="50" />
+          <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="OwnerDocuments">
+          <Key>
+            <PropertyRef Name="Document_DocumentId" />
+            <PropertyRef Name="Owner_OwnerId" />
+          </Key>
+          <Property Name="Document_DocumentId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Owner_OwnerId" Type="uniqueidentifier" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Ownership">
+          <Key>
+            <PropertyRef Name="OwnershipId" />
+          </Key>
+          <Property Name="OwnershipId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ParcelId" Type="uniqueidentifier" />
+          <Property Name="OwnerId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Ownership_t" Type="int" Nullable="false" />
+          <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Parcel">
+          <Key>
+            <PropertyRef Name="ParcelId" />
+          </Key>
+          <Property Name="ParcelId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Assessor_Parcel_Number" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="County_FIPS" Type="char" MaxLength="5" Nullable="false" />
+          <Property Name="County_Name" Type="nvarchar" MaxLength="50" />
+          <Property Name="SitusAddress" Type="nvarchar" MaxLength="800" />
+          <Property Name="Acreage" Type="float" />
+          <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
+          <Property Name="InitialROEOffer_OfferDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="InitialROEOffer_OfferAmount" Type="float" />
+          <Property Name="InitialROEOffer_OfferNotes" Type="nvarchar(max)" />
+          <Property Name="FinalROEOffer_OfferDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="FinalROEOffer_OfferAmount" Type="float" />
+          <Property Name="FinalROEOffer_OfferNotes" Type="nvarchar(max)" />
+          <Property Name="InitialOptionOffer_OfferDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="InitialOptionOffer_OfferAmount" Type="float" />
+          <Property Name="InitialOptionOffer_OfferNotes" Type="nvarchar(max)" />
+          <Property Name="FinalOptionOffer_OfferDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="FinalOptionOffer_OfferAmount" Type="float" />
+          <Property Name="FinalOptionOffer_OfferNotes" Type="nvarchar(max)" />
+          <Property Name="InitialEasementOffer_OfferDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="InitialEasementOffer_OfferAmount" Type="float" />
+          <Property Name="InitialEasementOffer_OfferNotes" Type="nvarchar(max)" />
+          <Property Name="FinalEasementOffer_OfferDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="FinalEasementOffer_OfferAmount" Type="float" />
+          <Property Name="FinalEasementOffer_OfferNotes" Type="nvarchar(max)" />
+          <Property Name="ParcelStatusCode" Type="nvarchar" MaxLength="40" />
+          <Property Name="RoeStatusCode" Type="nvarchar" MaxLength="40" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Parcel_Status">
+          <Key>
+            <PropertyRef Name="Code" />
+          </Key>
+          <Property Name="Code" Type="nvarchar" MaxLength="40" Nullable="false" />
+          <Property Name="DomainValue" Type="int" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="200" />
+          <Property Name="DisplayOrder" Type="int" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ParcelContactLogs">
+          <Key>
+            <PropertyRef Name="Parcel_ParcelId" />
+            <PropertyRef Name="ContactLog_ContactLogId" />
+          </Key>
+          <Property Name="Parcel_ParcelId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ContactLog_ContactLogId" Type="uniqueidentifier" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ParcelDocuments">
+          <Key>
+            <PropertyRef Name="Parcel_ParcelId" />
+            <PropertyRef Name="Document_DocumentId" />
+          </Key>
+          <Property Name="Parcel_ParcelId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Document_DocumentId" Type="uniqueidentifier" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Repesentation_Type">
+          <Key>
+            <PropertyRef Name="RelationTypeCode" />
+          </Key>
+          <Property Name="RelationTypeCode" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="DisplayOrder" Type="int" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Roe_Status">
+          <Key>
+            <PropertyRef Name="Code" />
+          </Key>
+          <Property Name="Code" Type="nvarchar" MaxLength="40" Nullable="false" />
+          <Property Name="DomainValue" Type="int" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="200" />
+          <Property Name="DisplayOrder" Type="int" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_dbo_ContactInfoContactLogs_ROWM_ContactInfo_ContactInfo_ContactId">
+          <End Role="ContactInfo" Type="Self.ContactInfo" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ContactInfoContactLogs" Type="Self.ContactInfoContactLogs" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ContactInfo">
+              <PropertyRef Name="ContactId" />
+            </Principal>
+            <Dependent Role="ContactInfoContactLogs">
+              <PropertyRef Name="ContactInfo_ContactId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_ContactInfoContactLogs_ROWM_ContactLog_ContactLog_ContactLogId">
+          <End Role="ContactLog" Type="Self.ContactLog" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ContactInfoContactLogs" Type="Self.ContactInfoContactLogs" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ContactLog">
+              <PropertyRef Name="ContactLogId" />
+            </Principal>
+            <Dependent Role="ContactInfoContactLogs">
+              <PropertyRef Name="ContactLog_ContactLogId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_DocumentAgents_ROWM_Agent_Agent_AgentId">
+          <End Role="Agent" Type="Self.Agent" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DocumentAgents" Type="Self.DocumentAgents" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Agent">
+              <PropertyRef Name="AgentId" />
+            </Principal>
+            <Dependent Role="DocumentAgents">
+              <PropertyRef Name="Agent_AgentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_DocumentAgents_ROWM_Document_Document_DocumentId">
+          <End Role="Document" Type="Self.Document" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DocumentAgents" Type="Self.DocumentAgents" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Document">
+              <PropertyRef Name="DocumentId" />
+            </Principal>
+            <Dependent Role="DocumentAgents">
+              <PropertyRef Name="Document_DocumentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_DocumentOwners_ROWM_Document_Document_DocumentId">
+          <End Role="Document" Type="Self.Document" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="OwnerDocuments" Type="Self.OwnerDocuments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Document">
+              <PropertyRef Name="DocumentId" />
+            </Principal>
+            <Dependent Role="OwnerDocuments">
+              <PropertyRef Name="Document_DocumentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_DocumentOwners_ROWM_Owner_Owner_OwnerId">
+          <End Role="Owner" Type="Self.Owner" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="OwnerDocuments" Type="Self.OwnerDocuments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Owner">
+              <PropertyRef Name="OwnerId" />
+            </Principal>
+            <Dependent Role="OwnerDocuments">
+              <PropertyRef Name="Owner_OwnerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_ParcelContactLogs_ROWM_ContactLog_ContactLog_ContactLogId">
+          <End Role="ContactLog" Type="Self.ContactLog" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ParcelContactLogs" Type="Self.ParcelContactLogs" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ContactLog">
+              <PropertyRef Name="ContactLogId" />
+            </Principal>
+            <Dependent Role="ParcelContactLogs">
+              <PropertyRef Name="ContactLog_ContactLogId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_ParcelContactLogs_ROWM_Parcel_Parcel_ParcelId">
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ParcelContactLogs" Type="Self.ParcelContactLogs" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel">
+              <PropertyRef Name="ParcelId" />
+            </Principal>
+            <Dependent Role="ParcelContactLogs">
+              <PropertyRef Name="Parcel_ParcelId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_ParcelDocuments_ROWM_Document_Document_DocumentId">
+          <End Role="Document" Type="Self.Document" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ParcelDocuments" Type="Self.ParcelDocuments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Document">
+              <PropertyRef Name="DocumentId" />
+            </Principal>
+            <Dependent Role="ParcelDocuments">
+              <PropertyRef Name="Document_DocumentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_ParcelDocuments_ROWM_Parcel_Parcel_ParcelId">
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ParcelDocuments" Type="Self.ParcelDocuments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel">
+              <PropertyRef Name="ParcelId" />
+            </Principal>
+            <Dependent Role="ParcelDocuments">
+              <PropertyRef Name="Parcel_ParcelId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId">
+          <End Role="Owner" Type="Self.Owner" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ContactInfo" Type="Self.ContactInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Owner">
+              <PropertyRef Name="OwnerId" />
+            </Principal>
+            <Dependent Role="ContactInfo">
+              <PropertyRef Name="ContactOwnerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_ContactLog_ROWM_Agent_ContactAgentId">
+          <End Role="Agent" Type="Self.Agent" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ContactLog" Type="Self.ContactLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Agent">
+              <PropertyRef Name="AgentId" />
+            </Principal>
+            <Dependent Role="ContactLog">
+              <PropertyRef Name="ContactAgentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_ContactLog_ROWM_Owner_Owner_OwnerId">
+          <End Role="Owner" Type="Self.Owner" Multiplicity="0..1" />
+          <End Role="ContactLog" Type="Self.ContactLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Owner">
+              <PropertyRef Name="OwnerId" />
+            </Principal>
+            <Dependent Role="ContactLog">
+              <PropertyRef Name="Owner_OwnerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_Document_ROWM_DocumentPackage_DocumentPackage_PackageId">
+          <End Role="DocumentPackage" Type="Self.DocumentPackage" Multiplicity="0..1" />
+          <End Role="Document" Type="Self.Document" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DocumentPackage">
+              <PropertyRef Name="PackageId" />
+            </Principal>
+            <Dependent Role="Document">
+              <PropertyRef Name="DocumentPackage_PackageId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_DocumentActivity_ROWM_Agent_AgentId">
+          <End Role="Agent" Type="Self.Agent" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DocumentActivity" Type="Self.DocumentActivity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Agent">
+              <PropertyRef Name="AgentId" />
+            </Principal>
+            <Dependent Role="DocumentActivity">
+              <PropertyRef Name="AgentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_DocumentActivity_ROWM_Document_ChildDocumentId">
+          <End Role="Document" Type="Self.Document" Multiplicity="0..1" />
+          <End Role="DocumentActivity" Type="Self.DocumentActivity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Document">
+              <PropertyRef Name="DocumentId" />
+            </Principal>
+            <Dependent Role="DocumentActivity">
+              <PropertyRef Name="ChildDocumentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_DocumentActivity_ROWM_Document_ParentDocumentId">
+          <End Role="Document" Type="Self.Document" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DocumentActivity" Type="Self.DocumentActivity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Document">
+              <PropertyRef Name="DocumentId" />
+            </Principal>
+            <Dependent Role="DocumentActivity">
+              <PropertyRef Name="ParentDocumentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_Ownership_ROWM_Owner_OwnerId">
+          <End Role="Owner" Type="Self.Owner" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Ownership" Type="Self.Ownership" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Owner">
+              <PropertyRef Name="OwnerId" />
+            </Principal>
+            <Dependent Role="Ownership">
+              <PropertyRef Name="OwnerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_Ownership_ROWM_Parcel_ParcelId">
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="0..1" />
+          <End Role="Ownership" Type="Self.Ownership" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel">
+              <PropertyRef Name="ParcelId" />
+            </Principal>
+            <Dependent Role="Ownership">
+              <PropertyRef Name="ParcelId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode">
+          <End Role="Parcel_Status" Type="Self.Parcel_Status" Multiplicity="0..1" />
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel_Status">
+              <PropertyRef Name="Code" />
+            </Principal>
+            <Dependent Role="Parcel">
+              <PropertyRef Name="ParcelStatusCode" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode">
+          <End Role="Roe_Status" Type="Self.Roe_Status" Multiplicity="0..1" />
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Roe_Status">
+              <PropertyRef Name="Code" />
+            </Principal>
+            <Dependent Role="Parcel">
+              <PropertyRef Name="RoeStatusCode" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="ROWMDalStoreContainer">
+          <EntitySet Name="Agent" EntityType="Self.Agent" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Contact_Channel" EntityType="Self.Contact_Channel" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Contact_Purpose" EntityType="Self.Contact_Purpose" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="ContactInfo" EntityType="Self.ContactInfo" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="ContactInfoContactLogs" EntityType="Self.ContactInfoContactLogs" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="ContactLog" EntityType="Self.ContactLog" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Document" EntityType="Self.Document" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Document_Type" EntityType="Self.Document_Type" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="DocumentActivity" EntityType="Self.DocumentActivity" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="DocumentAgents" EntityType="Self.DocumentAgents" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="DocumentPackage" EntityType="Self.DocumentPackage" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Owner" EntityType="Self.Owner" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="OwnerDocuments" EntityType="Self.OwnerDocuments" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Ownership" EntityType="Self.Ownership" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Parcel" EntityType="Self.Parcel" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Parcel_Status" EntityType="Self.Parcel_Status" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="ParcelContactLogs" EntityType="Self.ParcelContactLogs" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="ParcelDocuments" EntityType="Self.ParcelDocuments" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Repesentation_Type" EntityType="Self.Repesentation_Type" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Roe_Status" EntityType="Self.Roe_Status" Schema="ROWM" store:Type="Tables" />
+          <AssociationSet Name="FK_dbo_ContactInfoContactLogs_ROWM_ContactInfo_ContactInfo_ContactId" Association="Self.FK_dbo_ContactInfoContactLogs_ROWM_ContactInfo_ContactInfo_ContactId">
+            <End Role="ContactInfo" EntitySet="ContactInfo" />
+            <End Role="ContactInfoContactLogs" EntitySet="ContactInfoContactLogs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_ContactInfoContactLogs_ROWM_ContactLog_ContactLog_ContactLogId" Association="Self.FK_dbo_ContactInfoContactLogs_ROWM_ContactLog_ContactLog_ContactLogId">
+            <End Role="ContactLog" EntitySet="ContactLog" />
+            <End Role="ContactInfoContactLogs" EntitySet="ContactInfoContactLogs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_DocumentAgents_ROWM_Agent_Agent_AgentId" Association="Self.FK_dbo_DocumentAgents_ROWM_Agent_Agent_AgentId">
+            <End Role="Agent" EntitySet="Agent" />
+            <End Role="DocumentAgents" EntitySet="DocumentAgents" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_DocumentAgents_ROWM_Document_Document_DocumentId" Association="Self.FK_dbo_DocumentAgents_ROWM_Document_Document_DocumentId">
+            <End Role="Document" EntitySet="Document" />
+            <End Role="DocumentAgents" EntitySet="DocumentAgents" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_DocumentOwners_ROWM_Document_Document_DocumentId" Association="Self.FK_dbo_DocumentOwners_ROWM_Document_Document_DocumentId">
+            <End Role="Document" EntitySet="Document" />
+            <End Role="OwnerDocuments" EntitySet="OwnerDocuments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_DocumentOwners_ROWM_Owner_Owner_OwnerId" Association="Self.FK_dbo_DocumentOwners_ROWM_Owner_Owner_OwnerId">
+            <End Role="Owner" EntitySet="Owner" />
+            <End Role="OwnerDocuments" EntitySet="OwnerDocuments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_ParcelContactLogs_ROWM_ContactLog_ContactLog_ContactLogId" Association="Self.FK_dbo_ParcelContactLogs_ROWM_ContactLog_ContactLog_ContactLogId">
+            <End Role="ContactLog" EntitySet="ContactLog" />
+            <End Role="ParcelContactLogs" EntitySet="ParcelContactLogs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_ParcelContactLogs_ROWM_Parcel_Parcel_ParcelId" Association="Self.FK_dbo_ParcelContactLogs_ROWM_Parcel_Parcel_ParcelId">
+            <End Role="Parcel" EntitySet="Parcel" />
+            <End Role="ParcelContactLogs" EntitySet="ParcelContactLogs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_ParcelDocuments_ROWM_Document_Document_DocumentId" Association="Self.FK_dbo_ParcelDocuments_ROWM_Document_Document_DocumentId">
+            <End Role="Document" EntitySet="Document" />
+            <End Role="ParcelDocuments" EntitySet="ParcelDocuments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_ParcelDocuments_ROWM_Parcel_Parcel_ParcelId" Association="Self.FK_dbo_ParcelDocuments_ROWM_Parcel_Parcel_ParcelId">
+            <End Role="Parcel" EntitySet="Parcel" />
+            <End Role="ParcelDocuments" EntitySet="ParcelDocuments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId" Association="Self.FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId">
+            <End Role="Owner" EntitySet="Owner" />
+            <End Role="ContactInfo" EntitySet="ContactInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_ContactLog_ROWM_Agent_ContactAgentId" Association="Self.FK_ROWM_ContactLog_ROWM_Agent_ContactAgentId">
+            <End Role="Agent" EntitySet="Agent" />
+            <End Role="ContactLog" EntitySet="ContactLog" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_ContactLog_ROWM_Owner_Owner_OwnerId" Association="Self.FK_ROWM_ContactLog_ROWM_Owner_Owner_OwnerId">
+            <End Role="Owner" EntitySet="Owner" />
+            <End Role="ContactLog" EntitySet="ContactLog" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_Document_ROWM_DocumentPackage_DocumentPackage_PackageId" Association="Self.FK_ROWM_Document_ROWM_DocumentPackage_DocumentPackage_PackageId">
+            <End Role="DocumentPackage" EntitySet="DocumentPackage" />
+            <End Role="Document" EntitySet="Document" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_DocumentActivity_ROWM_Agent_AgentId" Association="Self.FK_ROWM_DocumentActivity_ROWM_Agent_AgentId">
+            <End Role="Agent" EntitySet="Agent" />
+            <End Role="DocumentActivity" EntitySet="DocumentActivity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_DocumentActivity_ROWM_Document_ChildDocumentId" Association="Self.FK_ROWM_DocumentActivity_ROWM_Document_ChildDocumentId">
+            <End Role="Document" EntitySet="Document" />
+            <End Role="DocumentActivity" EntitySet="DocumentActivity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_DocumentActivity_ROWM_Document_ParentDocumentId" Association="Self.FK_ROWM_DocumentActivity_ROWM_Document_ParentDocumentId">
+            <End Role="Document" EntitySet="Document" />
+            <End Role="DocumentActivity" EntitySet="DocumentActivity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_Ownership_ROWM_Owner_OwnerId" Association="Self.FK_ROWM_Ownership_ROWM_Owner_OwnerId">
+            <End Role="Owner" EntitySet="Owner" />
+            <End Role="Ownership" EntitySet="Ownership" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_Ownership_ROWM_Parcel_ParcelId" Association="Self.FK_ROWM_Ownership_ROWM_Parcel_ParcelId">
+            <End Role="Parcel" EntitySet="Parcel" />
+            <End Role="Ownership" EntitySet="Ownership" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode" Association="Self.FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode">
+            <End Role="Parcel_Status" EntitySet="Parcel_Status" />
+            <End Role="Parcel" EntitySet="Parcel" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode" Association="Self.FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode">
+            <End Role="Roe_Status" EntitySet="Roe_Status" />
+            <End Role="Parcel" EntitySet="Parcel" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="ROWM.Dal" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Agent">
+          <Key>
+            <PropertyRef Name="AgentId" />
+          </Key>
+          <Property Name="AgentId" Type="Guid" Nullable="false" />
+          <Property Name="AgentName" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Created" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastModified" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="ContactLog" Relationship="Self.FK_ROWM_ContactLog_ROWM_Agent_ContactAgentId" FromRole="Agent" ToRole="ContactLog" />
+          <NavigationProperty Name="DocumentActivity" Relationship="Self.FK_ROWM_DocumentActivity_ROWM_Agent_AgentId" FromRole="Agent" ToRole="DocumentActivity" />
+          <NavigationProperty Name="Document" Relationship="Self.DocumentAgents" FromRole="Agent" ToRole="Document" />
+        </EntityType>
+        <EntityType Name="Contact_Channel">
+          <Key>
+            <PropertyRef Name="ContactTypeCode" />
+          </Key>
+          <Property Name="ContactTypeCode" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DisplayOrder" Type="Int32" Nullable="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Contact_Purpose">
+          <Key>
+            <PropertyRef Name="PurposeCode" />
+          </Key>
+          <Property Name="PurposeCode" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DisplayOrder" Type="Int32" Nullable="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ContactInfo">
+          <Key>
+            <PropertyRef Name="ContactId" />
+          </Key>
+          <Property Name="ContactId" Type="Guid" Nullable="false" />
+          <Property Name="IsPrimaryContact" Type="Boolean" Nullable="false" />
+          <Property Name="OwnerFirstName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="OwnerLastName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="OwnerStreetAddress" Type="String" MaxLength="400" FixedLength="false" Unicode="true" />
+          <Property Name="OwnerCity" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="OwnerState" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="OwnerZIP" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="OwnerEmail" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
+          <Property Name="OwnerHomePhone" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="OwnerCellPhone" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="OwnerWorkPhone" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ContactOwnerId" Type="Guid" Nullable="false" />
+          <Property Name="Created" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastModified" Type="DateTimeOffset" Precision="7" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Representation" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="Owner" Relationship="Self.FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId" FromRole="ContactInfo" ToRole="Owner" />
+          <NavigationProperty Name="ContactLog" Relationship="Self.ContactInfoContactLogs" FromRole="ContactInfo" ToRole="ContactLog" />
+        </EntityType>
+        <EntityType Name="ContactLog">
+          <Key>
+            <PropertyRef Name="ContactLogId" />
+          </Key>
+          <Property Name="ContactLogId" Type="Guid" Nullable="false" />
+          <Property Name="DateAdded" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ContactAgentId" Type="Guid" Nullable="false" />
+          <Property Name="ContactChannel" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="ProjectPhase" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="Title" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Created" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastModified" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Owner_OwnerId" Type="Guid" />
+          <NavigationProperty Name="Agent" Relationship="Self.FK_ROWM_ContactLog_ROWM_Agent_ContactAgentId" FromRole="ContactLog" ToRole="Agent" />
+          <NavigationProperty Name="Owner" Relationship="Self.FK_ROWM_ContactLog_ROWM_Owner_Owner_OwnerId" FromRole="ContactLog" ToRole="Owner" />
+          <NavigationProperty Name="ContactInfo" Relationship="Self.ContactInfoContactLogs" FromRole="ContactLog" ToRole="ContactInfo" />
+          <NavigationProperty Name="Parcel" Relationship="Self.ParcelContactLogs" FromRole="ContactLog" ToRole="Parcel" />
+        </EntityType>
+        <EntityType Name="Document">
+          <Key>
+            <PropertyRef Name="DocumentId" />
+          </Key>
+          <Property Name="DocumentId" Type="Guid" Nullable="false" />
+          <Property Name="DocumentType" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Content" Type="Binary" MaxLength="Max" FixedLength="false" />
+          <Property Name="SharePointUrl" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="AzureBlobId" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="TitleInFile" Type="Boolean" Nullable="false" />
+          <Property Name="ReceivedDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="QCDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="ApprovedDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="SentDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="RowmTrackingNumber" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="DeliveredDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="SignedDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="ReceivedFromOwnerDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="ClientTrackingNumber" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="ClientSignatureDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="ReceivedFromClientDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="Created" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastModified" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="DocumentPackage_PackageId" Type="Guid" />
+          <Property Name="Title" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ContentType" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="SourceFilename" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="DateRecorded" Type="DateTimeOffset" Precision="7" />
+          <Property Name="CheckNo" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="DocumentPackage" Relationship="Self.FK_ROWM_Document_ROWM_DocumentPackage_DocumentPackage_PackageId" FromRole="Document" ToRole="DocumentPackage" />
+          <NavigationProperty Name="DocumentActivity" Relationship="Self.FK_ROWM_DocumentActivity_ROWM_Document_ChildDocumentId" FromRole="Document" ToRole="DocumentActivity" />
+          <NavigationProperty Name="DocumentActivity1" Relationship="Self.FK_ROWM_DocumentActivity_ROWM_Document_ParentDocumentId" FromRole="Document" ToRole="DocumentActivity" />
+          <NavigationProperty Name="Agent" Relationship="Self.DocumentAgents" FromRole="Document" ToRole="Agent" />
+          <NavigationProperty Name="Owner" Relationship="Self.OwnerDocuments" FromRole="Document" ToRole="Owner" />
+          <NavigationProperty Name="Parcel" Relationship="Self.ParcelDocuments" FromRole="Document" ToRole="Parcel" />
+        </EntityType>
+        <EntityType Name="Document_Type">
+          <Key>
+            <PropertyRef Name="DocTypeName" />
+          </Key>
+          <Property Name="DocTypeName" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="FolderPath" Type="String" MaxLength="400" FixedLength="false" Unicode="true" />
+          <Property Name="DisplayOrder" Type="Int32" Nullable="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DocumentActivity">
+          <Key>
+            <PropertyRef Name="ActivityId" />
+          </Key>
+          <Property Name="ActivityId" Type="Guid" Nullable="false" />
+          <Property Name="ActivityDate" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="Activity" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ActivityNotes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ParentDocumentId" Type="Guid" Nullable="false" />
+          <Property Name="ChildDocumentId" Type="Guid" />
+          <Property Name="AgentId" Type="Guid" Nullable="false" />
+          <NavigationProperty Name="Agent" Relationship="Self.FK_ROWM_DocumentActivity_ROWM_Agent_AgentId" FromRole="DocumentActivity" ToRole="Agent" />
+          <NavigationProperty Name="Document" Relationship="Self.FK_ROWM_DocumentActivity_ROWM_Document_ChildDocumentId" FromRole="DocumentActivity" ToRole="Document" />
+          <NavigationProperty Name="Document1" Relationship="Self.FK_ROWM_DocumentActivity_ROWM_Document_ParentDocumentId" FromRole="DocumentActivity" ToRole="Document" />
+        </EntityType>
+        <EntityType Name="DocumentPackage">
+          <Key>
+            <PropertyRef Name="PackageId" />
+          </Key>
+          <Property Name="PackageId" Type="Guid" Nullable="false" />
+          <Property Name="PackageName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Created" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastModified" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Document" Relationship="Self.FK_ROWM_Document_ROWM_DocumentPackage_DocumentPackage_PackageId" FromRole="DocumentPackage" ToRole="Document" />
+        </EntityType>
+        <EntityType Name="Owner">
+          <Key>
+            <PropertyRef Name="OwnerId" />
+          </Key>
+          <Property Name="OwnerId" Type="Guid" Nullable="false" />
+          <Property Name="PartyName" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="OwnerType" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Created" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastModified" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="ContactInfo" Relationship="Self.FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId" FromRole="Owner" ToRole="ContactInfo" />
+          <NavigationProperty Name="ContactLog" Relationship="Self.FK_ROWM_ContactLog_ROWM_Owner_Owner_OwnerId" FromRole="Owner" ToRole="ContactLog" />
+          <NavigationProperty Name="Ownership" Relationship="Self.FK_ROWM_Ownership_ROWM_Owner_OwnerId" FromRole="Owner" ToRole="Ownership" />
+          <NavigationProperty Name="Document" Relationship="Self.OwnerDocuments" FromRole="Owner" ToRole="Document" />
+        </EntityType>
+        <EntityType Name="Ownership">
+          <Key>
+            <PropertyRef Name="OwnershipId" />
+          </Key>
+          <Property Name="OwnershipId" Type="Guid" Nullable="false" />
+          <Property Name="ParcelId" Type="Guid" />
+          <Property Name="OwnerId" Type="Guid" Nullable="false" />
+          <Property Name="Ownership_t" Type="Int32" Nullable="false" />
+          <Property Name="Created" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastModified" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Owner" Relationship="Self.FK_ROWM_Ownership_ROWM_Owner_OwnerId" FromRole="Ownership" ToRole="Owner" />
+          <NavigationProperty Name="Parcel" Relationship="Self.FK_ROWM_Ownership_ROWM_Parcel_ParcelId" FromRole="Ownership" ToRole="Parcel" />
+        </EntityType>
+        <EntityType Name="Parcel">
+          <Key>
+            <PropertyRef Name="ParcelId" />
+          </Key>
+          <Property Name="ParcelId" Type="Guid" Nullable="false" />
+          <Property Name="County_FIPS" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="SitusAddress" Type="String" MaxLength="800" FixedLength="false" Unicode="true" />
+          <Property Name="Acreage" Type="Double" />
+          <Property Name="Created" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastModified" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="InitialROEOffer_OfferDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="InitialROEOffer_OfferAmount" Type="Double" />
+          <Property Name="InitialROEOffer_OfferNotes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="FinalROEOffer_OfferDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="FinalROEOffer_OfferAmount" Type="Double" />
+          <Property Name="FinalROEOffer_OfferNotes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="InitialOptionOffer_OfferDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="InitialOptionOffer_OfferAmount" Type="Double" />
+          <Property Name="InitialOptionOffer_OfferNotes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="FinalOptionOffer_OfferDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="FinalOptionOffer_OfferAmount" Type="Double" />
+          <Property Name="FinalOptionOffer_OfferNotes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="InitialEasementOffer_OfferDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="InitialEasementOffer_OfferAmount" Type="Double" />
+          <Property Name="InitialEasementOffer_OfferNotes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="FinalEasementOffer_OfferDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="FinalEasementOffer_OfferAmount" Type="Double" />
+          <Property Name="FinalEasementOffer_OfferNotes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ParcelStatusCode" Type="String" MaxLength="40" FixedLength="false" Unicode="true" />
+          <Property Name="RoeStatusCode" Type="String" MaxLength="40" FixedLength="false" Unicode="true" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Ownership" Relationship="Self.FK_ROWM_Ownership_ROWM_Parcel_ParcelId" FromRole="Parcel" ToRole="Ownership" />
+          <NavigationProperty Name="Parcel_Status" Relationship="Self.FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode" FromRole="Parcel" ToRole="Parcel_Status" />
+          <NavigationProperty Name="Roe_Status" Relationship="Self.FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode" FromRole="Parcel" ToRole="Roe_Status" />
+          <NavigationProperty Name="ContactLog" Relationship="Self.ParcelContactLogs" FromRole="Parcel" ToRole="ContactLog" />
+          <NavigationProperty Name="Document" Relationship="Self.ParcelDocuments" FromRole="Parcel" ToRole="Document" />
+          <Property Name="County_Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Assessor_Parcel_Number" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="Parcel_Status">
+          <Key>
+            <PropertyRef Name="Code" />
+          </Key>
+          <Property Name="Code" Type="String" MaxLength="40" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DomainValue" Type="Int32" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="DisplayOrder" Type="Int32" Nullable="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Parcel" Relationship="Self.FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode" FromRole="Parcel_Status" ToRole="Parcel" />
+        </EntityType>
+        <EntityType Name="Repesentation_Type">
+          <Key>
+            <PropertyRef Name="RelationTypeCode" />
+          </Key>
+          <Property Name="RelationTypeCode" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DisplayOrder" Type="Int32" Nullable="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Roe_Status">
+          <Key>
+            <PropertyRef Name="Code" />
+          </Key>
+          <Property Name="Code" Type="String" MaxLength="40" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DomainValue" Type="Int32" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="DisplayOrder" Type="Int32" Nullable="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Parcel" Relationship="Self.FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode" FromRole="Roe_Status" ToRole="Parcel" />
+        </EntityType>
+        <Association Name="FK_ROWM_ContactLog_ROWM_Agent_ContactAgentId">
+          <End Role="Agent" Type="Self.Agent" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ContactLog" Type="Self.ContactLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Agent">
+              <PropertyRef Name="AgentId" />
+            </Principal>
+            <Dependent Role="ContactLog">
+              <PropertyRef Name="ContactAgentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_DocumentActivity_ROWM_Agent_AgentId">
+          <End Role="Agent" Type="Self.Agent" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DocumentActivity" Type="Self.DocumentActivity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Agent">
+              <PropertyRef Name="AgentId" />
+            </Principal>
+            <Dependent Role="DocumentActivity">
+              <PropertyRef Name="AgentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId">
+          <End Role="Owner" Type="Self.Owner" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ContactInfo" Type="Self.ContactInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Owner">
+              <PropertyRef Name="OwnerId" />
+            </Principal>
+            <Dependent Role="ContactInfo">
+              <PropertyRef Name="ContactOwnerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_ContactLog_ROWM_Owner_Owner_OwnerId">
+          <End Role="Owner" Type="Self.Owner" Multiplicity="0..1" />
+          <End Role="ContactLog" Type="Self.ContactLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Owner">
+              <PropertyRef Name="OwnerId" />
+            </Principal>
+            <Dependent Role="ContactLog">
+              <PropertyRef Name="Owner_OwnerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_Document_ROWM_DocumentPackage_DocumentPackage_PackageId">
+          <End Role="DocumentPackage" Type="Self.DocumentPackage" Multiplicity="0..1" />
+          <End Role="Document" Type="Self.Document" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DocumentPackage">
+              <PropertyRef Name="PackageId" />
+            </Principal>
+            <Dependent Role="Document">
+              <PropertyRef Name="DocumentPackage_PackageId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_DocumentActivity_ROWM_Document_ChildDocumentId">
+          <End Role="Document" Type="Self.Document" Multiplicity="0..1" />
+          <End Role="DocumentActivity" Type="Self.DocumentActivity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Document">
+              <PropertyRef Name="DocumentId" />
+            </Principal>
+            <Dependent Role="DocumentActivity">
+              <PropertyRef Name="ChildDocumentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_DocumentActivity_ROWM_Document_ParentDocumentId">
+          <End Role="Document" Type="Self.Document" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DocumentActivity" Type="Self.DocumentActivity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Document">
+              <PropertyRef Name="DocumentId" />
+            </Principal>
+            <Dependent Role="DocumentActivity">
+              <PropertyRef Name="ParentDocumentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_Ownership_ROWM_Owner_OwnerId">
+          <End Role="Owner" Type="Self.Owner" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Ownership" Type="Self.Ownership" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Owner">
+              <PropertyRef Name="OwnerId" />
+            </Principal>
+            <Dependent Role="Ownership">
+              <PropertyRef Name="OwnerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_Ownership_ROWM_Parcel_ParcelId">
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="0..1" />
+          <End Role="Ownership" Type="Self.Ownership" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel">
+              <PropertyRef Name="ParcelId" />
+            </Principal>
+            <Dependent Role="Ownership">
+              <PropertyRef Name="ParcelId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode">
+          <End Role="Parcel_Status" Type="Self.Parcel_Status" Multiplicity="0..1" />
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel_Status">
+              <PropertyRef Name="Code" />
+            </Principal>
+            <Dependent Role="Parcel">
+              <PropertyRef Name="ParcelStatusCode" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode">
+          <End Role="Roe_Status" Type="Self.Roe_Status" Multiplicity="0..1" />
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Roe_Status">
+              <PropertyRef Name="Code" />
+            </Principal>
+            <Dependent Role="Parcel">
+              <PropertyRef Name="RoeStatusCode" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="ContactInfoContactLogs">
+          <End Role="ContactInfo" Type="Self.ContactInfo" Multiplicity="*" />
+          <End Role="ContactLog" Type="Self.ContactLog" Multiplicity="*" />
+        </Association>
+        <Association Name="DocumentAgents">
+          <End Role="Agent" Type="Self.Agent" Multiplicity="*" />
+          <End Role="Document" Type="Self.Document" Multiplicity="*" />
+        </Association>
+        <Association Name="OwnerDocuments">
+          <End Role="Document" Type="Self.Document" Multiplicity="*" />
+          <End Role="Owner" Type="Self.Owner" Multiplicity="*" />
+        </Association>
+        <Association Name="ParcelContactLogs">
+          <End Role="ContactLog" Type="Self.ContactLog" Multiplicity="*" />
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="*" />
+        </Association>
+        <Association Name="ParcelDocuments">
+          <End Role="Document" Type="Self.Document" Multiplicity="*" />
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="*" />
+        </Association>
+        <EntityContainer Name="ROWM_Context" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Agent" EntityType="Self.Agent" />
+          <EntitySet Name="Contact_Channel" EntityType="Self.Contact_Channel" />
+          <EntitySet Name="Contact_Purpose" EntityType="Self.Contact_Purpose" />
+          <EntitySet Name="ContactInfo" EntityType="Self.ContactInfo" />
+          <EntitySet Name="ContactLog" EntityType="Self.ContactLog" />
+          <EntitySet Name="Document" EntityType="Self.Document" />
+          <EntitySet Name="Document_Type" EntityType="Self.Document_Type" />
+          <EntitySet Name="DocumentActivity" EntityType="Self.DocumentActivity" />
+          <EntitySet Name="DocumentPackage" EntityType="Self.DocumentPackage" />
+          <EntitySet Name="Owner" EntityType="Self.Owner" />
+          <EntitySet Name="Ownership" EntityType="Self.Ownership" />
+          <EntitySet Name="Parcel" EntityType="Self.Parcel" />
+          <EntitySet Name="Parcel_Status" EntityType="Self.Parcel_Status" />
+          <EntitySet Name="Repesentation_Type" EntityType="Self.Repesentation_Type" />
+          <EntitySet Name="Roe_Status" EntityType="Self.Roe_Status" />
+          <AssociationSet Name="FK_ROWM_ContactLog_ROWM_Agent_ContactAgentId" Association="Self.FK_ROWM_ContactLog_ROWM_Agent_ContactAgentId">
+            <End Role="Agent" EntitySet="Agent" />
+            <End Role="ContactLog" EntitySet="ContactLog" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_DocumentActivity_ROWM_Agent_AgentId" Association="Self.FK_ROWM_DocumentActivity_ROWM_Agent_AgentId">
+            <End Role="Agent" EntitySet="Agent" />
+            <End Role="DocumentActivity" EntitySet="DocumentActivity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId" Association="Self.FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId">
+            <End Role="Owner" EntitySet="Owner" />
+            <End Role="ContactInfo" EntitySet="ContactInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_ContactLog_ROWM_Owner_Owner_OwnerId" Association="Self.FK_ROWM_ContactLog_ROWM_Owner_Owner_OwnerId">
+            <End Role="Owner" EntitySet="Owner" />
+            <End Role="ContactLog" EntitySet="ContactLog" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_Document_ROWM_DocumentPackage_DocumentPackage_PackageId" Association="Self.FK_ROWM_Document_ROWM_DocumentPackage_DocumentPackage_PackageId">
+            <End Role="DocumentPackage" EntitySet="DocumentPackage" />
+            <End Role="Document" EntitySet="Document" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_DocumentActivity_ROWM_Document_ChildDocumentId" Association="Self.FK_ROWM_DocumentActivity_ROWM_Document_ChildDocumentId">
+            <End Role="Document" EntitySet="Document" />
+            <End Role="DocumentActivity" EntitySet="DocumentActivity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_DocumentActivity_ROWM_Document_ParentDocumentId" Association="Self.FK_ROWM_DocumentActivity_ROWM_Document_ParentDocumentId">
+            <End Role="Document" EntitySet="Document" />
+            <End Role="DocumentActivity" EntitySet="DocumentActivity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_Ownership_ROWM_Owner_OwnerId" Association="Self.FK_ROWM_Ownership_ROWM_Owner_OwnerId">
+            <End Role="Owner" EntitySet="Owner" />
+            <End Role="Ownership" EntitySet="Ownership" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_Ownership_ROWM_Parcel_ParcelId" Association="Self.FK_ROWM_Ownership_ROWM_Parcel_ParcelId">
+            <End Role="Parcel" EntitySet="Parcel" />
+            <End Role="Ownership" EntitySet="Ownership" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode" Association="Self.FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode">
+            <End Role="Parcel_Status" EntitySet="Parcel_Status" />
+            <End Role="Parcel" EntitySet="Parcel" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode" Association="Self.FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode">
+            <End Role="Roe_Status" EntitySet="Roe_Status" />
+            <End Role="Parcel" EntitySet="Parcel" />
+          </AssociationSet>
+          <AssociationSet Name="ContactInfoContactLogs" Association="Self.ContactInfoContactLogs">
+            <End Role="ContactInfo" EntitySet="ContactInfo" />
+            <End Role="ContactLog" EntitySet="ContactLog" />
+          </AssociationSet>
+          <AssociationSet Name="DocumentAgents" Association="Self.DocumentAgents">
+            <End Role="Agent" EntitySet="Agent" />
+            <End Role="Document" EntitySet="Document" />
+          </AssociationSet>
+          <AssociationSet Name="OwnerDocuments" Association="Self.OwnerDocuments">
+            <End Role="Document" EntitySet="Document" />
+            <End Role="Owner" EntitySet="Owner" />
+          </AssociationSet>
+          <AssociationSet Name="ParcelContactLogs" Association="Self.ParcelContactLogs">
+            <End Role="ContactLog" EntitySet="ContactLog" />
+            <End Role="Parcel" EntitySet="Parcel" />
+          </AssociationSet>
+          <AssociationSet Name="ParcelDocuments" Association="Self.ParcelDocuments">
+            <End Role="Document" EntitySet="Document" />
+            <End Role="Parcel" EntitySet="Parcel" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="ROWMDalStoreContainer" CdmEntityContainer="ROWM_Context">
+          <EntitySetMapping Name="Agent">
+            <EntityTypeMapping TypeName="ROWM.Dal.Agent">
+              <MappingFragment StoreEntitySet="Agent">
+                <ScalarProperty Name="AgentId" ColumnName="AgentId" />
+                <ScalarProperty Name="AgentName" ColumnName="AgentName" />
+                <ScalarProperty Name="Created" ColumnName="Created" />
+                <ScalarProperty Name="LastModified" ColumnName="LastModified" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Contact_Channel">
+            <EntityTypeMapping TypeName="ROWM.Dal.Contact_Channel">
+              <MappingFragment StoreEntitySet="Contact_Channel">
+                <ScalarProperty Name="ContactTypeCode" ColumnName="ContactTypeCode" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Contact_Purpose">
+            <EntityTypeMapping TypeName="ROWM.Dal.Contact_Purpose">
+              <MappingFragment StoreEntitySet="Contact_Purpose">
+                <ScalarProperty Name="PurposeCode" ColumnName="PurposeCode" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ContactInfo">
+            <EntityTypeMapping TypeName="ROWM.Dal.ContactInfo">
+              <MappingFragment StoreEntitySet="ContactInfo">
+                <ScalarProperty Name="ContactId" ColumnName="ContactId" />
+                <ScalarProperty Name="IsPrimaryContact" ColumnName="IsPrimaryContact" />
+                <ScalarProperty Name="OwnerFirstName" ColumnName="OwnerFirstName" />
+                <ScalarProperty Name="OwnerLastName" ColumnName="OwnerLastName" />
+                <ScalarProperty Name="OwnerStreetAddress" ColumnName="OwnerStreetAddress" />
+                <ScalarProperty Name="OwnerCity" ColumnName="OwnerCity" />
+                <ScalarProperty Name="OwnerState" ColumnName="OwnerState" />
+                <ScalarProperty Name="OwnerZIP" ColumnName="OwnerZIP" />
+                <ScalarProperty Name="OwnerEmail" ColumnName="OwnerEmail" />
+                <ScalarProperty Name="OwnerHomePhone" ColumnName="OwnerHomePhone" />
+                <ScalarProperty Name="OwnerCellPhone" ColumnName="OwnerCellPhone" />
+                <ScalarProperty Name="OwnerWorkPhone" ColumnName="OwnerWorkPhone" />
+                <ScalarProperty Name="ContactOwnerId" ColumnName="ContactOwnerId" />
+                <ScalarProperty Name="Created" ColumnName="Created" />
+                <ScalarProperty Name="LastModified" ColumnName="LastModified" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="Representation" ColumnName="Representation" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ContactLog">
+            <EntityTypeMapping TypeName="ROWM.Dal.ContactLog">
+              <MappingFragment StoreEntitySet="ContactLog">
+                <ScalarProperty Name="ContactLogId" ColumnName="ContactLogId" />
+                <ScalarProperty Name="DateAdded" ColumnName="DateAdded" />
+                <ScalarProperty Name="ContactAgentId" ColumnName="ContactAgentId" />
+                <ScalarProperty Name="ContactChannel" ColumnName="ContactChannel" />
+                <ScalarProperty Name="ProjectPhase" ColumnName="ProjectPhase" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="Created" ColumnName="Created" />
+                <ScalarProperty Name="LastModified" ColumnName="LastModified" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="Owner_OwnerId" ColumnName="Owner_OwnerId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Document">
+            <EntityTypeMapping TypeName="ROWM.Dal.Document">
+              <MappingFragment StoreEntitySet="Document">
+                <ScalarProperty Name="DocumentId" ColumnName="DocumentId" />
+                <ScalarProperty Name="DocumentType" ColumnName="DocumentType" />
+                <ScalarProperty Name="Content" ColumnName="Content" />
+                <ScalarProperty Name="SharePointUrl" ColumnName="SharePointUrl" />
+                <ScalarProperty Name="AzureBlobId" ColumnName="AzureBlobId" />
+                <ScalarProperty Name="TitleInFile" ColumnName="TitleInFile" />
+                <ScalarProperty Name="ReceivedDate" ColumnName="ReceivedDate" />
+                <ScalarProperty Name="QCDate" ColumnName="QCDate" />
+                <ScalarProperty Name="ApprovedDate" ColumnName="ApprovedDate" />
+                <ScalarProperty Name="SentDate" ColumnName="SentDate" />
+                <ScalarProperty Name="RowmTrackingNumber" ColumnName="RowmTrackingNumber" />
+                <ScalarProperty Name="DeliveredDate" ColumnName="DeliveredDate" />
+                <ScalarProperty Name="SignedDate" ColumnName="SignedDate" />
+                <ScalarProperty Name="ReceivedFromOwnerDate" ColumnName="ReceivedFromOwnerDate" />
+                <ScalarProperty Name="ClientTrackingNumber" ColumnName="ClientTrackingNumber" />
+                <ScalarProperty Name="ClientSignatureDate" ColumnName="ClientSignatureDate" />
+                <ScalarProperty Name="ReceivedFromClientDate" ColumnName="ReceivedFromClientDate" />
+                <ScalarProperty Name="Created" ColumnName="Created" />
+                <ScalarProperty Name="LastModified" ColumnName="LastModified" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="DocumentPackage_PackageId" ColumnName="DocumentPackage_PackageId" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="ContentType" ColumnName="ContentType" />
+                <ScalarProperty Name="SourceFilename" ColumnName="SourceFilename" />
+                <ScalarProperty Name="DateRecorded" ColumnName="DateRecorded" />
+                <ScalarProperty Name="CheckNo" ColumnName="CheckNo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Document_Type">
+            <EntityTypeMapping TypeName="ROWM.Dal.Document_Type">
+              <MappingFragment StoreEntitySet="Document_Type">
+                <ScalarProperty Name="DocTypeName" ColumnName="DocTypeName" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="FolderPath" ColumnName="FolderPath" />
+                <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DocumentActivity">
+            <EntityTypeMapping TypeName="ROWM.Dal.DocumentActivity">
+              <MappingFragment StoreEntitySet="DocumentActivity">
+                <ScalarProperty Name="ActivityId" ColumnName="ActivityId" />
+                <ScalarProperty Name="ActivityDate" ColumnName="ActivityDate" />
+                <ScalarProperty Name="Activity" ColumnName="Activity" />
+                <ScalarProperty Name="ActivityNotes" ColumnName="ActivityNotes" />
+                <ScalarProperty Name="ParentDocumentId" ColumnName="ParentDocumentId" />
+                <ScalarProperty Name="ChildDocumentId" ColumnName="ChildDocumentId" />
+                <ScalarProperty Name="AgentId" ColumnName="AgentId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DocumentPackage">
+            <EntityTypeMapping TypeName="ROWM.Dal.DocumentPackage">
+              <MappingFragment StoreEntitySet="DocumentPackage">
+                <ScalarProperty Name="PackageId" ColumnName="PackageId" />
+                <ScalarProperty Name="PackageName" ColumnName="PackageName" />
+                <ScalarProperty Name="Created" ColumnName="Created" />
+                <ScalarProperty Name="LastModified" ColumnName="LastModified" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Owner">
+            <EntityTypeMapping TypeName="ROWM.Dal.Owner">
+              <MappingFragment StoreEntitySet="Owner">
+                <ScalarProperty Name="OwnerId" ColumnName="OwnerId" />
+                <ScalarProperty Name="PartyName" ColumnName="PartyName" />
+                <ScalarProperty Name="OwnerType" ColumnName="OwnerType" />
+                <ScalarProperty Name="Created" ColumnName="Created" />
+                <ScalarProperty Name="LastModified" ColumnName="LastModified" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Ownership">
+            <EntityTypeMapping TypeName="ROWM.Dal.Ownership">
+              <MappingFragment StoreEntitySet="Ownership">
+                <ScalarProperty Name="OwnershipId" ColumnName="OwnershipId" />
+                <ScalarProperty Name="ParcelId" ColumnName="ParcelId" />
+                <ScalarProperty Name="OwnerId" ColumnName="OwnerId" />
+                <ScalarProperty Name="Ownership_t" ColumnName="Ownership_t" />
+                <ScalarProperty Name="Created" ColumnName="Created" />
+                <ScalarProperty Name="LastModified" ColumnName="LastModified" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Parcel">
+            <EntityTypeMapping TypeName="ROWM.Dal.Parcel">
+              <MappingFragment StoreEntitySet="Parcel">
+                <ScalarProperty Name="Assessor_Parcel_Number" ColumnName="Assessor_Parcel_Number" />
+                <ScalarProperty Name="County_Name" ColumnName="County_Name" />
+                <ScalarProperty Name="ParcelId" ColumnName="ParcelId" />
+                <ScalarProperty Name="County_FIPS" ColumnName="County_FIPS" />
+                <ScalarProperty Name="SitusAddress" ColumnName="SitusAddress" />
+                <ScalarProperty Name="Acreage" ColumnName="Acreage" />
+                <ScalarProperty Name="Created" ColumnName="Created" />
+                <ScalarProperty Name="LastModified" ColumnName="LastModified" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="InitialROEOffer_OfferDate" ColumnName="InitialROEOffer_OfferDate" />
+                <ScalarProperty Name="InitialROEOffer_OfferAmount" ColumnName="InitialROEOffer_OfferAmount" />
+                <ScalarProperty Name="InitialROEOffer_OfferNotes" ColumnName="InitialROEOffer_OfferNotes" />
+                <ScalarProperty Name="FinalROEOffer_OfferDate" ColumnName="FinalROEOffer_OfferDate" />
+                <ScalarProperty Name="FinalROEOffer_OfferAmount" ColumnName="FinalROEOffer_OfferAmount" />
+                <ScalarProperty Name="FinalROEOffer_OfferNotes" ColumnName="FinalROEOffer_OfferNotes" />
+                <ScalarProperty Name="InitialOptionOffer_OfferDate" ColumnName="InitialOptionOffer_OfferDate" />
+                <ScalarProperty Name="InitialOptionOffer_OfferAmount" ColumnName="InitialOptionOffer_OfferAmount" />
+                <ScalarProperty Name="InitialOptionOffer_OfferNotes" ColumnName="InitialOptionOffer_OfferNotes" />
+                <ScalarProperty Name="FinalOptionOffer_OfferDate" ColumnName="FinalOptionOffer_OfferDate" />
+                <ScalarProperty Name="FinalOptionOffer_OfferAmount" ColumnName="FinalOptionOffer_OfferAmount" />
+                <ScalarProperty Name="FinalOptionOffer_OfferNotes" ColumnName="FinalOptionOffer_OfferNotes" />
+                <ScalarProperty Name="InitialEasementOffer_OfferDate" ColumnName="InitialEasementOffer_OfferDate" />
+                <ScalarProperty Name="InitialEasementOffer_OfferAmount" ColumnName="InitialEasementOffer_OfferAmount" />
+                <ScalarProperty Name="InitialEasementOffer_OfferNotes" ColumnName="InitialEasementOffer_OfferNotes" />
+                <ScalarProperty Name="FinalEasementOffer_OfferDate" ColumnName="FinalEasementOffer_OfferDate" />
+                <ScalarProperty Name="FinalEasementOffer_OfferAmount" ColumnName="FinalEasementOffer_OfferAmount" />
+                <ScalarProperty Name="FinalEasementOffer_OfferNotes" ColumnName="FinalEasementOffer_OfferNotes" />
+                <ScalarProperty Name="ParcelStatusCode" ColumnName="ParcelStatusCode" />
+                <ScalarProperty Name="RoeStatusCode" ColumnName="RoeStatusCode" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Parcel_Status">
+            <EntityTypeMapping TypeName="ROWM.Dal.Parcel_Status">
+              <MappingFragment StoreEntitySet="Parcel_Status">
+                <ScalarProperty Name="Code" ColumnName="Code" />
+                <ScalarProperty Name="DomainValue" ColumnName="DomainValue" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Repesentation_Type">
+            <EntityTypeMapping TypeName="ROWM.Dal.Repesentation_Type">
+              <MappingFragment StoreEntitySet="Repesentation_Type">
+                <ScalarProperty Name="RelationTypeCode" ColumnName="RelationTypeCode" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Roe_Status">
+            <EntityTypeMapping TypeName="ROWM.Dal.Roe_Status">
+              <MappingFragment StoreEntitySet="Roe_Status">
+                <ScalarProperty Name="Code" ColumnName="Code" />
+                <ScalarProperty Name="DomainValue" ColumnName="DomainValue" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <AssociationSetMapping Name="ContactInfoContactLogs" TypeName="ROWM.Dal.ContactInfoContactLogs" StoreEntitySet="ContactInfoContactLogs">
+            <EndProperty Name="ContactInfo">
+              <ScalarProperty Name="ContactId" ColumnName="ContactInfo_ContactId" />
+            </EndProperty>
+            <EndProperty Name="ContactLog">
+              <ScalarProperty Name="ContactLogId" ColumnName="ContactLog_ContactLogId" />
+            </EndProperty>
+          </AssociationSetMapping>
+          <AssociationSetMapping Name="DocumentAgents" TypeName="ROWM.Dal.DocumentAgents" StoreEntitySet="DocumentAgents">
+            <EndProperty Name="Agent">
+              <ScalarProperty Name="AgentId" ColumnName="Agent_AgentId" />
+            </EndProperty>
+            <EndProperty Name="Document">
+              <ScalarProperty Name="DocumentId" ColumnName="Document_DocumentId" />
+            </EndProperty>
+          </AssociationSetMapping>
+          <AssociationSetMapping Name="OwnerDocuments" TypeName="ROWM.Dal.OwnerDocuments" StoreEntitySet="OwnerDocuments">
+            <EndProperty Name="Document">
+              <ScalarProperty Name="DocumentId" ColumnName="Document_DocumentId" />
+            </EndProperty>
+            <EndProperty Name="Owner">
+              <ScalarProperty Name="OwnerId" ColumnName="Owner_OwnerId" />
+            </EndProperty>
+          </AssociationSetMapping>
+          <AssociationSetMapping Name="ParcelContactLogs" TypeName="ROWM.Dal.ParcelContactLogs" StoreEntitySet="ParcelContactLogs">
+            <EndProperty Name="ContactLog">
+              <ScalarProperty Name="ContactLogId" ColumnName="ContactLog_ContactLogId" />
+            </EndProperty>
+            <EndProperty Name="Parcel">
+              <ScalarProperty Name="ParcelId" ColumnName="Parcel_ParcelId" />
+            </EndProperty>
+          </AssociationSetMapping>
+          <AssociationSetMapping Name="ParcelDocuments" TypeName="ROWM.Dal.ParcelDocuments" StoreEntitySet="ParcelDocuments">
+            <EndProperty Name="Document">
+              <ScalarProperty Name="DocumentId" ColumnName="Document_DocumentId" />
+            </EndProperty>
+            <EndProperty Name="Parcel">
+              <ScalarProperty Name="ParcelId" ColumnName="Parcel_ParcelId" />
+            </EndProperty>
+          </AssociationSetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

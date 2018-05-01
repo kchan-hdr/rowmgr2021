@@ -8,13 +8,13 @@ namespace ROWM.Controllers
 {
     public class ParcelStatusHelper
     {
-        readonly List<ParcelStatus_Master> _Status;
-        readonly List<RoeStatus_Master> _roeStatus;
+        readonly List<Parcel_Status> _Status;
+        readonly List<Roe_Status> _roeStatus;
 
         public ParcelStatusHelper(ROWM_Context c)
         {
-            _Status = c.ParcelStatus.AsNoTracking().ToList();
-            _roeStatus = c.RoeStatus.AsNoTracking().ToList();
+            _Status = c.Parcel_Status.AsNoTracking().ToList();
+            _roeStatus = c.Roe_Status.AsNoTracking().ToList();
         }
 
         public string ParseDomainValue(int d)
@@ -35,6 +35,6 @@ namespace ROWM.Controllers
             return s.DomainValue;
         }
 
-        public static bool HasNoContact(Parcel parcel) => parcel.ParcelStatus.DomainValue <= 0;
+        public static bool HasNoContact(Parcel parcel) => parcel.Parcel_Status.DomainValue <= 0;
     }
 }

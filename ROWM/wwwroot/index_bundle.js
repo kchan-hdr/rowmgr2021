@@ -41223,7 +41223,7 @@ var Application = function (_React$Component) {
                                 React.createElement(
                                     "span",
                                     null,
-                                    "Sunflower Transmission Line"
+                                    "B2H Transmission Line"
                                 ),
                                 React.createElement("img", { src: "assets/images/icon-chevron-down.png", alt: "HDR" })
                             )
@@ -41807,46 +41807,6 @@ var StatsPanel = function (_React$Component) {
                             React.createElement("span", null),
                             "No Access: ",
                             this.props.roeArray[4]
-                        )
-                    )
-                ),
-                React.createElement(
-                    "p",
-                    null,
-                    React.createElement(
-                        "h2",
-                        null,
-                        "Exports"
-                    ),
-                    React.createElement(
-                        "ul",
-                        null,
-                        React.createElement(
-                            "li",
-                            null,
-                            React.createElement(
-                                "a",
-                                { href: "/export/contactlogs?f=excel", download: true },
-                                "Contact Log"
-                            )
-                        ),
-                        React.createElement(
-                            "li",
-                            null,
-                            React.createElement(
-                                "a",
-                                { href: "/export/documents?f=excel", download: true },
-                                "Documents List"
-                            )
-                        ),
-                        React.createElement(
-                            "li",
-                            null,
-                            React.createElement(
-                                "a",
-                                { href: "/export/contacts?f=excel", download: true },
-                                "Contacts List"
-                            )
                         )
                     )
                 )
@@ -52397,7 +52357,7 @@ var DocInfoOverlay = function (_React$Component) {
     }, {
         key: "getDownloadLink",
         value: function getDownloadLink(id) {
-            return "/api/documents/" + id;
+            return "http://rowm-mezzy.azurewebsites.net/api/documents/" + id;
         }
     }, {
         key: "render",
@@ -53965,7 +53925,7 @@ var AddDocumentOverlay = function (_React$Component) {
                     fData.append("ParcelIds", pcls[i]);
                 }
 
-                xmlHR.open("POST", "/api/addDocument", true);
+                xmlHR.open("POST", "http://rowm-mezzy.azurewebsites.net/api/addDocument", true);
                 xmlHR.send(fData);
             } else {
                 alert("There were problems with this submission:  " + validate);
@@ -54819,36 +54779,38 @@ var MapArea = function (_super) {
                 var m = new Map({
                     basemap: "topo"
                 });
-                // https://gis05s.hdrgateway.com/arcgis/rest/services/California/SunFlower_Parcels_FS/FeatureServer
+                // Staging: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS_stg/FeatureServer
+                // Production: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer
                 var parcelLay = new FeatureLayer({
-                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/Sunflower_Parcel_Stg_FS/FeatureServer/0",
+                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS_stg/FeatureServer/0",
                     outFields: ["*"]
                 });
                 parcelLay.popupTemplate = {
                     title: "Impacted Parcel",
-                    content: "Parcel ID: {PID}<br />{SitusAddre}",
+                    content: "Parcel ID: {PARCEL_ID}<br />{SitusAddre}",
                     actions: [{
                         id: "row-details", title: "Details"
                     }]
                 };
-                // https://gis05s.hdrgateway.com/arcgis/rest/services/California/Sunflower_ROW_ParcelStatus/MapServer
+                // Staging map service: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_MapService_stg/MapServer
+                // Production map service: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_MapService/MapServer
                 var lay = new MapImageLayer({
-                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/Sunflower_ROW_ParcelStatus_Stg/MapServer"
+                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_MapService_stg/MapServer"
                 });
                 m.add(lay);
                 m.add(parcelLay);
                 _this.vi = new MapView({
                     map: m,
                     container: _this.mapContainer,
-                    center: [-100.625, 38],
-                    scale: 316800,
+                    center: [-118.30, 44.60],
+                    scale: 1200000,
                     padding: {
                         left: 10
                     }
                 }).then(function (v) {
                     v.popup.viewModel.on("trigger-action", function (evt) {
                         var attr = v.popup.viewModel.selectedFeature.attributes;
-                        _this.props.ident(attr.PID);
+                        _this.props.ident(attr.PARCEL_ID);
                     });
                     var h = new Home({ view: v });
                     v.ui.add(h, "top-left");
@@ -54861,13 +54823,13 @@ var MapArea = function (_super) {
                         view: v,
                         sources: [{
                             featureLayer: parcelLay,
-                            searchFields: ["PartyName", "PID"],
-                            displayField: "PartyName",
+                            searchFields: ["M_OWNER", "M_OWNER2", "PARCEL_ID"],
+                            displayField: "M_OWNER",
                             exactMatch: false,
                             outFields: ["*"],
                             name: "Parcels",
                             suggestionsEnabled: true,
-                            suggestionTemplate: "Name: {PartyName}, Parcel: {PID}",
+                            suggestionTemplate: "Name: {M_OWNER}, Parcel: {PARCEL_ID}",
                             maxSuggestions: 6,
                             placeholder: "Search by Owner or Parcel"
                         }]
@@ -55099,27 +55061,53 @@ var DataServices = function () {
         this.getDocTypes = function () {
             return _this._getDocTypes();
         };
+        /*
+            By Owner (page 17):
+         
+        1.      Get Owner Details by Owner (type, address, phone numbers, email)
+        */
         this.getOwner = function (id) {
             return _this._getOwner(id);
         };
+        /*
+        2.      Get Contact Logs by Owner
+        */
         this.getLogsForOwner = function (id) {
             return _this._getOwner(id).then(function (d) {
                 return d.contactLogs;
             });
         };
+        /*
+        3.      Get Parcels that Owner primarily owns
+        
+        this is essentially the same as getOwner(). look into the parcels property.
+        */
         this.getPrimaryParcelsForOwner = function (id) {
             return _this._getOwner(id).then(function (d) {
                 return d.ownParcel;
             });
         };
+        /*
+        4.      Get Parcels that Owner is “related to”
+        
+        ditto #3
+        */
         this.getRelatedParcelsForOwner = function (id) {
             return _this._getOwner(id).then(function (d) {
                 return d.ownParcel;
             });
         };
+        /*
+        5.      Get Related Contacts per Owner --this is fake. since there are no related. and I'm not building this for the demo if there is nothing to demo
+        */
         this.getRelatedContactsForOwner = function (id) {
             return _this._getOwner(id);
         };
+        /*
+        6.      Add/Edit a Contact Log by Owner
+        o   What is the logic of the Related Contacts and Related Parcels lists when adding a Contact Log? (see page 11)  Is it possible to just reuse functions #3-5 above?
+        
+        */
         this.addContactForOwner = function (id, firstname, lastname, address, city, state, zip, email, cellfone, workfone, homefone, primary, relations) {
             return _this._addContact(id, firstname, lastname, address, city, state, zip, email, cellfone, workfone, homefone, primary, relations);
         };
@@ -55132,16 +55120,27 @@ var DataServices = function () {
         this.getParcel = function (pid) {
             return _this._getParcel(pid);
         };
+        /*
+        By Parcel (page 8):
+         
+        8.      Get Primary Owner by Parcel
+        */
         this.getPrimaryOwnersForParcel = function (pid) {
             return _this._getParcel(pid).then(function (d) {
                 return d.owners;
             });
         };
+        /*
+        9.      Get Related Owners by Parcel (…see the questions in #7 above though, as I could maybe reuse function #5?)
+        */
         this.getRelatedOwnersForParcel = function (pid) {
             return _this._getParcel(pid).then(function (d) {
                 return d.owners;
             });
         };
+        /*
+        10.   Get Contact Logs by Parcel
+        */
         this.getContactLogsForParcel = function (pid) {
             return _this._getParcel(pid).then(function (d) {
                 return d.contactLogs;
@@ -55150,28 +55149,64 @@ var DataServices = function () {
         this.setROEStatus = function (pid, status) {
             return _this._setROEStatus(pid, status);
         };
+        /*
+        14.   Get Status of a Parcel
+        o   This is based on the red check marks along the top of the parcel panel (page 8):
+        §  Is the logic of these based on the rest of the information somehow?
+        ·        If not, how is this status set?
+        ·        Is there another dialogue that hasn’t been designed in the mockup?
+        ·        Maybe these circles could be clickable?
+        ·        It’s very likely we’ll also need a Set Parcel Status call.
+        */
         this.getParcelStatus = function (pid) {
             return _this._getParcel(pid).then(function (d) {
                 return d.parcelStatus;
             });
         };
+        /*
+        15.   Add/Edit Contact Log by Parcel
+        o   But note that this might be the same as #6 above?  Can we assume a default relationship between primary owner and parcel?
+        */
         this.editContactLog = function (agentname, pid, lid, parcelIds, contactIds, contactType, title, notes, date, phase) {
             return _this._editContactLog(agentname, pid, lid, parcelIds, contactIds, contactType, title, notes, date, phase);
         };
+        // pid is the "required" parcel, at least one.
+        // parcelIds is an array of related parcels.
+        // contactIds is an array of contacts, Guid.
         this.addContactLog = function (agentname, pid, parcelIds, contactIds, contactType, title, notes, date, phase) {
             return _this._addContactLog(agentname, pid, parcelIds, contactIds, contactType, title, notes, date, phase);
         };
+        /*
+        16.   Add/Edit Initial Offer by Parcel
+        */
         this.editInitialOffer = function (parcelId, type, date, amount, notes) {
             return _this._initialOffer(parcelId, type, date, amount, notes);
         };
+        /*
+        17.   Add/Edit Final Offer by Parcel
+        */
         this.editFinalOffer = function (parcelId, type, date, amount, notes) {
             return _this._finalOffer(parcelId, type, date, amount, notes);
         };
+        /*
+        Documents:
+         
+        18.   Get Document Info (date, phase, notes)
+        */
         this.getDocumentInfoForParcel = function (pid) {
             return _this._getParcel(pid).then(function (d) {
                 return d.documents;
             });
         };
+        /*
+        19.   Add/Edit Document by Parcel
+        o   The dialog for this is on page 13:
+        §  Just so it’s clear, there is no way to take an already-uploaded document and link it to another set once it’s uploaded, right?
+        §  I also need to know the logic of the Related Contacts and Parcels list again.
+        ·        It looks like I can use function #9 above for the Contacts?
+        ·        I am not even sure where to get the Related Parcels here at all, so a Related Parcel by Parcel call might be needed??
+        
+        */
         this.getDocumentInfo = function (docId) {
             return _this._docuInfo(docId);
         };
@@ -55310,6 +55345,7 @@ var DataServices = function () {
                 return console.log("ouch " + err);
             });
         };
+        // things will be different going forward. so not really "duplicated"
         this._finalOffer = function (parcelId, type, date, amount, notes) {
             var payload = JSON.stringify({
                 "OfferType": type,
@@ -55429,7 +55465,8 @@ var DataServices = function () {
             });
         };
     }
-    DataServices._baseUrl = "/api";
+    // private services
+    DataServices._baseUrl = "/api"; // "http://rowm-mezzy.azurewebsites.net/api";
     return DataServices;
 }();
 module.exports = DataServices;

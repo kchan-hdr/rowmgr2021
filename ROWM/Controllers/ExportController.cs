@@ -180,18 +180,18 @@ namespace ROWM.Controllers
 
             public static IEnumerable<LogExport> Export(ContactLog log)
             {
-                return log.Parcels.Where(p => p.IsActive).Select(p => new LogExport
+                return log.Parcel.Where(p => p.IsActive).Select(p => new LogExport
                 {
-                    ParcelId = p.ParcelId,
+                    ParcelId = p.Assessor_Parcel_Number,
                     ParcelStatusCode = p.ParcelStatusCode,
                     RoeStatusCode = p.RoeStatusCode,
-                    ContactName = p.Owners.FirstOrDefault()?.Owner.PartyName ?? "",
+                    ContactName = p.Ownership.FirstOrDefault()?.Owner.PartyName ?? "",
                     DateAdded = log.DateAdded,
                     ContactChannel = log.ContactChannel,
                     ProjectPhase = log.ProjectPhase,
                     Title = log.Title,
                     Notes = log.Notes,
-                    AgentName = log.ContactAgent.AgentName
+                    AgentName = log.Agent.AgentName
                 });
             }
 
@@ -224,10 +224,10 @@ namespace ROWM.Controllers
 
             public static IEnumerable<ContactExport2> Export(IGrouping<Guid, Ownership> og)
             {
-                var relatedParcels = og.Select(p => p.ParcelId).OrderBy(p => p).ToArray<string>();
+                var relatedParcels = og.Select(p => p.Parcel.Assessor_Parcel_Number).OrderBy(p => p).ToArray<string>();
 
                 var ox = og.First();
-                return ox.Owner.Contacts.Select(cx =>  new ContactExport2
+                return ox.Owner.ContactInfo.Select(cx =>  new ContactExport2
                 {
                     PartyName = ox.Owner.PartyName,
                     IsPrimary = cx.IsPrimaryContact,
@@ -271,9 +271,9 @@ namespace ROWM.Controllers
 
             public static IEnumerable<ContactExport> Export(Ownership op)
             {
-                return op.Owner.Contacts.Select(cx => new ContactExport
+                return op.Owner.ContactInfo.Select(cx => new ContactExport
                 {
-                    ParcelId = op.ParcelId,
+                    ParcelId = op.Parcel.Assessor_Parcel_Number,
                     PartyName = op.Owner.PartyName,
                     IsPrimary = cx.IsPrimaryContact,
                     FirstName = cx.OwnerFirstName,

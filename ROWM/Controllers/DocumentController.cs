@@ -197,13 +197,13 @@ namespace ROWM.Controllers
             var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent?.AgentId ?? (await _repo.GetDefaultAgent()).AgentId, bb);
             //d.Agents.Add(agent);
 
-            myParcel.Documents.Add(d);
+            myParcel.Document.Add(d);
             await _repo.UpdateParcel(myParcel);
 
             header.DocumentId = d.DocumentId;
 
             sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename);
-            Ownership primaryOwner = myParcel.Owners.First<Ownership>(o => o.Ownership_t == Ownership.OwnershipType.Primary);
+            Ownership primaryOwner = myParcel.Ownership.First<Ownership>(o => o.IsPrimary()); // o.Ownership_t == OwnershipType.Primary);
             string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
             try
             {
@@ -344,13 +344,13 @@ namespace ROWM.Controllers
             foreach (string pid in myParcels)
             {
                 var myParcel = await _repo.GetParcel(pid);
-                myParcel.Documents.Add(d);
+                myParcel.Document.Add(d);
                 await _repo.UpdateParcel(myParcel);
 
                 header.DocumentId = d.DocumentId;
 
                 sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename);
-                Ownership primaryOwner = myParcel.Owners.First<Ownership>(o => o.Ownership_t == Ownership.OwnershipType.Primary);
+                Ownership primaryOwner = myParcel.Ownership.First<Ownership>(o => o.IsPrimary()); // o.Ownership_t == Ownership.OwnershipType.Primary);
                 string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
                 try
                 {
