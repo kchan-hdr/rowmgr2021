@@ -40828,7 +40828,8 @@ var Application = function (_React$Component) {
             parcelDetails: null,
             parcelTotal: null,
             rightPanel: "stats",
-            roeStatArray: []
+            roeStatArray: [],
+            agents: []
         };
 
         _this.toggleMenu = _this.toggleMenu.bind(_this);
@@ -40869,6 +40870,10 @@ var Application = function (_React$Component) {
             app.setState({ ownerTotal: d.numberOfOwners, parcelTotal: d.numberOfParcels, roeStatArray: arr });
         });
 
+        // dropdowns
+        dSvcs.getLookups().then(function (d) {
+            app.setState({ agents: d.agents });
+        });
         // doc type dropdown
         var _docTypes = [];
         dSvcs.getDocTypes().then(function (d) {
@@ -41139,7 +41144,7 @@ var Application = function (_React$Component) {
 
                 case "add-contact-log":
                     overlay = React.createElement(AddContactLogOverlay, {
-                        owner: this.state.currentOwner,
+                        owner: this.state.currentOwner, agents: this.state.agents,
                         panel: this.state.rightPanel,
                         parcel: this.state.currentParcel,
                         parcelDetails: this.state.parcelDetails,
@@ -41147,7 +41152,7 @@ var Application = function (_React$Component) {
                         setOverlay: this.setOverlay });break;
                 case "edit-contact-log":
                     overlay = React.createElement(AddContactLogOverlay, {
-                        log: this.state.logToShow,
+                        log: this.state.logToShow, agents: this.state.agents,
                         owner: this.state.currentOwner,
                         panel: this.state.rightPanel,
                         parcel: this.state.currentParcel,
@@ -41807,6 +41812,46 @@ var StatsPanel = function (_React$Component) {
                             React.createElement("span", null),
                             "No Access: ",
                             this.props.roeArray[4]
+                        )
+                    )
+                ),
+                React.createElement(
+                    "p",
+                    null,
+                    React.createElement(
+                        "h2",
+                        null,
+                        "Exports"
+                    ),
+                    React.createElement(
+                        "ul",
+                        null,
+                        React.createElement(
+                            "li",
+                            null,
+                            React.createElement(
+                                "a",
+                                { href: "/export/contactlogs?f=excel", download: true },
+                                "Contact Log"
+                            )
+                        ),
+                        React.createElement(
+                            "li",
+                            null,
+                            React.createElement(
+                                "a",
+                                { href: "/export/documents?f=excel", download: true },
+                                "Documents List"
+                            )
+                        ),
+                        React.createElement(
+                            "li",
+                            null,
+                            React.createElement(
+                                "a",
+                                { href: "/export/contacts?f=excel", download: true },
+                                "Contacts List"
+                            )
                         )
                     )
                 )
@@ -52357,7 +52402,7 @@ var DocInfoOverlay = function (_React$Component) {
     }, {
         key: "getDownloadLink",
         value: function getDownloadLink(id) {
-            return "http://rowm-mezzy.azurewebsites.net/api/documents/" + id;
+            return "/api/documents/" + id;
         }
     }, {
         key: "render",
@@ -53036,6 +53081,14 @@ var AddContactLogOverlay = function (_React$Component) {
                 submitFunction = this.saveData.bind(this, "edit-log");
             }
 
+            var agentDropdown = this.props.agents.map(function (a) {
+                return React.createElement(
+                    "option",
+                    { id: "{a.description}", key: a.code },
+                    a.description
+                );
+            });
+
             return React.createElement(
                 "div",
                 { id: "add-contact-log-overlay", className: "shorter" },
@@ -53111,26 +53164,7 @@ var AddContactLogOverlay = function (_React$Component) {
                         React.createElement(
                             "select",
                             { id: "add-contact-log-agent", name: "add-contact-logo-agent", defaultValue: editAgent },
-                            React.createElement(
-                                "option",
-                                { id: "Erin Begier" },
-                                "Erin Begier"
-                            ),
-                            React.createElement(
-                                "option",
-                                { id: "Amy Borders" },
-                                "Amy Borders"
-                            ),
-                            React.createElement(
-                                "option",
-                                { id: "Stephen Sykes" },
-                                "Stephen Sykes"
-                            ),
-                            React.createElement(
-                                "option",
-                                { id: "Abby Hinman" },
-                                "Abby Hinman"
-                            )
+                            agentDropdown
                         )
                     ),
                     React.createElement(
@@ -53925,7 +53959,7 @@ var AddDocumentOverlay = function (_React$Component) {
                     fData.append("ParcelIds", pcls[i]);
                 }
 
-                xmlHR.open("POST", "http://rowm-mezzy.azurewebsites.net/api/addDocument", true);
+                xmlHR.open("POST", "/api/addDocument", true);
                 xmlHR.send(fData);
             } else {
                 alert("There were problems with this submission:  " + validate);
@@ -54782,12 +54816,12 @@ var MapArea = function (_super) {
                 // Staging: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS_stg/FeatureServer
                 // Production: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer
                 var parcelLay = new FeatureLayer({
-                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS_stg/FeatureServer/0",
+                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer/0",
                     outFields: ["*"]
                 });
                 parcelLay.popupTemplate = {
                     title: "Impacted Parcel",
-                    content: "Parcel ID: {PARCEL_ID}<br />{SitusAddre}",
+                    content: "Parcel ID: {PARCEL_ID}<br />",
                     actions: [{
                         id: "row-details", title: "Details"
                     }]

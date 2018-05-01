@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="B2hParcel.cs" />
     <Compile Include="FeatureService.cs" />
     <Compile Include="IFeatureUpdate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

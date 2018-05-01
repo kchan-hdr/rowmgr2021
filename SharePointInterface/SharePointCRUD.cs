@@ -29,7 +29,7 @@ namespace SharePointInterface
     public class SharePointCRUD : ISharePointCRUD
     {
         // staging URL to move to app config
-        static readonly string _STAGING_SITE_URL = "https://hdroneview.sharepoint.com/row_dev";
+        static readonly string _STAGING_SITE_URL = "https://b2hpm.sharepoint.com/staging";
 
         private ClientContext _ctx;
         private string _parcelsFolderName;

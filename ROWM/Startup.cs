@@ -63,7 +63,7 @@ namespace ROWM
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddSingleton<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, SunflowerParcel>();
+            services.AddScoped<IFeatureUpdate, B2hParcel>();
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
             services.AddSwaggerGen(c =>

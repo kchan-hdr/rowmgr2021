@@ -5,22 +5,30 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="422a1c310d3744b294d970d561daf08d" Name="Diagram1">
-        <EntityTypeShape EntityType="ROWM.Dal.Agent" Width="1.5" PointX="0.75" PointY="10" IsExpanded="true" />
+        <EntityTypeShape EntityType="ROWM.Dal.Agent" Width="1.5" PointX="3.625" PointY="4.875" IsExpanded="true" />
         <EntityTypeShape EntityType="ROWM.Dal.Contact_Channel" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="ROWM.Dal.Contact_Purpose" Width="1.5" PointX="2.75" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ROWM.Dal.ContactInfo" Width="1.5" PointX="10.5" PointY="14" IsExpanded="true" />
-        <EntityTypeShape EntityType="ROWM.Dal.ContactLog" Width="1.5" PointX="3" PointY="9.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="ROWM.Dal.Document" Width="1.5" PointX="6" PointY="7.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ROWM.Dal.Document_Type" Width="1.5" PointX="0.75" PointY="3.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ROWM.Dal.DocumentActivity" Width="1.5" PointX="8.25" PointY="9.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="ROWM.Dal.DocumentPackage" Width="1.5" PointX="3.75" PointY="6.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="ROWM.Dal.Owner" Width="1.5" PointX="8.25" PointY="14.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="ROWM.Dal.ContactInfo" Width="1.5" PointX="16.375" PointY="9.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="ROWM.Dal.ContactLog" Width="1.5" PointX="18.875" PointY="6.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="ROWM.Dal.Document" Width="1.5" PointX="7.125" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ROWM.Dal.Document_Type" Width="1.5" PointX="6.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ROWM.Dal.DocumentActivity" Width="1.5" PointX="3.5" PointY="13" IsExpanded="true" />
+        <EntityTypeShape EntityType="ROWM.Dal.DocumentPackage" Width="1.5" PointX="4.875" PointY="9.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="ROWM.Dal.Owner" Width="1.5" PointX="13.5" PointY="14.25" IsExpanded="true" />
         <EntityTypeShape EntityType="ROWM.Dal.Ownership" Width="1.5" PointX="13.5" PointY="10.375" IsExpanded="true" />
         <EntityTypeShape EntityType="ROWM.Dal.Parcel" Width="1.5" PointX="11.25" PointY="5.625" IsExpanded="true" />
         <EntityTypeShape EntityType="ROWM.Dal.Parcel_Status" Width="1.5" PointX="9" PointY="6.875" IsExpanded="true" />
         <EntityTypeShape EntityType="ROWM.Dal.Repesentation_Type" Width="1.5" PointX="4.75" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ROWM.Dal.Roe_Status" Width="1.5" PointX="9" PointY="3.75" IsExpanded="true" />
-        <AssociationConnector Association="ROWM.Dal.FK_ROWM_ContactLog_ROWM_Agent_ContactAgentId" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="ROWM.Dal.Roe_Status" Width="1.5" PointX="10.875" PointY="2.125" IsExpanded="true" />
+        <AssociationConnector Association="ROWM.Dal.FK_ROWM_ContactLog_ROWM_Agent_ContactAgentId" ManuallyRouted="true" >
+          <ConnectorPoint PointX="5.125" PointY="5.1980354606331165" />
+          <ConnectorPoint PointX="5.7647875000000006" PointY="5.1980354606331165" />
+          <ConnectorPoint PointX="5.7647875000000006" PointY="4.75" />
+          <ConnectorPoint PointX="11.729166666666666" PointY="4.7499999999999991" />
+          <ConnectorPoint PointX="11.895833333333334" PointY="4.75" />
+          <ConnectorPoint PointX="19.625" PointY="4.75" />
+          <ConnectorPoint PointX="19.625" PointY="6.5" />
+        </AssociationConnector>
         <AssociationConnector Association="ROWM.Dal.FK_ROWM_DocumentActivity_ROWM_Agent_AgentId" ManuallyRouted="false" />
         <AssociationConnector Association="ROWM.Dal.FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId" ManuallyRouted="false" />
         <AssociationConnector Association="ROWM.Dal.FK_ROWM_ContactLog_ROWM_Owner_Owner_OwnerId" ManuallyRouted="false" />
@@ -31,7 +39,8 @@
         <AssociationConnector Association="ROWM.Dal.FK_ROWM_Ownership_ROWM_Parcel_ParcelId" ManuallyRouted="false" />
         <AssociationConnector Association="ROWM.Dal.FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode" ManuallyRouted="false" />
         <AssociationConnector Association="ROWM.Dal.FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode" ManuallyRouted="false" />
-        <AssociationConnector Association="ROWM.Dal.ContactInfoContactLogs" ManuallyRouted="false" />
+        <AssociationConnector Association="ROWM.Dal.ContactInfoContactLogs" ManuallyRouted="false" >
+        </AssociationConnector>
         <AssociationConnector Association="ROWM.Dal.DocumentAgents" ManuallyRouted="false" />
         <AssociationConnector Association="ROWM.Dal.OwnerDocuments" ManuallyRouted="false" />
         <AssociationConnector Association="ROWM.Dal.ParcelContactLogs" ManuallyRouted="false" />
