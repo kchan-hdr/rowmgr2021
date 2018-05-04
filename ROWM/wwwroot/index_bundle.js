@@ -54816,7 +54816,7 @@ var MapArea = function (_super) {
                 // Staging: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS_stg/FeatureServer
                 // Production: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer
                 var parcelLay = new FeatureLayer({
-                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS_stg/FeatureServer/0",
+                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer/0",
                     outFields: ["*"]
                 });
                 parcelLay.popupTemplate = {
