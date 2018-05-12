@@ -15,6 +15,8 @@ using System.Text;
 using System.Threading.Tasks;
 using SharePointInterface;
 using geographia.ags;
+using com.hdr.Rowm.Sunflower;
+using System.Diagnostics;
 
 namespace ROWM.Controllers
 {
@@ -22,18 +24,19 @@ namespace ROWM.Controllers
     public class DocumentController : Controller
     {
         static readonly string _APP_NAME = "ROWM";
-        private readonly ISharePointCRUD _sharePointCRUD; 
+        private readonly ISharePointCRUD _sharePointCRUD;
+        private readonly ParcelStatusHelper _statusHelper;
 
         #region ctor
         OwnerRepository _repo;
         readonly IFeatureUpdate _featureUpdate;
 
-        public DocumentController(OwnerRepository r, ISharePointCRUD sp, IFeatureUpdate f)
+        public DocumentController(OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, IFeatureUpdate f)
         {
             _repo = r;
             _sharePointCRUD = sp;
             _featureUpdate = f;
-
+            _statusHelper = h;
         }
         #endregion
 
@@ -191,14 +194,13 @@ namespace ROWM.Controllers
                 }
             }
 
+            var agent = await _repo.GetAgent(header.AgentName) ?? await _repo.GetDefaultAgent();
 
-            var agent = await _repo.GetAgent(header.AgentName);
-
-            var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent?.AgentId ?? (await _repo.GetDefaultAgent()).AgentId, bb);
-            //d.Agents.Add(agent);
+            // Store Document
+            var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent.AgentId, bb);
+            d.Agents.Add(agent); // this relationship is not used anymore
 
             myParcel.Documents.Add(d);
-            await _repo.UpdateParcel(myParcel);
 
             header.DocumentId = d.DocumentId;
 
@@ -211,13 +213,16 @@ namespace ROWM.Controllers
                 //_sharePointCRUD.UploadParcelDoc(parcelName, "Other", sourceFilename, bb, null);
                 _sharePointCRUD.UploadParcelDoc(parcelName, header.DocumentType, sourceFilename, bb, null);
                 string parcelDocUrl = _sharePointCRUD.GetParcelFolderURL(parcelName, null);
-                bool success = await _featureUpdate.UpdateFeatureDocuments(pid, parcelDocUrl);
+
+                // bool success = await _featureUpdate.UpdateFeatureDocuments(pid, parcelDocUrl);
+                bool success = await ParcelStatusEvent(myParcel, parcelDocUrl, header.DocumentType);
+                await _repo.UpdateParcel(myParcel);
             }
             catch (Exception e)
             {
                 // TODO: Return error to user?
                 Console.WriteLine("Error uploading document {0} type {1} to Sharepoint for {2}", sourceFilename, header.DocumentType, parcelName);
-            }
+            }           
             return Json(header);
         }
 
@@ -332,11 +337,11 @@ namespace ROWM.Controllers
             }
 
 
-            var agent = await _repo.GetAgent(header.AgentName);
+            var agent = await _repo.GetAgent(header.AgentName) ?? await _repo.GetDefaultAgent();
 
             // Store Document
-            var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent?.AgentId ?? (await _repo.GetDefaultAgent()).AgentId, bb);
-            // d.Agents.Add(agent); this relationship is not used anymore
+            var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent.AgentId, bb);
+            d.Agents.Add(agent); // this relationship is not used anymore
 
             // Add document to parcels
             var myParcels = header.ParcelIds.Distinct();
@@ -345,7 +350,6 @@ namespace ROWM.Controllers
             {
                 var myParcel = await _repo.GetParcel(pid);
                 myParcel.Documents.Add(d);
-                await _repo.UpdateParcel(myParcel);
 
                 header.DocumentId = d.DocumentId;
 
@@ -358,7 +362,10 @@ namespace ROWM.Controllers
                     //_sharePointCRUD.UploadParcelDoc(parcelName, "Other", sourceFilename, bb, null);
                     _sharePointCRUD.UploadParcelDoc(parcelName, header.DocumentType, sourceFilename, bb, null);
                     string parcelDocUrl = _sharePointCRUD.GetParcelFolderURL(parcelName, null);
-                    bool success = await _featureUpdate.UpdateFeatureDocuments(pid, parcelDocUrl);
+
+                    // bool success = await _featureUpdate.UpdateFeatureDocuments(pid, parcelDocUrl);
+                    bool success = await ParcelStatusEvent(myParcel, parcelDocUrl, header.DocumentType);
+                    await _repo.UpdateParcel(myParcel);
                 }
                 catch (Exception e)
                 {
@@ -387,6 +394,40 @@ namespace ROWM.Controllers
 
             return mediaType.Encoding;
         }
+
+        async Task<bool> ParcelStatusEvent(Parcel p, string parcelDocUrl, string docType)
+        {
+            var dt = DocType.Find(docType) ?? DocType.Default;
+
+            var tasks = new List<Task<bool>>();
+            tasks.Add(_featureUpdate.UpdateFeatureDocuments(p.ParcelId, parcelDocUrl));
+
+            var pid = p.ParcelId;
+
+            /*
+             * 
+             * TODO: quick fix until the final doctype implementation. 2018.5.10
+             * 
+                Acquisition Offer Package Received by Owner -> Parcel status to Offer Made
+                Acquisition Offer Package Signed -> Parcel status to Easement Signed
+                Acquisition Compensation Check Cut -> Parcel Status to Compensation Check Cut
+                Acquisition Documents Recorded -> Parcel Status to Documents Recorded
+                Acquisition Compensation Received by Owner -> Parcel Status to Compensation Received by Owner
+                Acquisition Offer Package Original -> Parcel status to Offer Made
+            */
+
+            switch (dt.DocTypeName)
+            {
+                case "Acquisition Offer Package Original": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
+                case "Acquisition Offer Package Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3); break;
+                case "Acquisition Offer Package Signed": tasks.Add(_featureUpdate.UpdateFeature(pid, 4)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(4); break;
+                case "Acquisition Compensation Check": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5); break;
+                case "Acquisition Documents Recorded": tasks.Add(_featureUpdate.UpdateFeature(pid, 6)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(6); break;
+                case "Acquisition Compensation Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 7)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(7); break;
+            }
+
+            return (await Task.WhenAll(tasks)).All(rt => rt);
+        }
         #endregion
     }
 
@@ -399,6 +440,10 @@ namespace ROWM.Controllers
         public Guid DocumentId { get; set; }
         public List<string> ParcelIds { get; set; }
 
+        public DateTimeOffset? DateRecorded { get; set; }
+        public DateTimeOffset Created { get; set; }
+        public DateTimeOffset LastModified { get; set; }
+
         /// <summary>
         /// default ctor
         /// </summary>
@@ -409,6 +454,11 @@ namespace ROWM.Controllers
             DocumentId = d.DocumentId;
             DocumentType = d.DocumentType;
             DocumentTitle = d.Title;
+            DateRecorded = d.DateRecorded;
+            Created = d.Created;
+            LastModified = d.LastModified;
+
+
             //AgentName = d.Agents.FirstOrDefault()?.AgentName ?? "";
         }
     }

@@ -1,0 +1,394 @@
+﻿{
+  "currentVersion": 10.3,
+  "id": 0,
+  "name": "Parcels",
+  "type": "Feature Layer",
+  "description": "",
+  "copyrightText": "",
+  "defaultVisibility": true,
+  "editFieldsInfo": null,
+  "ownershipBasedAccessControlForFeatures": null,
+  "syncCanReturnChanges": false,
+  "relationships": [],
+  "isDataVersioned": false,
+  "supportsRollbackOnFailureParameter": true,
+  "supportsStatistics": true,
+  "supportsAdvancedQueries": true,
+  "advancedQueryCapabilities": {
+    "supportsPagination": true,
+    "supportsStatistics": true,
+    "supportsOrderBy": true,
+    "supportsDistinct": true
+  },
+  "geometryType": "esriGeometryPolygon",
+  "minScale": 0,
+  "maxScale": 0,
+  "extent": {
+    "xmin": 694019.89045389,
+    "ymin": 1734804.4361149818,
+    "xmax": 735565.6213386357,
+    "ymax": 1826850.0679682344,
+    "spatialReference": {
+      "wkid": 102678,
+      "latestWkid": 3420
+    }
+  },
+  "drawingInfo": {
+    "renderer": {
+      "type": "simple",
+      "symbol": {
+        "type": "esriSFS",
+        "style": "esriSFSSolid",
+        "color": [ 0, 0, 0, 0 ],
+        "outline": {
+          "type": "esriSLS",
+          "style": "esriSLSSolid",
+          "color": [ 255, 170, 0, 255 ],
+          "width": 1
+        }
+      },
+      "label": "",
+      "description": ""
+    },
+    "transparency": 0,
+    "labelingInfo": null
+  },
+  "hasM": false,
+  "hasZ": false,
+  "allowGeometryUpdates": true,
+  "hasAttachments": false,
+  "htmlPopupType": "esriServerHTMLPopupTypeAsHTMLText",
+  "objectIdField": "OBJECTID",
+  "globalIdField": "",
+  "displayField": "PartyName",
+  "typeIdField": "",
+  "fields": [
+    {
+      "name": "OBJECTID",
+      "type": "esriFieldTypeOID",
+      "alias": "OBJECTID",
+      "domain": null,
+      "editable": false,
+      "nullable": false
+    },
+    {
+      "name": "PID",
+      "type": "esriFieldTypeString",
+      "alias": "Parel ID",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 16
+    },
+    {
+      "name": "PARCELNUM",
+      "type": "esriFieldTypeString",
+      "alias": "Parcel Number",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 7
+    },
+    {
+      "name": "ACRES",
+      "type": "esriFieldTypeDouble",
+      "alias": "Acres",
+      "domain": null,
+      "editable": true,
+      "nullable": true
+    },
+    {
+      "name": "EDIT_DATE",
+      "type": "esriFieldTypeDate",
+      "alias": "Edit Date",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 36
+    },
+    {
+      "name": "QuickRefID",
+      "type": "esriFieldTypeString",
+      "alias": "Quick Ref ID",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 254
+    },
+    {
+      "name": "SitusAddre",
+      "type": "esriFieldTypeString",
+      "alias": "Situs Address",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 254
+    },
+    {
+      "name": "PartyName",
+      "type": "esriFieldTypeString",
+      "alias": "Owners",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 254
+    },
+    {
+      "name": "Address1",
+      "type": "esriFieldTypeString",
+      "alias": "Owner Address1",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 254
+    },
+    {
+      "name": "Address2",
+      "type": "esriFieldTypeString",
+      "alias": "Owner Address 2",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 254
+    },
+    {
+      "name": "Address3",
+      "type": "esriFieldTypeString",
+      "alias": "Owner Address 3",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 254
+    },
+    {
+      "name": "OCity",
+      "type": "esriFieldTypeString",
+      "alias": "Owner City",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 254
+    },
+    {
+      "name": "OState",
+      "type": "esriFieldTypeString",
+      "alias": "Ower State",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 254
+    },
+    {
+      "name": "OZip",
+      "type": "esriFieldTypeString",
+      "alias": "Owner Zip",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 254
+    },
+    {
+      "name": "LegalLocat",
+      "type": "esriFieldTypeString",
+      "alias": "Legal Description",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 254
+    },
+    {
+      "name": "TownshipSe",
+      "type": "esriFieldTypeDouble",
+      "alias": "Township Section",
+      "domain": null,
+      "editable": true,
+      "nullable": true
+    },
+    {
+      "name": "Township",
+      "type": "esriFieldTypeDouble",
+      "alias": "Township",
+      "domain": null,
+      "editable": true,
+      "nullable": true
+    },
+    {
+      "name": "TownshipRa",
+      "type": "esriFieldTypeString",
+      "alias": "Township Range",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 254
+    },
+    {
+      "name": "County",
+      "type": "esriFieldTypeString",
+      "alias": "County",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 20
+    },
+    {
+      "name": "Documents",
+      "type": "esriFieldTypeString",
+      "alias": "Documents",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 300
+    },
+    {
+      "name": "ROE_Status",
+      "type": "esriFieldTypeSmallInteger",
+      "alias": "ROE Status",
+      "domain": {
+        "type": "codedValue",
+        "name": "SF_ROEStatus",
+        "codedValues": [
+          {
+            "name": "No Activity",
+            "code": 0
+          },
+          {
+            "name": "ROE In Progress",
+            "code": 1
+          },
+          {
+            "name": "ROE Obtained",
+            "code": 2
+          },
+          {
+            "name": "ROE with Conditions",
+            "code": 3
+          },
+          {
+            "name": "No Access",
+            "code": 4
+          }
+        ]
+      },
+      "editable": true,
+      "nullable": true
+    },
+    {
+      "name": "ParcelStatus",
+      "type": "esriFieldTypeSmallInteger",
+      "alias": "Parcel Status",
+      "domain": {
+        "type": "codedValue",
+        "name": "SF_ParcelStatus",
+        "codedValues": [
+          {
+            "name": "No Activity",
+            "code": 0
+          },
+          {
+            "name": "Owner Contacted",
+            "code": 1
+          },
+          {
+            "name": "ROE Obtained",
+            "code": 2
+          },
+          {
+            "name": "Offer Made",
+            "code": 3
+          },
+          {
+            "name": "Easement Signed",
+            "code": 4
+          },
+          {
+            "name": "Compensation Check Cut",
+            "code": 5
+          },
+          {
+            "name": "Documents Recorded",
+            "code": 6
+          },
+          {
+            "name": "Compensation Received by Owner",
+            "code": 7
+          },
+          {
+            "name": "Non-Active",
+            "code": 99
+          }
+        ]
+      },
+      "editable": true,
+      "nullable": true
+    },
+    {
+      "name": "ROE_Condition",
+      "type": "esriFieldTypeString",
+      "alias": "ROE Condition",
+      "domain": null,
+      "editable": true,
+      "nullable": true,
+      "length": 250
+    },
+    {
+      "name": "IsActive",
+      "type": "esriFieldTypeSmallInteger",
+      "alias": "IsActive",
+      "domain": {
+        "type": "codedValue",
+        "name": "SF_IsActive",
+        "codedValues": [
+          {
+            "name": "Non-Active",
+            "code": 0
+          },
+          {
+            "name": "Active",
+            "code": 1
+          }
+        ]
+      },
+      "editable": true,
+      "nullable": true
+    }
+  ],
+  "types": [],
+  "templates": [
+    {
+      "name": "Parcels",
+      "description": "",
+      "prototype": {
+        "attributes": {
+          "ROE_Condition": null,
+          "IsActive": null,
+          "PID": null,
+          "PARCELNUM": null,
+          "ACRES": null,
+          "EDIT_DATE": null,
+          "QuickRefID": null,
+          "SitusAddre": null,
+          "PartyName": null,
+          "Address1": null,
+          "Address2": null,
+          "Address3": null,
+          "OCity": null,
+          "OState": null,
+          "OZip": null,
+          "LegalLocat": null,
+          "TownshipSe": null,
+          "Township": null,
+          "TownshipRa": null,
+          "County": null,
+          "Documents": null,
+          "ROE_Status": null,
+          "ParcelStatus": null
+        }
+      },
+      "drawingTool": "esriFeatureEditToolPolygon"
+    }
+  ],
+  "maxRecordCount": 1000,
+  "supportedQueryFormats": "JSON, AMF",
+  "capabilities": "Create,Query,Update,Delete,Uploads,Editing",
+  "useStandardizedQueries": true
+}

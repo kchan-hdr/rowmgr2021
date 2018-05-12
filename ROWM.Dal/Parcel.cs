@@ -23,11 +23,11 @@ namespace ROWM.Dal
 
         public bool IsActive { get; set; }
 
-        [ForeignKey("ParcelStatus"), StringLength(20)]
+        [ForeignKey("ParcelStatus"), StringLength(40)]
         public string ParcelStatusCode { get; set; }
         public virtual ParcelStatus_Master ParcelStatus { get; set; }
 
-        [ForeignKey("RoeStatus"), StringLength(20)]
+        [ForeignKey("RoeStatus"), StringLength(40)]
         public string RoeStatusCode { get; set; }
         public virtual RoeStatus_Master RoeStatus { get; set; }
 
