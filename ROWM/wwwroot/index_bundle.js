@@ -1893,7 +1893,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         if (!locales[name] && typeof module !== 'undefined' && module && module.exports) {
             try {
                 oldLocale = globalLocale._abbr;
-                __webpack_require__(326)("./" + name);
+                __webpack_require__(328)("./" + name);
                 // because defineLocale currently also sets the global locale, we
                 // want to undo that for lazy loaded locales
                 getSetGlobalLocale(oldLocale);
@@ -12814,7 +12814,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(328);
+var content = __webpack_require__(330);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -37415,7 +37415,7 @@ var _react = __webpack_require__(5);
 
 var _reactDom = __webpack_require__(65);
 
-var _generateOutsideCheck = __webpack_require__(327);
+var _generateOutsideCheck = __webpack_require__(329);
 
 var _generateOutsideCheck2 = _interopRequireDefault(_generateOutsideCheck);
 
@@ -37815,7 +37815,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(329);
+var	fixUrls = __webpack_require__(331);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -38232,7 +38232,7 @@ var React = __webpack_require__(5);
 var ReactDOM = __webpack_require__(65);
 var Application = __webpack_require__(312);
 
-__webpack_require__(344);
+__webpack_require__(346);
 
 ReactDOM.render(React.createElement(Application, null), document.getElementById("application-area"));
 
@@ -50237,21 +50237,22 @@ var LeftLegend = __webpack_require__(314);
 var LeftBasemap = __webpack_require__(315);
 
 var StatsPanel = __webpack_require__(316);
-var OwnerPanel = __webpack_require__(317);
-var ParcelPanel = __webpack_require__(319);
+var OwnerPanel = __webpack_require__(318);
+var ParcelPanel = __webpack_require__(320);
+var ReportsPanel = __webpack_require__(322);
 
-var RelatedOwnersOverlay = __webpack_require__(321);
-var LogInfoOverlay = __webpack_require__(322);
-var DocInfoOverlay = __webpack_require__(323);
-var AddContact = __webpack_require__(324);
-var AddContactLogOverlay = __webpack_require__(325);
-var AddDocumentOverlay = __webpack_require__(330);
-var CompensationInfoOverlay = __webpack_require__(331);
-var AddCompensationOverlay = __webpack_require__(332);
-var EditROEStatus = __webpack_require__(333);
-var MapArea = __webpack_require__(334);
+var RelatedOwnersOverlay = __webpack_require__(323);
+var LogInfoOverlay = __webpack_require__(324);
+var DocInfoOverlay = __webpack_require__(325);
+var AddContact = __webpack_require__(326);
+var AddContactLogOverlay = __webpack_require__(327);
+var AddDocumentOverlay = __webpack_require__(332);
+var CompensationInfoOverlay = __webpack_require__(333);
+var AddCompensationOverlay = __webpack_require__(334);
+var EditROEStatus = __webpack_require__(335);
+var MapArea = __webpack_require__(336);
 
-var DataServices = __webpack_require__(338); // require("../../mock/dataServices");
+var DataServices = __webpack_require__(340); // require("../../mock/dataServices");
 var dSvcs = new DataServices();
 
 // var ownerArr;
@@ -50282,7 +50283,8 @@ var Application = function (_React$Component) {
             parcelDetails: null,
             parcelTotal: null,
             rightPanel: "stats",
-            roeStatArray: []
+            roeStatArray: [],
+            agents: []
         };
 
         _this.toggleMenu = _this.toggleMenu.bind(_this);
@@ -50320,7 +50322,12 @@ var Application = function (_React$Component) {
                 }
             }
 
-            app.setState({ ownerTotal: d.numberOfOwners, parcelTotal: d.numberOfParcels, roeStatArray: arr });
+            app.setState({ ownerTotal: d.numberOfOwners, parcelTotal: d.numberOfParcels, roeStatArray: arr, parcelStatArray: d.parcelStatus });
+        });
+
+        // dropdowns
+        dSvcs.getLookups().then(function (d) {
+            app.setState({ agents: d.agents });
         });
 
         // doc type dropdown
@@ -50356,6 +50363,8 @@ var Application = function (_React$Component) {
                     case "owner":
                         this.setState({ currentOwner: newVal, rightPanel: "owner" });
                         break;
+                    case "reports":
+                        this.setState({ rightPanel: "reports" });
                     default:
                         break;
                 }
@@ -50417,11 +50426,8 @@ var Application = function (_React$Component) {
             }
 
             if (type == "document-metadata") {
-                console.log("IN?");
                 dSvcs.editDocumentInfo(newObj.docId, newObj.trackingNo, newObj.dateSent, newObj.dateDelivered, newObj.dateReceived, newObj.dateSigned, newObj.dateRecorded, newObj.checkNo).then(function (c) {
-                    console.log(c);
                     dSvcs.getParcel(app.state.currentParcel).then(function (d) {
-                        console.log("HERE???");
                         app.setState({ currentParcel: app.state.currentParcel, parcelDetails: d });
                     });
                 });
@@ -50528,11 +50534,15 @@ var Application = function (_React$Component) {
                         changePanel: this.setRightPanel,
                         launchOverlay: this.setOverlay,
                         parcel: this.state.parcelDetails });break;
+                case "reports":
+                    rightpanel = React.createElement(ReportsPanel, {
+                        changePanel: this.setRightPanel });break;
                 default:
                     rightpanel = React.createElement(StatsPanel, {
                         changePanel: this.setRightPanel,
                         ownerTotal: this.state.ownerTotal,
                         parcelTotal: this.state.parcelTotal,
+                        statsArray: this.state.parcelStatArray,
                         roeArray: this.state.roeStatArray });break; // "stats"
             }
 
@@ -50595,7 +50605,7 @@ var Application = function (_React$Component) {
 
                 case "add-contact-log":
                     overlay = React.createElement(AddContactLogOverlay, {
-                        owner: this.state.currentOwner,
+                        owner: this.state.currentOwner, agents: this.state.agents,
                         panel: this.state.rightPanel,
                         parcel: this.state.currentParcel,
                         parcelDetails: this.state.parcelDetails,
@@ -50603,7 +50613,7 @@ var Application = function (_React$Component) {
                         setOverlay: this.setOverlay });break;
                 case "edit-contact-log":
                     overlay = React.createElement(AddContactLogOverlay, {
-                        log: this.state.logToShow,
+                        log: this.state.logToShow, agents: this.state.agents,
                         owner: this.state.currentOwner,
                         panel: this.state.rightPanel,
                         parcel: this.state.currentParcel,
@@ -50676,14 +50686,9 @@ var Application = function (_React$Component) {
                             "div",
                             { id: "top-right" },
                             React.createElement(
-                                "div",
-                                { id: "project-drop-down" },
-                                React.createElement(
-                                    "span",
-                                    null,
-                                    "Sunflower Transmission Line"
-                                ),
-                                React.createElement("img", { src: "assets/images/icon-chevron-down.png", alt: "HDR" })
+                                "a",
+                                { onClick: this.setRightPanel.bind(null, "reports") },
+                                "Reports"
                             )
                         )
                     ),
@@ -51062,6 +51067,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var React = __webpack_require__(5);
+var CircleGraph = __webpack_require__(317);
 
 var StatsPanel = function (_React$Component) {
     _inherits(StatsPanel, _React$Component);
@@ -51088,6 +51094,10 @@ var StatsPanel = function (_React$Component) {
                     total += amt[i];
                 }
             }
+
+            var acq = this.props.statsArray ? this.props.statsArray.filter(function (x) {
+                return x.title != 'Owner_Contacted' && x.title == 'ROE_Obtained';
+            }) : [];
 
             return React.createElement(
                 "div",
@@ -51132,11 +51142,17 @@ var StatsPanel = function (_React$Component) {
                     React.createElement(
                         "h3",
                         null,
-                        "PARCEL STATUS"
+                        "ACQUISITION STATUS"
+                    ),
+                    React.createElement(CircleGraph, { id: "parcel-status-graph", dataArray: acq }),
+                    React.createElement(
+                        "h3",
+                        null,
+                        "ROE STATUS"
                     ),
                     React.createElement(
                         "div",
-                        { id: "parcel-status-graph" },
+                        { id: "roe-status-graph" },
                         this.props.roeArray.map(function (val, i) {
                             if (val / total > .25) {
                                 var k = 0;
@@ -51293,9 +51309,181 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var React = __webpack_require__(5);
+
+var CircleGraph = function (_React$Component) {
+    _inherits(CircleGraph, _React$Component);
+
+    function CircleGraph(props) {
+        _classCallCheck(this, CircleGraph);
+
+        return _possibleConstructorReturn(this, (CircleGraph.__proto__ || Object.getPrototypeOf(CircleGraph)).call(this, props));
+    }
+
+    _createClass(CircleGraph, [{
+        key: "render",
+        value: function render() {
+            var side = 220;
+            var clrs = ["#ccc", "#0070ff", "#5f0", "#ff0", "#e60000"];
+
+            if (!this.props.dataArray) return React.createElement(
+                "p",
+                { style: { transform: "rotate(0 deg)" } },
+                React.createElement("span", { style: { backgroundColor: clrs[0], transform: "skewX( 360 deg) translateX(" + -(side * Math.tan(360 * (Math.PI / 180)) / 4) + "px)" } })
+            );
+
+            var deg, angle, currDegTotal;
+            var idx = -1,
+                degTotal = 0;
+            var amt = this.props.dataArray;
+
+            var total = this.props.dataArray.reduce(function (s, x) {
+                return s += x.count;
+            }, 0);
+            // for(var i = 0; i < amt.length; i++) { total += amt[i]; }
+
+            var statusChart = this.props.dataArray.map(function (d, i) {
+                var val = d.count;
+                if (val / total > .25) {
+                    var k = 0;
+                    for (var j = val / total; j > .25; j -= .25) {
+                        k++;
+                    }
+
+                    deg = 360 * j;
+                    angle = 90 - deg;
+
+                    currDegTotal = degTotal;
+                    degTotal += deg + k * 90;
+                    idx++;
+
+                    if (k == 1) {
+                        return React.createElement(
+                            "div",
+                            { key: val + i + k, className: "ignore" },
+                            React.createElement(
+                                "p",
+                                { style: { transform: "rotate(" + currDegTotal + "deg)" } },
+                                React.createElement("span", { style: { backgroundColor: clrs[i] } })
+                            ),
+                            React.createElement(
+                                "p",
+                                { style: { transform: "rotate(" + (currDegTotal + 90) + "deg)" } },
+                                React.createElement("span", { style: { backgroundColor: clrs[i], transform: "skewX(" + angle + "deg) translateX(" + -(side * Math.tan(angle * (Math.PI / 180)) / 4) + "px)" } })
+                            )
+                        );
+                    } else if (k == 2) {
+                        return React.createElement(
+                            "div",
+                            { key: val + i + k + 2, className: "ignore" },
+                            React.createElement(
+                                "p",
+                                { style: { transform: "rotate(" + currDegTotal + "deg)" } },
+                                React.createElement("span", { style: { backgroundColor: clrs[i] } })
+                            ),
+                            React.createElement(
+                                "p",
+                                { style: { transform: "rotate(" + (currDegTotal + 90) + "deg)" } },
+                                React.createElement("span", { style: { backgroundColor: clrs[i] } })
+                            ),
+                            React.createElement(
+                                "p",
+                                { style: { transform: "rotate(" + (currDegTotal + 180) + "deg)" } },
+                                React.createElement("span", { style: { backgroundColor: clrs[i], transform: "skewX(" + angle + "deg) translateX(" + -(side * Math.tan(angle * (Math.PI / 180)) / 4) + "px)" } })
+                            )
+                        );
+                    } else if (k == 3) {
+                        return React.createElement(
+                            "div",
+                            { key: val + i + k + 3, className: "ignore" },
+                            React.createElement(
+                                "p",
+                                { style: { transform: "rotate(" + currDegTotal + "deg)" } },
+                                React.createElement("span", { style: { backgroundColor: clrs[i] } })
+                            ),
+                            React.createElement(
+                                "p",
+                                { style: { transform: "rotate(" + (currDegTotal + 90) + "deg)" } },
+                                React.createElement("span", { style: { backgroundColor: clrs[i] } })
+                            ),
+                            React.createElement(
+                                "p",
+                                { style: { transform: "rotate(" + (currDegTotal + 180) + "deg)" } },
+                                React.createElement("span", { style: { backgroundColor: clrs[i] } })
+                            ),
+                            React.createElement(
+                                "p",
+                                { style: { transform: "rotate(" + (currDegTotal + 270) + "deg)" } },
+                                React.createElement("span", { style: { backgroundColor: clrs[i], transform: "skewX(" + angle + "deg) translateX(" + -(side * Math.tan(angle * (Math.PI / 180)) / 4) + "px)" } })
+                            )
+                        );
+                    }
+                } else {
+                    deg = 360 * (val / total);
+                    angle = 90 - deg;
+
+                    currDegTotal = degTotal;
+                    degTotal += deg;
+                    idx++;
+
+                    return React.createElement(
+                        "p",
+                        { key: val + i + Math.random(), style: { transform: "rotate(" + currDegTotal + "deg)" } },
+                        React.createElement("span", { style: { backgroundColor: clrs[i], transform: "skewX(" + angle + "deg) translateX(" + -(side * Math.tan(angle * (Math.PI / 180)) / 4) + "px)" } })
+                    );
+                }
+            });
+
+            var legend = this.props.dataArray.map(function (x, idx) {
+                return React.createElement(
+                    "span",
+                    { key: idx },
+                    x.title,
+                    ": ",
+                    x.count
+                );
+            });
+
+            return React.createElement(
+                "div",
+                null,
+                React.createElement(
+                    "div",
+                    { className: "parcel-status-graph" },
+                    statusChart
+                ),
+                React.createElement(
+                    "div",
+                    { className: "graph-key" },
+                    legend
+                )
+            );
+        }
+    }]);
+
+    return CircleGraph;
+}(React.Component);
+
+module.exports = CircleGraph;
+
+/***/ }),
+/* 318 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var React = __webpack_require__(5);
 var Checkbox = __webpack_require__(34);
 var LinedList = __webpack_require__(54);
-var OwnerParcelLists = __webpack_require__(318);
+var OwnerParcelLists = __webpack_require__(319);
 
 var OwnerPanel = function (_React$Component) {
     _inherits(OwnerPanel, _React$Component);
@@ -51560,7 +51748,7 @@ var OwnerPanel = function (_React$Component) {
 module.exports = OwnerPanel;
 
 /***/ }),
-/* 318 */
+/* 319 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -51633,7 +51821,7 @@ var OwnerParcelLists = function (_React$Component) {
 module.exports = OwnerParcelLists;
 
 /***/ }),
-/* 319 */
+/* 320 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -51649,7 +51837,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var React = __webpack_require__(5);
 var LinedList = __webpack_require__(54);
-var DocumentList = __webpack_require__(320);
+var DocumentList = __webpack_require__(321);
 var _ = __webpack_require__(91);
 
 var ParcelPanel = function (_React$Component) {
@@ -51740,21 +51928,9 @@ var ParcelPanel = function (_React$Component) {
                                 { className: parcelStatus > 0 ? "checked" : "" },
                                 React.createElement("img", { src: "assets/images/icon-check.png", alt: "checked" })
                             ),
-                            "Owner",
+                            "Pending",
                             React.createElement("br", null),
-                            "contacted"
-                        ),
-                        React.createElement(
-                            "li",
-                            null,
-                            React.createElement(
-                                "span",
-                                { className: ROEclass },
-                                React.createElement("img", { src: ROEclass == "checked rejected" ? "assets/images/icon-no-access.png" : "assets/images/icon-check.png", alt: "checked" })
-                            ),
-                            "ROE",
-                            React.createElement("br", null),
-                            "obtained"
+                            "Offer"
                         ),
                         React.createElement(
                             "li",
@@ -51766,7 +51942,19 @@ var ParcelPanel = function (_React$Component) {
                             ),
                             "Offer",
                             React.createElement("br", null),
-                            "made"
+                            "delivered"
+                        ),
+                        React.createElement(
+                            "li",
+                            null,
+                            React.createElement(
+                                "span",
+                                { className: parcelStatus > 2 ? "checked" : "" },
+                                React.createElement("img", { src: "assets/images/icon-check.png", alt: "checked" })
+                            ),
+                            "Final offer",
+                            React.createElement("br", null),
+                            "delivered"
                         ),
                         React.createElement(
                             "li",
@@ -51788,9 +51976,21 @@ var ParcelPanel = function (_React$Component) {
                                 { className: parcelStatus > 4 ? "checked" : "" },
                                 React.createElement("img", { src: "assets/images/icon-check.png", alt: "checked" })
                             ),
-                            "Compensation",
+                            "Offer packet",
                             React.createElement("br", null),
-                            "check cut"
+                            "sent"
+                        ),
+                        React.createElement(
+                            "li",
+                            null,
+                            React.createElement(
+                                "span",
+                                { className: parcelStatus > 4 ? "checked" : "" },
+                                React.createElement("img", { src: "assets/images/icon-check.png", alt: "checked" })
+                            ),
+                            "Check cut",
+                            React.createElement("br", null),
+                            "send to owner"
                         ),
                         React.createElement(
                             "li",
@@ -51803,18 +52003,6 @@ var ParcelPanel = function (_React$Component) {
                             "Document",
                             React.createElement("br", null),
                             "recorded"
-                        ),
-                        React.createElement(
-                            "li",
-                            null,
-                            React.createElement(
-                                "span",
-                                { className: parcelStatus > 6 ? "checked" : "" },
-                                React.createElement("img", { src: "assets/images/icon-check.png", alt: "checked" })
-                            ),
-                            "Compensation",
-                            React.createElement("br", null),
-                            "received by owner"
                         )
                     )
                 ),
@@ -52030,7 +52218,7 @@ var ParcelPanel = function (_React$Component) {
 module.exports = ParcelPanel;
 
 /***/ }),
-/* 320 */
+/* 321 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52085,7 +52273,84 @@ var DocumentListItem = /** @class */function (_super) {
 module.exports = DocumentList;
 
 /***/ }),
-/* 321 */
+/* 322 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var React = __webpack_require__(5);
+
+var ReportsPanel = function (_React$Component) {
+    _inherits(ReportsPanel, _React$Component);
+
+    function ReportsPanel(props) {
+        _classCallCheck(this, ReportsPanel);
+
+        return _possibleConstructorReturn(this, (ReportsPanel.__proto__ || Object.getPrototypeOf(ReportsPanel)).call(this, props));
+    }
+
+    _createClass(ReportsPanel, [{
+        key: "render",
+        value: function render() {
+            return React.createElement(
+                "div",
+                { id: "reports-panel", className: "right-panel-content" },
+                React.createElement(
+                    "h2",
+                    null,
+                    "Reports"
+                ),
+                React.createElement(
+                    "ul",
+                    null,
+                    React.createElement(
+                        "li",
+                        null,
+                        React.createElement(
+                            "a",
+                            { href: "/export/contactlogs?f=excel", download: true },
+                            "Contact Log"
+                        )
+                    ),
+                    React.createElement(
+                        "li",
+                        null,
+                        React.createElement(
+                            "a",
+                            { href: "/export/documents?f=excel", download: true },
+                            "Documents List"
+                        )
+                    ),
+                    React.createElement(
+                        "li",
+                        null,
+                        React.createElement(
+                            "a",
+                            { href: "/export/contacts?f=excel", download: true },
+                            "Contacts List"
+                        )
+                    )
+                )
+            );
+        }
+    }]);
+
+    return ReportsPanel;
+}(React.Component);
+
+module.exports = ReportsPanel;
+
+/***/ }),
+/* 323 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52156,7 +52421,7 @@ var RelatedOwnersOverlay = function (_React$Component) {
 module.exports = RelatedOwnersOverlay;
 
 /***/ }),
-/* 322 */
+/* 324 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52350,7 +52615,7 @@ var LogInfoOverlay = function (_React$Component) {
 module.exports = LogInfoOverlay;
 
 /***/ }),
-/* 323 */
+/* 325 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52578,7 +52843,7 @@ var DocInfoOverlay = function (_React$Component) {
 module.exports = DocInfoOverlay;
 
 /***/ }),
-/* 324 */
+/* 326 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52917,7 +53182,7 @@ var AddContact = function (_React$Component) {
 module.exports = AddContact;
 
 /***/ }),
-/* 325 */
+/* 327 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53099,6 +53364,14 @@ var AddContactLogOverlay = function (_React$Component) {
                 submitFunction = this.saveData.bind(this, "edit-log");
             }
 
+            var agentDropdown = this.props.agents.map(function (a) {
+                return React.createElement(
+                    "option",
+                    { id: "{a.description}", key: a.code },
+                    a.description
+                );
+            });
+
             return React.createElement(
                 "div",
                 { id: "add-contact-log-overlay", className: "shorter" },
@@ -53174,26 +53447,7 @@ var AddContactLogOverlay = function (_React$Component) {
                         React.createElement(
                             "select",
                             { id: "add-contact-log-agent", name: "add-contact-logo-agent", defaultValue: editAgent },
-                            React.createElement(
-                                "option",
-                                { id: "Erin Begier" },
-                                "Erin Begier"
-                            ),
-                            React.createElement(
-                                "option",
-                                { id: "Amy Borders" },
-                                "Amy Borders"
-                            ),
-                            React.createElement(
-                                "option",
-                                { id: "Stephen Sykes" },
-                                "Stephen Sykes"
-                            ),
-                            React.createElement(
-                                "option",
-                                { id: "Abby Hinman" },
-                                "Abby Hinman"
-                            )
+                            agentDropdown
                         )
                     ),
                     React.createElement(
@@ -53407,7 +53661,7 @@ var AddContactLogOverlay = function (_React$Component) {
 module.exports = AddContactLogOverlay;
 
 /***/ }),
-/* 326 */
+/* 328 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
@@ -53656,10 +53910,10 @@ webpackContext.keys = function webpackContextKeys() {
 };
 webpackContext.resolve = webpackContextResolve;
 module.exports = webpackContext;
-webpackContext.id = 326;
+webpackContext.id = 328;
 
 /***/ }),
-/* 327 */
+/* 329 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53739,7 +53993,7 @@ function generateOutsideCheck(componentNode, eventHandler, ignoreClass, excludeS
 }
 
 /***/ }),
-/* 328 */
+/* 330 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(209)(undefined);
@@ -53753,7 +54007,7 @@ exports.push([module.i, ".react-datepicker-popper[data-placement^=\"bottom\"] .r
 
 
 /***/ }),
-/* 329 */
+/* 331 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53848,7 +54102,7 @@ module.exports = function (css) {
 };
 
 /***/ }),
-/* 330 */
+/* 332 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53885,8 +54139,7 @@ var AddDocumentOverlay = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (AddDocumentOverlay.__proto__ || Object.getPrototypeOf(AddDocumentOverlay)).call(this, props));
 
-        console.log("XJIGJOSDJGIOJ");
-        console.log(_this.props.doc);
+        ;
 
         var sentDate = _this.props.doc != null && _this.props.doc.sentDate != null ? (0, _moment2.default)(_this.props.doc.sentDate).utcOffset(300) : "";
         var deliveredDate = _this.props.doc != null && _this.props.doc.deliveredDate != null ? (0, _moment2.default)(_this.props.doc.deliveredDate).utcOffset(300) : "";
@@ -53955,8 +54208,6 @@ var AddDocumentOverlay = function (_React$Component) {
             var validate = "";
             var pcls = this.state.arrays[1].array;
 
-            console.log(pcls);
-
             if (document.getElementById("documentTitle").value == "") {
                 validate += "Please enter a title.  ";
             }
@@ -53976,12 +54227,6 @@ var AddDocumentOverlay = function (_React$Component) {
                     var xmlHR = new XMLHttpRequest();
                     xmlHR.onload = function (e) {
                         if (xmlHR.status === 200) {
-                            console.log("IGISGHUISDH");
-                            console.log(e.currentTarget);
-
-                            console.log(document.getElementById("add-document-tracking-number"));
-                            console.log(document.getElementById("add-document-tracking-number").value);
-
                             var id = e.currentTarget.response.split('"documentId":"')[1].split('"')[0];
 
                             app.props.saveData("document-metadata", {
@@ -54007,7 +54252,6 @@ var AddDocumentOverlay = function (_React$Component) {
                     xmlHR.open("POST", "/api/addDocument", true);
                     xmlHR.send(fData);
                 } else {
-                    console.log("INnnnXCNN XF F  FXFFJIWEJIOFWEOIFJOEI");
                     this.props.saveData("document-metadata", {
                         docId: this.props.doc.documentId,
                         trackingNo: document.getElementById("add-document-tracking-number") ? document.getElementById("add-document-tracking-number").value : null,
@@ -54055,9 +54299,6 @@ var AddDocumentOverlay = function (_React$Component) {
         key: "render",
         value: function render() {
             var editTitle = "";
-
-            console.log("FIOEJFOWIEJF");
-            console.log(this.props.doc);
 
             if (this.props.doc != null) {
                 editTitle = this.props.doc.title;
@@ -54297,7 +54538,7 @@ var AddDocumentOverlay = function (_React$Component) {
 module.exports = AddDocumentOverlay;
 
 /***/ }),
-/* 331 */
+/* 333 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54470,7 +54711,7 @@ var CompensationInfoOverlay = function (_React$Component) {
 module.exports = CompensationInfoOverlay;
 
 /***/ }),
-/* 332 */
+/* 334 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54721,7 +54962,7 @@ var AddCompensationOverlay = function (_React$Component) {
 module.exports = AddCompensationOverlay;
 
 /***/ }),
-/* 333 */
+/* 335 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54843,7 +55084,7 @@ var EditROEStatus = function (_React$Component) {
 module.exports = EditROEStatus;
 
 /***/ }),
-/* 334 */
+/* 336 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54866,7 +55107,7 @@ var __extends = undefined && undefined.__extends || function () {
     };
 }();
 var React = __webpack_require__(5);
-var esri_loader_react_1 = __webpack_require__(335);
+var esri_loader_react_1 = __webpack_require__(337);
 var esri_loader_1 = __webpack_require__(211);
 // const logo = require('./logo.svg');
 var MapArea = function (_super) {
@@ -54957,7 +55198,7 @@ var MapArea = function (_super) {
 module.exports = MapArea;
 
 /***/ }),
-/* 335 */
+/* 337 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54973,7 +55214,7 @@ var _react = __webpack_require__(5);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(336);
+var _propTypes = __webpack_require__(338);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
@@ -55043,7 +55284,7 @@ exports.default = EsriLoader;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 336 */
+/* 338 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55074,12 +55315,12 @@ if (process.env.NODE_ENV !== 'production') {
 } else {
   // By explicitly using `prop-types` you are opting into new production behavior.
   // http://fb.me/prop-types-in-prod
-  module.exports = __webpack_require__(337)();
+  module.exports = __webpack_require__(339)();
 }
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 337 */
+/* 339 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55139,14 +55380,14 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 338 */
+/* 340 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-__webpack_require__(339);
-__webpack_require__(343);
+__webpack_require__(341);
+__webpack_require__(345);
 var DataServices = function () {
     function DataServices() {
         var _this = this;
@@ -55495,7 +55736,7 @@ var DataServices = function () {
 module.exports = DataServices;
 
 /***/ }),
-/* 339 */
+/* 341 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55528,7 +55769,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
  * 
  */
 /**
- * bluebird build version 3.5.0
+ * bluebird build version 3.5.1
  * Features enabled: core, race, call_get, generators, map, nodeify, promisify, props, reduce, settle, some, using, timers, filter, any, each
 */
 !function (e) {
@@ -56225,7 +56466,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                 Promise.prototype._ensurePossibleRejectionHandled = function () {
                     if ((this._bitField & 524288) !== 0) return;
                     this._setRejectionIsUnhandled();
-                    async.invokeLater(this._notifyUnhandledRejection, this, undefined);
+                    var self = this;
+                    setTimeout(function () {
+                        self._notifyUnhandledRejection();
+                    }, 1);
                 };
 
                 Promise.prototype._notifyUnhandledRejectionIsHandled = function () {
@@ -58836,7 +59080,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                 _dereq_("./synchronous_inspection")(Promise);
                 _dereq_("./join")(Promise, PromiseArray, tryConvertToPromise, INTERNAL, async, getDomain);
                 Promise.Promise = Promise;
-                Promise.version = "3.5.0";
+                Promise.version = "3.5.1";
                 _dereq_('./map.js')(Promise, PromiseArray, apiRejection, tryConvertToPromise, INTERNAL, debug);
                 _dereq_('./call_get.js')(Promise);
                 _dereq_('./using.js')(Promise, apiRejection, tryConvertToPromise, createContext, INTERNAL, debug);
@@ -60667,7 +60911,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             }
 
             function isError(obj) {
-                return obj !== null && (typeof obj === "undefined" ? "undefined" : _typeof(obj)) === "object" && typeof obj.message === "string" && typeof obj.name === "string";
+                return obj instanceof Error || obj !== null && (typeof obj === "undefined" ? "undefined" : _typeof(obj)) === "object" && typeof obj.message === "string" && typeof obj.name === "string";
             }
 
             function markAsOriginatingFromRejection(e) {
@@ -60826,10 +61070,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 } else if (typeof self !== 'undefined' && self !== null) {
     self.P = self.Promise;
 }
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(35), __webpack_require__(340).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(35), __webpack_require__(342).setImmediate))
 
 /***/ }),
-/* 340 */
+/* 342 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -60883,13 +61127,13 @@ exports._unrefActive = exports.active = function (item) {
 };
 
 // setimmediate attaches itself to the global object
-__webpack_require__(341);
-var global = __webpack_require__(342);
+__webpack_require__(343);
+var global = __webpack_require__(344);
 exports.setImmediate = global.setImmediate;
 exports.clearImmediate = global.clearImmediate;
 
 /***/ }),
-/* 341 */
+/* 343 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -61080,7 +61324,7 @@ exports.clearImmediate = global.clearImmediate;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(35), __webpack_require__(1)))
 
 /***/ }),
-/* 342 */
+/* 344 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -61102,7 +61346,7 @@ module.exports = win;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(35)))
 
 /***/ }),
-/* 343 */
+/* 345 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -61567,13 +61811,13 @@ module.exports = win;
 })(typeof self !== 'undefined' ? self : undefined);
 
 /***/ }),
-/* 344 */
+/* 346 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(345);
+var content = __webpack_require__(347);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -61598,7 +61842,7 @@ if(false) {
 }
 
 /***/ }),
-/* 345 */
+/* 347 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(209)(undefined);
@@ -61606,7 +61850,7 @@ exports = module.exports = __webpack_require__(209)(undefined);
 
 
 // module
-exports.push([module.i, "body { font-family: \"Open Sans Condensed\",sans-serif; height: 100%; overflow: hidden; }\r\nh1,h2,h3,h4,h5,h6,input,select,textarea { font-family: \"Open Sans Condensed\",sans-serif; margin: 0; }\r\n*, *:before, *:after { -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; }\r\n.row { max-width: 100%; width: 100%; }\r\n.columns { padding: 0; }\r\na { color: #4298b5; text-decoration: none; }\r\n.hide-this { display: none; }\r\n\r\n\r\n/* GENERAL */\r\n#app-panel { height: 100%; left: 0; position: absolute; top: 0; transition: left .55s; width: 100%; }\r\n#app-panel.menu-opened { left: -350px; }\r\n.panel-header { background-color: #4298b5; color: #fff; padding: 8px 16px; text-align: left; }\r\n.panel-header img { height: 36px; margin-right: 8px; vertical-align: middle; }\r\n.panel-header h2 { color: #fff; display: inline-block; font-size: 1.8em; vertical-align: middle; }\r\n.panel-header a { border: 1px solid #fff; color: #fff; display: inline-block; font-size: .8em; margin-left: 18px; margin-top: 4px; padding: 0 4px; vertical-align: middle; }\r\n.panel-header span { font-size: .85em; margin-left: 14px; vertical-align: middle; }\r\nspan.panel-close { color: #fff; cursor: pointer; font-size: 2.4em; position: absolute; top: 74px; right: 16px; }\r\n.half-column { display: inline-block; vertical-align: top; width: 50%; }\r\n.limit-height { height: 200px; overflow-y: auto; }\r\n.red-button { background-color: #c8102e; color: #fff; font-size: .85em; float: right; margin-top: 13px; padding: 4px 8px 4px 5px; }\r\n.red-button img { height: 20px; margin-right: 2px; vertical-align: top;  }\r\n.red-button:hover { background-color: #4298b5; color: #fff; }\r\n.checkbox { color: #000; display: inline-block; font-size: .9em; margin: 0 18px 0 4px; }\r\n.checkbox span { background-color: #fff; border: 1px solid #000; display: inline-block; height: 14px; margin-right: 6px; vertical-align: middle; width: 14px; }\r\n.checkbox span img { display: none; left: -2px; position: relative; top: -5px; width: 16px; }\r\n.checkbox.checked span img { display: block; }\r\n#body-container { background-color: #303; height: 100%; left: 0; padding-top: 72px; position: absolute; top: 0; width: 100%; }\r\n\r\n\r\n/* TOP BAR */\r\n#top-bar { background-color: #fff; height: 72px; position: relative; z-index: 2; }\r\n#top-bar > a { display: inline-block; vertical-align: middle; }\r\n#top-bar > a > img { margin: 11px 24px; width: 80px; }\r\n#breadcrumb-menu { display: inline-block; margin-left: 9px; vertical-align: middle; }\r\n#breadcrumb-menu a { display: inline-block; vertical-align: middle; }\r\n#breadcrumb-menu a img { width: 28px; }\r\n#breadcrumb-menu span { color: #a8a99e; font-size: .8em; font-weight: 700; margin: 0 8px 0 6px;  }\r\n#breadcrumb-menu h1 { display: inline-block; font-size: 1em; }\r\n#top-right { float: right; margin: 22px 26px; }\r\n#project-drop-down { display: inline-block; }\r\n#project-drop-down span { text-decoration: underline; margin-right: 6px; }\r\n#project-drop-down img { width: 20px; }\r\n#menu-button { cursor: pointer; display: inline-block; margin-left: 42px; vertical-align: middle; }\r\n#menu-button span { background-color: #54595b; border-radius: 3px; display: block; height: 4px; margin-bottom: 6px; transition: transform .1s; width: 44px; }\r\n.menu-opened #menu-button span { margin-top: 10px; transform: rotate(45deg); }\r\n.menu-opened #menu-button span:nth-of-type(2) { margin-top: -10px; transform: rotate(-45deg); }\r\n.menu-opened #menu-button span:nth-of-type(3) { display: none; }\r\n\r\n/* LEFT BAR & PANELS */\r\n#left-bar { background-color: #4298b5; height: 100%; left: 0; padding-top: 14px; position: absolute; text-align: center; top: 72px; width: 80px; }\r\n#left-bar a { color: #fff; display: block; font-size: .9em; margin-bottom: 14px; position: relative; }\r\n#left-bar a:after { background-color: #c8102e; content: \"\"; display: block; height: 100%; left: -10px; position: absolute; top: 0; transition: left .65s; width: 10px; }\r\n#left-bar a.selected:after { left: 0; }\r\n#left-bar a img { display: block; height: 40px; margin: 0 auto; }\r\n#left-bar-panel { background-color: #66acc3; height: 100%; left: -240px; padding: 79px 18px 16px; position: absolute; top: 0; transition: left .65s; width: 320px; }\r\n#left-bar-panel.opened { left: 80px; }\r\n#left-bar-panel span.panel-close { color: #fff; cursor: pointer; font-size: 2.4em; position: absolute; top: 72px; right: 14px;  }\r\n#left-bar-panel h2 { color: #fff; font-size: 1.8em; font-weight: 700; margin-bottom: 18px; }\r\n\r\n.panel-input { margin-bottom: 12px; position: relative; width: 100%; }\r\n.panel-input.shorter { width: 75%; }\r\n.panel-input.shortest { width: 26%; }\r\n.wider .panel-input.shortest { width: 20%; }\r\n.panel-input label { color: #fff; display: block; font-size: .9em; line-height: 1.2em; }\r\n.panel-input input[type=\"text\"],\r\n.panel-input select { background-color: transparent; display: block; font-size: 1em; height: 28px; margin-top: 2px; padding-left: 4px; width: 100%; }\r\n#left-bar-panel .panel-input input[type=\"text\"],\r\n#left-bar-panel .panel-input select { background-color: #fff; }\r\n.panel-input textarea { display: block; font-size: 1em; height: 84px; padding: 3px 5px; resize: none; width: 100%; }\r\n.panel-input img { bottom: 3px; height: 21px; position: absolute; right: 4px; }\r\n.same-row-inputs .panel-input { display: inline-block; margin-right: 25px; }\r\n.same-row-inputs .panel-input.shorter { width: 46%; }\r\n.required { color: #a00; font-size: .8em; font-style: italic; margin-right: 5px; }\r\ninput[type=\"checkbox\"] { margin-left: 6px; }\r\ninput[type=\"file\"] { margin: 2px 0 16px; }\r\n\r\n#legend-panel .checkbox { font-size: 1em; font-weight: 700; margin-bottom: 12px; margin-left: 0;}\r\n#legend-panel .checkbox span { height: 18px; margin-right: 8px; width: 18px; }\r\n\r\n.basemap-link { color: #fff; display: inline-block; font-weight: 700; line-height: 1.1em; margin-bottom: 15px; margin-right: 8%; width: 41%; }\r\n.basemap-link img { border: 1px solid #fff; width: 100%; }\r\n.basemap-link.selected img { border: 2px solid #c8102e; }\r\n\r\n\r\n/* RIGHT BAR & PANELS */\r\n#right-bar { background-color: #fff; height: 100%; overflow: auto; padding-top: 72px; position: absolute; right: 0; top: 0; width: 38%; }\r\n.right-panel-content { padding: 0 20px 80px; }\r\n.right-panel-content h3 { clear: both; font-size: 1.3em; font-weight: 700; padding: 16px 0 12px; }\r\n.right-panel-content p { line-height: 1.4em; margin-bottom: 14px; }\r\n.option-list > a, .option-list-two-options div { border-bottom: 1px solid #a8a99e; display: block; font-size: .9em; padding: 4px 2px; width: 100%; }\r\n.option-list > a:last-of-type { border-bottom-width: 3px; }\r\n.option-list a img { height: 18px; margin-right: 4px; vertical-align: middle; }\r\n.option-list a span { color: #000; float: right; }\r\n.option-list-two-options div a:last-of-type { float: right; }\r\n.contact-info { border-bottom: 1px solid #555; }\r\n.contact-info a img { height: 22px; margin-left: 4px; vertical-align: middle; }\r\n\r\n#parcel-progress { background-color: #e4e4e4; padding: 49px 0 88px; }\r\n#parcel-progress ul { border-top: 1px solid #000; margin: 0 10%; position: relative; }\r\n#parcel-progress ul li { display: inline-block; font-size: .9em; left: -10%; line-height: 1.3em; position: absolute; text-align: center; top: -18px; width: 19%; }\r\n#parcel-progress ul li:nth-of-type(2) { left: 7%; }\r\n#parcel-progress ul li:nth-of-type(3) { left: 23%; }\r\n#parcel-progress ul li:nth-of-type(4) { left: 40%; }\r\n#parcel-progress ul li:nth-of-type(5) { left: 57%; }\r\n#parcel-progress ul li:nth-of-type(6) { left: 74%; }\r\n#parcel-progress ul li:nth-of-type(7) { left: auto; right: -10%; }\r\n#parcel-progress ul li span { background-color: #a8a99e; border-radius: 100%; display: block; height: 34px; margin: 0 auto 4px; width: 34px; }\r\n#parcel-progress ul li span img { display: none; }\r\n#parcel-progress ul li span.checked { background-color: #c8102e; padding-top: 6px; }\r\n#parcel-progress ul li span.checked img { display: inline-block; }\r\n#parcel-progress ul li span.checked.rejected { background-color: #000; }\r\n\r\n#parcels-view-on-map { background-color: #e4e4e4; margin-bottom: 12px; padding: 4px 5px 5px; }\r\n#parcels-view-on-map img { margin-right: 3px; vertical-align: middle; }\r\n#parcels-view-on-map strong { margin-right: 14px; vertical-align: middle;  }\r\n#parcels-view-on-map a.checkbox { display: inline-block; }\r\n.owner-parcel-list a { display: inline-block; line-height: 1.4em; margin-right: 35px; }\r\n\r\n.compensation-box { background-color: #e4e4e4; height: 120px; margin-right: 4%; margin-bottom: 14px; padding: 9px 11px 10px; position: relative; width: 48%; }\r\n.compensation-box:nth-of-type(even) { margin: 0; }\r\n.compensation-box h4 { font-size: .9em; font-weight: 700; }\r\n.compensation-box img { background-color: #c8102e; padding: 2px 4px; position: absolute; right: 0; top: 0; }\r\n.compensation-box span { font-size: 4em; line-height: 1.2em; }\r\n.compensation-box span.not-entered { display: block; font-size: .9em; font-style: italic; margin-top: 28px; }\r\n\r\n#stat-numbers { background-color: #e4e4e4; padding: 18px 0 30px; }\r\n#stat-numbers div { display: inline-block; text-align: center; width: 50%; }\r\n#stat-numbers div img { height: 30px; }\r\n#stat-numbers div h2 { font-size: 1.1em; font-weight: 700; padding: 0; }\r\n#stat-numbers div span { color: #c8102e; font-size: 4.4em; line-height: 1.1em; }\r\n#stat-graphs { margin-bottom: 40px; text-align: center; }\r\n#stat-graphs h3 { font-size: 1.6em; margin: 8px 0; }\r\n#parcel-status-graph { border-radius: 100%; display: inline-block; height: 220px; margin: 12px 18px 16px; overflow: hidden; position: relative; width: 220px; }\r\n#parcel-status-graph p { height: 100%; width: 100%; margin: 0; position: absolute; top: 0; left: 0; }\r\n#parcel-status-graph p > span { height: 50%; left: 0; position: absolute; top: 0; width: 50%; }\r\n\r\n.graph-key { display: inline-block; margin-top: 42px; vertical-align: top;  }\r\n.graph-key > span { display: block; font-size: .95em; margin: 0 10px 6px; text-align: left; }\r\n.graph-key > span > span { background-color: #e60000; display: inline-block; height: 16px; margin-right: 5px;  vertical-align: middle; width: 16px; }\r\n#no-activity-gk > span { background-color: #ccc; }\r\n#roe-in-progress-gk > span { background-color: #0070ff; }\r\n#roe-obtained-gk > span { background-color: #5f0; }\r\n#roe-with-conditions-gk > span { background-color: #ff0; }\r\n\r\n/* MENU */\r\n#menu-panel { background-color: #76797b; height: 100%; position: absolute; right: -350px; top: 0; width: 350px; }\r\n#menu-panel .panel-header { background-color: #65696b; }\r\n#menu-panel ul { list-style-type: none; margin: 0; padding: 0 }\r\n#menu-panel ul li a { border-bottom: 1px solid #65696b; color: #fff; display: block; font-size: 1.2em; padding: 9px 14px; width: 100%; }\r\n#menu-panel-bottom { bottom: 0; height: 52px; position: absolute; width: 100%; }\r\n#menu-panel-bottom a { background-color: #c8102e; color: #fff; float: left; height: 100%; padding-left: 20px; padding-top: 13px; width: 65%; }\r\n#menu-panel-bottom a img { height: 28px; margin-right: 8px; vertical-align: middle; }\r\n#menu-panel-bottom a.logout-btn { background-color: #424242; padding-left: 0; text-align: center; width: 35%; }\r\n\r\n\r\n/* OVERLAY SCREENS */\r\n#overlay-screen { height: 100%; left: -100%; opacity: 0; position: fixed; text-align: center; top: 0; transition: opacity .5s, left 0s ease-in-out .5s; width: 100%; z-index: 3; }\r\n#overlay-screen strong { font-size: .9em; }\r\n#overlay-screen > span { background-color: #000; background-color: rgba(0,0,0,.4); cursor: pointer; height: 100%; left: 0; position: absolute; top: 0; width: 100%; }\r\n#overlay-screen > div { background-color: #fff; display: inline-block; height: auto; margin: -24px auto 0; position: relative; vertical-align: middle; width: 56%; }\r\n#overlay-screen > div.shorter { width: 35%; }\r\n#overlay-screen .panel-close { top: 1px; }\r\n#overlay-screen:after { content: \"\"; display: inline-block; height: 100%; vertical-align: middle; width: 0; }\r\n#overlay-screen.showing { dispflay: block; left: 0; opacity: 1; transition: left 0s, opacity .25s ease-in-out .1s; }\r\n#overlay-screen.wider > div { width: 70%; }\r\n.date-row p { display: inline-block; margin-right: 1%; width: 30%; }\r\n\r\n.oc-header { border-bottom: 1px solid #000; padding-bottom: 6px; position: relative; }\r\n.oc-header h3 { font-size: 1.2em; font-weight: 700; }\r\n.oc-header > span { position: absolute; right: 0; top: 2px; }\r\n\r\n#overlay-screen .panel-input label { color: #000; }\r\n#overlay-screen a[class*=\"select-\"] { display: inline-block; font-size: .85em; line-height: .9em; padding-bottom: 10px; }\r\n#overlay-screen > div p { margin-top: 2px; }\r\n.overlay-form-buttons { float: right; padding-bottom: 18px; }\r\n.overlay-form-buttons a { margin-left: 16px; }\r\n\r\n.document-links a { background-color: #e4e4e4; display: block; font-size: 1.4em; font-weight: 700; margin-bottom: 12px; padding: 4px 8px; width: 60%; }\r\n.document-links a img { height: 34px; margin-right: 5px; vertical-align: middle; }\r\n.document-receiver { background-color: #e4e4e4; border: 2px dashed #000; margin-bottom: 12px; padding: 6px 0 8px; text-align: center; width: 100%; }\r\n.document-receiver img { display: block; height: 40px; margin: 0 auto; }\r\n.document-receiver strong { display: block; margin-bottom: 8px; }\r\n.document-receiver span { font-size: .85em; }\r\n.half-column .document-receiver { margin-top: 4px; padding-top: 3px; width: 93%; }\r\n.half-column .document-receiver img { height: 25px; }\r\n.related-contacts a { margin-right: 44px; }\r\n\r\n.overlay-container { padding: 16px 22px 26px; text-align: left; }\r\n.overlay-container .red-button { display: inline-block; float: none; margin-top: 14px; }\r\n.overlay-container .option-list a:last-of-type { border-width: 0; }\r\n\r\n.react-datepicker-wrapper, .react-datepicker__input-container { width: 100%; }\r\n.react-datepicker-popper { width: 600px; }\r\n.react-datepicker { padding: 0 30px; }\r\n.react-datepicker__navigation {border-width: 14px; height: 0; top: 70px; }\r\n.react-datepicker__navigation--previous { left: -7px; }\r\n.react-datepicker__navigation--next { right: -7px !important; }\r\n", ""]);
+exports.push([module.i, "body { font-family: \"Open Sans Condensed\",sans-serif; height: 100%; overflow: hidden; }\r\nh1,h2,h3,h4,h5,h6,input,select,textarea { font-family: \"Open Sans Condensed\",sans-serif; margin: 0; }\r\n*, *:before, *:after { -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; }\r\n.row { max-width: 100%; width: 100%; }\r\n.columns { padding: 0; }\r\na { color: #4298b5; text-decoration: none; }\r\n.hide-this { display: none; }\r\n\r\n\r\n/* GENERAL */\r\n#app-panel { height: 100%; left: 0; position: absolute; top: 0; transition: left .55s; width: 100%; }\r\n#app-panel.menu-opened { left: -350px; }\r\n.panel-header { background-color: #4298b5; color: #fff; padding: 8px 16px; text-align: left; }\r\n.panel-header img { height: 36px; margin-right: 8px; vertical-align: middle; }\r\n.panel-header h2 { color: #fff; display: inline-block; font-size: 1.8em; vertical-align: middle; }\r\n.panel-header a { border: 1px solid #fff; color: #fff; display: inline-block; font-size: .8em; margin-left: 18px; margin-top: 4px; padding: 0 4px; vertical-align: middle; }\r\n.panel-header span { font-size: .85em; margin-left: 14px; vertical-align: middle; }\r\nspan.panel-close { color: #fff; cursor: pointer; font-size: 2.4em; position: absolute; top: 74px; right: 16px; }\r\n.half-column { display: inline-block; vertical-align: top; width: 50%; }\r\n.limit-height { height: 200px; overflow-y: auto; }\r\n.red-button { background-color: #c8102e; color: #fff; font-size: .85em; float: right; margin-top: 13px; padding: 4px 8px 4px 5px; }\r\n.red-button img { height: 20px; margin-right: 2px; vertical-align: top;  }\r\n.red-button:hover { background-color: #4298b5; color: #fff; }\r\n.checkbox { color: #000; display: inline-block; font-size: .9em; margin: 0 18px 0 4px; }\r\n.checkbox span { background-color: #fff; border: 1px solid #000; display: inline-block; height: 14px; margin-right: 6px; vertical-align: middle; width: 14px; }\r\n.checkbox span img { display: none; left: -2px; position: relative; top: -5px; width: 16px; }\r\n.checkbox.checked span img { display: block; }\r\n#body-container { background-color: #303; height: 100%; left: 0; padding-top: 72px; position: absolute; top: 0; width: 100%; }\r\n\r\n\r\n/* TOP BAR */\r\n#top-bar { background-color: #fff; height: 72px; position: relative; z-index: 2; }\r\n#top-bar > a { display: inline-block; vertical-align: middle; }\r\n#top-bar > a > img { margin: 11px 24px; width: 80px; }\r\n#breadcrumb-menu { display: inline-block; margin-left: 9px; vertical-align: middle; }\r\n#breadcrumb-menu a { display: inline-block; vertical-align: middle; }\r\n#breadcrumb-menu a img { width: 28px; }\r\n#breadcrumb-menu span { color: #a8a99e; font-size: .8em; font-weight: 700; margin: 0 8px 0 6px;  }\r\n#breadcrumb-menu h1 { display: inline-block; font-size: 1em; }\r\n#top-right { float: right; margin: 22px 26px; }\r\n#top-right a { cursor: pointer; }\r\n#project-drop-down { display: inline-block; }\r\n#project-drop-down span { text-decoration: underline; margin-right: 6px; }\r\n#project-drop-down img { width: 20px; }\r\n#menu-button { cursor: pointer; display: inline-block; margin-left: 42px; vertical-align: middle; }\r\n#menu-button span { background-color: #54595b; border-radius: 3px; display: block; height: 4px; margin-bottom: 6px; transition: transform .1s; width: 44px; }\r\n.menu-opened #menu-button span { margin-top: 10px; transform: rotate(45deg); }\r\n.menu-opened #menu-button span:nth-of-type(2) { margin-top: -10px; transform: rotate(-45deg); }\r\n.menu-opened #menu-button span:nth-of-type(3) { display: none; }\r\n\r\n/* LEFT BAR & PANELS */\r\n#left-bar { background-color: #4298b5; height: 100%; left: 0; padding-top: 14px; position: absolute; text-align: center; top: 72px; width: 80px; }\r\n#left-bar a { color: #fff; display: block; font-size: .9em; margin-bottom: 14px; position: relative; }\r\n#left-bar a:after { background-color: #c8102e; content: \"\"; display: block; height: 100%; left: -10px; position: absolute; top: 0; transition: left .65s; width: 10px; }\r\n#left-bar a.selected:after { left: 0; }\r\n#left-bar a img { display: block; height: 40px; margin: 0 auto; }\r\n#left-bar-panel { background-color: #66acc3; height: 100%; left: -240px; padding: 79px 18px 16px; position: absolute; top: 0; transition: left .65s; width: 320px; }\r\n#left-bar-panel.opened { left: 80px; }\r\n#left-bar-panel span.panel-close { color: #fff; cursor: pointer; font-size: 2.4em; position: absolute; top: 72px; right: 14px;  }\r\n#left-bar-panel h2 { color: #fff; font-size: 1.8em; font-weight: 700; margin-bottom: 18px; }\r\n\r\n.panel-input { margin-bottom: 12px; position: relative; width: 100%; }\r\n.panel-input.shorter { width: 75%; }\r\n.panel-input.shortest { width: 26%; }\r\n.wider .panel-input.shortest { width: 20%; }\r\n.panel-input label { color: #fff; display: block; font-size: .9em; line-height: 1.2em; }\r\n.panel-input input[type=\"text\"],\r\n.panel-input select { background-color: transparent; display: block; font-size: 1em; height: 28px; margin-top: 2px; padding-left: 4px; width: 100%; }\r\n#left-bar-panel .panel-input input[type=\"text\"],\r\n#left-bar-panel .panel-input select { background-color: #fff; }\r\n.panel-input textarea { display: block; font-size: 1em; height: 84px; padding: 3px 5px; resize: none; width: 100%; }\r\n.panel-input img { bottom: 3px; height: 21px; position: absolute; right: 4px; }\r\n.same-row-inputs .panel-input { display: inline-block; margin-right: 25px; }\r\n.same-row-inputs .panel-input.shorter { width: 46%; }\r\n.required { color: #a00; font-size: .8em; font-style: italic; margin-right: 5px; }\r\ninput[type=\"checkbox\"] { margin-left: 6px; }\r\ninput[type=\"file\"] { margin: 2px 0 16px; }\r\n\r\n#legend-panel .checkbox { font-size: 1em; font-weight: 700; margin-bottom: 12px; margin-left: 0;}\r\n#legend-panel .checkbox span { height: 18px; margin-right: 8px; width: 18px; }\r\n\r\n.basemap-link { color: #fff; display: inline-block; font-weight: 700; line-height: 1.1em; margin-bottom: 15px; margin-right: 8%; width: 41%; }\r\n.basemap-link img { border: 1px solid #fff; width: 100%; }\r\n.basemap-link.selected img { border: 2px solid #c8102e; }\r\n\r\n\r\n/* RIGHT BAR & PANELS */\r\n#right-bar { background-color: #fff; height: 100%; overflow: auto; padding-top: 72px; position: absolute; right: 0; top: 0; width: 38%; }\r\n.right-panel-content { padding: 0 20px 80px; }\r\n.right-panel-content h3 { clear: both; font-size: 1.3em; font-weight: 700; padding: 16px 0 12px; }\r\n.right-panel-content p { line-height: 1.4em; margin-bottom: 14px; }\r\n.option-list > a, .option-list-two-options div { border-bottom: 1px solid #a8a99e; display: block; font-size: .9em; padding: 4px 2px; width: 100%; }\r\n.option-list > a:last-of-type { border-bottom-width: 3px; }\r\n.option-list a img { height: 18px; margin-right: 4px; vertical-align: middle; }\r\n.option-list a span { color: #000; float: right; }\r\n.option-list-two-options div a:last-of-type { float: right; }\r\n.contact-info { border-bottom: 1px solid #555; }\r\n.contact-info a img { height: 22px; margin-left: 4px; vertical-align: middle; }\r\n\r\n#parcel-progress { background-color: #e4e4e4; padding: 49px 0 88px; }\r\n#parcel-progress ul { border-top: 1px solid #000; margin: 0 10%; position: relative; }\r\n#parcel-progress ul li { display: inline-block; font-size: .9em; left: -10%; line-height: 1.3em; position: absolute; text-align: center; top: -18px; width: 19%; }\r\n#parcel-progress ul li:nth-of-type(2) { left: 7%; }\r\n#parcel-progress ul li:nth-of-type(3) { left: 23%; }\r\n#parcel-progress ul li:nth-of-type(4) { left: 40%; }\r\n#parcel-progress ul li:nth-of-type(5) { left: 57%; }\r\n#parcel-progress ul li:nth-of-type(6) { left: 74%; }\r\n#parcel-progress ul li:nth-of-type(7) { left: auto; right: -10%; }\r\n#parcel-progress ul li span { background-color: #a8a99e; border-radius: 100%; display: block; height: 34px; margin: 0 auto 4px; width: 34px; }\r\n#parcel-progress ul li span img { display: none; }\r\n#parcel-progress ul li span.checked { background-color: #c8102e; padding-top: 6px; }\r\n#parcel-progress ul li span.checked img { display: inline-block; }\r\n#parcel-progress ul li span.checked.rejected { background-color: #000; }\r\n\r\n#parcels-view-on-map { background-color: #e4e4e4; margin-bottom: 12px; padding: 4px 5px 5px; }\r\n#parcels-view-on-map img { margin-right: 3px; vertical-align: middle; }\r\n#parcels-view-on-map strong { margin-right: 14px; vertical-align: middle;  }\r\n#parcels-view-on-map a.checkbox { display: inline-block; }\r\n.owner-parcel-list a { display: inline-block; line-height: 1.4em; margin-right: 35px; }\r\n\r\n.compensation-box { background-color: #e4e4e4; height: 120px; margin-right: 4%; margin-bottom: 14px; padding: 9px 11px 10px; position: relative; width: 48%; }\r\n.compensation-box:nth-of-type(even) { margin: 0; }\r\n.compensation-box h4 { font-size: .9em; font-weight: 700; }\r\n.compensation-box img { background-color: #c8102e; padding: 2px 4px; position: absolute; right: 0; top: 0; }\r\n.compensation-box span { font-size: 4em; line-height: 1.2em; }\r\n.compensation-box span.not-entered { display: block; font-size: .9em; font-style: italic; margin-top: 28px; }\r\n\r\n#stat-numbers { background-color: #e4e4e4; padding: 18px 0 30px; }\r\n#stat-numbers div { display: inline-block; text-align: center; width: 50%; }\r\n#stat-numbers div img { height: 30px; }\r\n#stat-numbers div h2 { font-size: 1.1em; font-weight: 700; padding: 0; }\r\n#stat-numbers div span { color: #c8102e; font-size: 4.4em; line-height: 1.1em; }\r\n#stat-graphs { margin-bottom: 40px; text-align: center; }\r\n#stat-graphs h3 { font-size: 1.6em; margin: 8px 0; }\r\n.parcel-status-graph { border-radius: 100%; display: inline-block; height: 220px; margin: 12px 18px 16px; overflow: hidden; position: relative; width: 220px; }\r\n.parcel-status-graph p { height: 100%; width: 100%; margin: 0; position: absolute; top: 0; left: 0; }\r\n.parcel-status-graph p > span { height: 50%; left: 0; position: absolute; top: 0; width: 50%; }\r\n#roe-status-graph { border-radius: 100%; display: inline-block; height: 220px; margin: 12px 18px 16px; overflow: hidden; position: relative; width: 220px; }\r\n#roe-status-graph p { height: 100%; width: 100%; margin: 0; position: absolute; top: 0; left: 0; }\r\n#roe-status-graph p > span { height: 50%; left: 0; position: absolute; top: 0; width: 50%; }\r\n\r\n.graph-key { display: inline-block; margin-top: 42px; vertical-align: top;  }\r\n.graph-key > span { display: block; font-size: .95em; margin: 0 10px 6px; text-align: left; }\r\n.graph-key > span > span { background-color: #e60000; display: inline-block; height: 16px; margin-right: 5px;  vertical-align: middle; width: 16px; }\r\n#no-activity-gk > span { background-color: #ccc; }\r\n#roe-in-progress-gk > span { background-color: #0070ff; }\r\n#roe-obtained-gk > span { background-color: #5f0; }\r\n#roe-with-conditions-gk > span { background-color: #ff0; }\r\n\r\n/* MENU */\r\n#menu-panel { background-color: #76797b; height: 100%; position: absolute; right: -350px; top: 0; width: 350px; }\r\n#menu-panel .panel-header { background-color: #65696b; }\r\n#menu-panel ul { list-style-type: none; margin: 0; padding: 0 }\r\n#menu-panel ul li a { border-bottom: 1px solid #65696b; color: #fff; display: block; font-size: 1.2em; padding: 9px 14px; width: 100%; }\r\n#menu-panel-bottom { bottom: 0; height: 52px; position: absolute; width: 100%; }\r\n#menu-panel-bottom a { background-color: #c8102e; color: #fff; float: left; height: 100%; padding-left: 20px; padding-top: 13px; width: 65%; }\r\n#menu-panel-bottom a img { height: 28px; margin-right: 8px; vertical-align: middle; }\r\n#menu-panel-bottom a.logout-btn { background-color: #424242; padding-left: 0; text-align: center; width: 35%; }\r\n\r\n\r\n/* OVERLAY SCREENS */\r\n#overlay-screen { height: 100%; left: -100%; opacity: 0; position: fixed; text-align: center; top: 0; transition: opacity .5s, left 0s ease-in-out .5s; width: 100%; z-index: 3; }\r\n#overlay-screen strong { font-size: .9em; }\r\n#overlay-screen > span { background-color: #000; background-color: rgba(0,0,0,.4); cursor: pointer; height: 100%; left: 0; position: absolute; top: 0; width: 100%; }\r\n#overlay-screen > div { background-color: #fff; display: inline-block; height: auto; margin: -24px auto 0; position: relative; vertical-align: middle; width: 56%; }\r\n#overlay-screen > div.shorter { width: 35%; }\r\n#overlay-screen .panel-close { top: 1px; }\r\n#overlay-screen:after { content: \"\"; display: inline-block; height: 100%; vertical-align: middle; width: 0; }\r\n#overlay-screen.showing { dispflay: block; left: 0; opacity: 1; transition: left 0s, opacity .25s ease-in-out .1s; }\r\n#overlay-screen.wider > div { width: 70%; }\r\n.date-row p { display: inline-block; margin-right: 1%; width: 30%; }\r\n\r\n.oc-header { border-bottom: 1px solid #000; padding-bottom: 6px; position: relative; }\r\n.oc-header h3 { font-size: 1.2em; font-weight: 700; }\r\n.oc-header > span { position: absolute; right: 0; top: 2px; }\r\n\r\n#overlay-screen .panel-input label { color: #000; }\r\n#overlay-screen a[class*=\"select-\"] { display: inline-block; font-size: .85em; line-height: .9em; padding-bottom: 10px; }\r\n#overlay-screen > div p { margin-top: 2px; }\r\n.overlay-form-buttons { float: right; padding-bottom: 18px; }\r\n.overlay-form-buttons a { margin-left: 16px; }\r\n\r\n.document-links a { background-color: #e4e4e4; display: block; font-size: 1.4em; font-weight: 700; margin-bottom: 12px; padding: 4px 8px; width: 60%; }\r\n.document-links a img { height: 34px; margin-right: 5px; vertical-align: middle; }\r\n.document-receiver { background-color: #e4e4e4; border: 2px dashed #000; margin-bottom: 12px; padding: 6px 0 8px; text-align: center; width: 100%; }\r\n.document-receiver img { display: block; height: 40px; margin: 0 auto; }\r\n.document-receiver strong { display: block; margin-bottom: 8px; }\r\n.document-receiver span { font-size: .85em; }\r\n.half-column .document-receiver { margin-top: 4px; padding-top: 3px; width: 93%; }\r\n.half-column .document-receiver img { height: 25px; }\r\n.related-contacts a { margin-right: 44px; }\r\n\r\n.overlay-container { padding: 16px 22px 26px; text-align: left; }\r\n.overlay-container .red-button { display: inline-block; float: none; margin-top: 14px; }\r\n.overlay-container .option-list a:last-of-type { border-width: 0; }\r\n\r\n.react-datepicker-wrapper, .react-datepicker__input-container { width: 100%; }\r\n.react-datepicker-popper { width: 600px; }\r\n.react-datepicker { padding: 0 30px; }\r\n.react-datepicker__navigation {border-width: 14px; height: 0; top: 70px; }\r\n.react-datepicker__navigation--previous { left: -7px; }\r\n.react-datepicker__navigation--next { right: -7px !important; }\r\n", ""]);
 
 // exports
 
