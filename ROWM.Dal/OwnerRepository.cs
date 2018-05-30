@@ -102,9 +102,9 @@ namespace ROWM.Dal
         }
         public async Task<List<Document>> GetDocumentsForParcel(string pid)
         {
-            var q = _ctx.Database.SqlQuery<DocumentH>("SELECT d.DocumentId, d.DocumentType, d.title FROM dbo.ParcelDocuments pd INNER JOIN rowm.Document d on pd.document_documentid = d.documentid WHERE pd.parcel_parcelId = @pid", new System.Data.SqlClient.SqlParameter("@pid", pid));
+            var q = _ctx.Database.SqlQuery<DocumentH>("SELECT d.DocumentId, d.DocumentType, d.title, d.Created, d.LastModified, d.DateRecorded FROM dbo.ParcelDocuments pd INNER JOIN rowm.Document d on pd.document_documentid = d.documentid WHERE pd.parcel_parcelId = @pid", new System.Data.SqlClient.SqlParameter("@pid", pid));
             var ds = await q.ToListAsync();
-            return ds.Select(dx => new Document { Title = dx.Title, DocumentId = dx.DocumentId, DocumentType = dx.DocumentType }).ToList();
+            return ds.Select(dx => new Document { Title = dx.Title, DocumentId = dx.DocumentId, DocumentType = dx.DocumentType, DateRecorded = dx.DateRecorded, Created = dx.Created, LastModified = dx.LastModified }).ToList();
         }
         #region Db dto
         public class DocumentH
@@ -112,6 +112,9 @@ namespace ROWM.Dal
             public Guid DocumentId { get; set; }
             public string DocumentType { get; set; }
             public string Title { get; set; }
+            public DateTimeOffset? DateRecorded { get; set; }
+            public DateTimeOffset Created { get; set; }
+            public DateTimeOffset LastModified { get; set; }
         }
         #endregion
 
