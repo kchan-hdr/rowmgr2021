@@ -63,6 +63,7 @@
     <Compile Include="DbTests.cs" />
     <Compile Include="DocumentTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ParcelStatusTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -72,6 +73,10 @@
     <ProjectReference Include="..\ROWM.Dal\ROWM.Dal.csproj">
       <Project>{b84ba747-f2a6-4804-be7a-5f76d5ed2826}</Project>
       <Name>ROWM.Dal</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ROWM\ROWM.csproj">
+      <Project>{31360b6a-20fe-4159-a5f6-081e6126d04a}</Project>
+      <Name>ROWM</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -62,13 +62,13 @@ namespace com.hdr.Rowm.Sunflower
             _docTypes.Add(new DocType("Option Compensation Received by Owner", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment", ++line, false));
 
             line = 30;
-            _docTypes.Add(new DocType("Acquistion Offer Package Original", "4.3.3 Easement/3 Easement Final Sent to LO", ++line));
-            _docTypes.Add(new DocType("Acquistion Offer Package Updated", "4.3.3 Easement/3 Easement Final Sent to LO", ++line));
+            _docTypes.Add(new DocType("Acquisition Offer Package Original", "4.3.3 Easement/3 Easement Final Sent to LO", ++line));
+            _docTypes.Add(new DocType("Acquisition Offer Package Updated", "4.3.3 Easement/3 Easement Final Sent to LO", ++line));
             _docTypes.Add(new DocType("Acquisition Notice of Intent Package", "4.3.3 Easement/3 Easement Final Sent to LO", ++line));
-            _docTypes.Add(new DocType("Acquistion Offer Package Received by Owner", "4.3.3 Easement/4  Easement Signed Recorded Payment", ++line));
+            _docTypes.Add(new DocType("Acquisition Offer Package Received by Owner", "4.3.3 Easement/4  Easement Signed Recorded Payment", ++line));
             _docTypes.Add(new DocType("Acquisition Final Offer Package", "4.3.3 Easement/3 Easement Final Sent to LO", ++line));
-            _docTypes.Add(new DocType("Acquistion Offer Package Signed", "4.3.3 Easement/4 Easement Signed Recorded Payment", ++line));
-            _docTypes.Add(new DocType("Acquistion Offer Packet Sent to Client", "4.3.3 Easement/4 Easement Signed Recorded Payment", ++line));
+            _docTypes.Add(new DocType("Acquisition Offer Package Signed", "4.3.3 Easement/4 Easement Signed Recorded Payment", ++line));
+            _docTypes.Add(new DocType("Acquisition Offer Packet Sent to Client", "4.3.3 Easement/4 Easement Signed Recorded Payment", ++line));
             _docTypes.Add(new DocType("Acquisition Compensation Check", "4.3.3 Easement/4 Easement Signed Recorded Payment", ++line));
             _docTypes.Add(new DocType("Acquisition Documents Recorded", "4.3.3 Easement/4 Easement Signed Recorded Payment", ++line));
             _docTypes.Add(new DocType("Acquisition Compensation Received by Owner", "4.3.3 Easement/4 Easement Signed Recorded Payment", ++line));
