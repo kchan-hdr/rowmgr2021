@@ -7,6 +7,7 @@ using System.Security;
 using Microsoft.SharePoint.Client;
 using OfficeDevPnP.Core;
 using System.Text.RegularExpressions;
+using com.hdr.Rowm.Sunflower;
 
 namespace SharePointInterface
 {
@@ -27,68 +28,87 @@ namespace SharePointInterface
 
     public class SharePointCRUD : ISharePointCRUD
     {
+        // staging URL to move to app config
+        static readonly string _STAGING_SITE_URL = "https://hdroneview.sharepoint.com/row_dev";
+
         private ClientContext _ctx;
         private string _parcelsFolderName;
         private string _parcelsFolderTemplate;
         private string _siteUrl;
-        private Dictionary<string, string> _docTypes;
+        // private Dictionary<string, string> _docTypes;
+        private DocType _docTypes;
 
-        public SharePointCRUD (string _appId = null, string _appSecret = null, Dictionary<string,string> docTypes = null)
+        public SharePointCRUD (string _appId = null, string _appSecret = null, DocType d = null) // Dictionary<string,string> docTypes = null)
         {
+            _docTypes = d;
+
             _parcelsFolderName = "4.0 ROW/4.3 Parcels";
-            _siteUrl = "https://hdroneview.sharepoint.com/SF-CH-TS";
+            _siteUrl = _STAGING_SITE_URL; //  "https://hdroneview.sharepoint.com/SF-CH-TS";
             _parcelsFolderTemplate = "Documents/4.0 ROW/4.3 Parcels/_Parcel No_LO Name";
-            if (docTypes == null)
-            {
-                _docTypes = new Dictionary<string, string>();
-                _docTypes.Add("Other", "4.3.7 Reference");
-                _docTypes.Add("ROE Package Original", "4.3.1 ROE/3 Final Sent to LO");
-                _docTypes.Add("ROE Package Updated", "4.3.1 ROE/3 Final Sent to LO");
-                _docTypes.Add("ROE Package Received by Owner", "4.3.1 ROE/4 Signed");
-                _docTypes.Add("ROE Package Signed", "4.3.1 ROE/4 Signed");
-                _docTypes.Add("ROE Sent to Client", "4.3.1 ROE/4 Signed");
+            //if (docTypes == null)
+            //{
+            //    _docTypes = new Dictionary<string, string>();
+            //    _docTypes.Add("Other", "4.3.7 Reference");
+            //    _docTypes.Add("ROE Package Original", "4.3.1 ROE/3 Final Sent to LO");
+            //    _docTypes.Add("ROE Package Updated", "4.3.1 ROE/3 Final Sent to LO");
+            //    _docTypes.Add("ROE Package Received by Owner", "4.3.1 ROE/4 Signed");
+            //    _docTypes.Add("ROE Package Signed", "4.3.1 ROE/4 Signed");
+            //    _docTypes.Add("ROE Sent to Client", "4.3.1 ROE/4 Signed");
 
-                _docTypes.Add("Market Study", "4.3.7 Reference");
-                _docTypes.Add("Survey", "4.3.7 Reference");
-                _docTypes.Add("Appraisal", "4.3.7 Reference");
+            //    _docTypes.Add("Market Study", "4.3.7 Reference");
+            //    _docTypes.Add("Survey", "4.3.7 Reference");
+            //    _docTypes.Add("Appraisal", "4.3.7 Reference");
 
-                _docTypes.Add("Option Offer Package Original", "4.3.2 Option Agreement/1 Option Agreement Working");
-                _docTypes.Add("Option Offer Package Updated", "4.3.2 Option Agreement/2 Option Agreement QC");
-                _docTypes.Add("Option Offer Package Received by Owner", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
-                _docTypes.Add("Option Offer Package Signed", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
-                _docTypes.Add("Option Offer Package Sent to Client", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
-                _docTypes.Add("Option Compensation Check Cut", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
-                _docTypes.Add("Option Documents Recorded", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
-                _docTypes.Add("Option Compensation Received by Owner", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
+            //    _docTypes.Add("Option Offer Package Original", "4.3.2 Option Agreement/1 Option Agreement Working");
+            //    _docTypes.Add("Option Offer Package Updated", "4.3.2 Option Agreement/2 Option Agreement QC");
+            //    _docTypes.Add("Option Offer Package Received by Owner", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
+            //    _docTypes.Add("Option Offer Package Signed", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
+            //    _docTypes.Add("Option Offer Package Sent to Client", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
+            //    _docTypes.Add("Option Compensation Check Cut", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
+            //    _docTypes.Add("Option Documents Recorded", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
+            //    _docTypes.Add("Option Compensation Received by Owner", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
 
-                _docTypes.Add("Acquistion Offer Package Original", "4.3.3 Easement/3 Easement Final Sent to LO");
-                _docTypes.Add("Acquistion Offer Package Updated", "4.3.3 Easement/3 Easement Final Sent to LO");
-                _docTypes.Add("Acquisition Notice of Intent Package", "4.3.3 Easement/3 Easement Final Sent to LO");
-                _docTypes.Add("Acquistion Offer Package Received by Owner", "4.3.3 Easement/4  Easement Signed Recorded Payment");
-                _docTypes.Add("Acquisition Final Offer Package", "4.3.3 Easement/3 Easement Final Sent to LO");
-                _docTypes.Add("Acquistion Offer Package Signed", "4.3.3 Easement/4  Easement Signed Recorded Payment");
-                _docTypes.Add("Acquistion Offer Packet Sent to Client", "4.3.3 Easement/4  Easement Signed Recorded Payment");
-                _docTypes.Add("Acquisition Compensation Check Cut", "4.3.3 Easement/4  Easement Signed Recorded Payment");
-                _docTypes.Add("Acquisition Documents Recorded", "4.3.3 Easement/4  Easement Signed Recorded Payment");
-                _docTypes.Add("Acquisition Compensation Received by Owner", "4.3.3 Easement/4  Easement Signed Recorded Payment");
+            //    _docTypes.Add("Acquistion Offer Package Original", "4.3.3 Easement/3 Easement Final Sent to LO");
+            //    _docTypes.Add("Acquistion Offer Package Updated", "4.3.3 Easement/3 Easement Final Sent to LO");
+            //    _docTypes.Add("Acquisition Notice of Intent Package", "4.3.3 Easement/3 Easement Final Sent to LO");
+            //    _docTypes.Add("Acquistion Offer Package Received by Owner", "4.3.3 Easement/4  Easement Signed Recorded Payment");
+            //    _docTypes.Add("Acquisition Final Offer Package", "4.3.3 Easement/3 Easement Final Sent to LO");
+            //    _docTypes.Add("Acquistion Offer Package Signed", "4.3.3 Easement/4  Easement Signed Recorded Payment");
+            //    _docTypes.Add("Acquistion Offer Packet Sent to Client", "4.3.3 Easement/4  Easement Signed Recorded Payment");
+            //    _docTypes.Add("Acquisition Compensation Check Cut", "4.3.3 Easement/4  Easement Signed Recorded Payment");
+            //    _docTypes.Add("Acquisition Documents Recorded", "4.3.3 Easement/4  Easement Signed Recorded Payment");
+            //    _docTypes.Add("Acquisition Compensation Received by Owner", "4.3.3 Easement/4  Easement Signed Recorded Payment");
 
-                _docTypes.Add("Construction Damages Packet Original", "4.3.4 Restoration");
-                _docTypes.Add("Construction Damages Packet Updated", "4.3.4 Restoration");
-                _docTypes.Add("Construction Damages Packet Signed", "4.3.4 Restoration");
-                _docTypes.Add("Construction Damages Packet Sent to Client", "4.3.4 Restoration");
-                _docTypes.Add("Construction Damages Check Cut", "4.3.4 Restoration");
-                _docTypes.Add("Construction Damages Compensation Received by Owner", "4.3.4 Restoration");
+            //    _docTypes.Add("Construction Damages Packet Original", "4.3.4 Restoration");
+            //    _docTypes.Add("Construction Damages Packet Updated", "4.3.4 Restoration");
+            //    _docTypes.Add("Construction Damages Packet Signed", "4.3.4 Restoration");
+            //    _docTypes.Add("Construction Damages Packet Sent to Client", "4.3.4 Restoration");
+            //    _docTypes.Add("Construction Damages Check Cut", "4.3.4 Restoration");
+            //    _docTypes.Add("Construction Damages Compensation Received by Owner", "4.3.4 Restoration");
 
-            }
-            else
-            {
-                _docTypes = docTypes;
-            }
+            //}
+            //else
+            //{
+            //    _docTypes = docTypes;
+            //}
+
+            /*
+             * STAGING---
+             * 
+             * The app identifier has been successfully created.
+            Client Id:  	26589ee5-16ef-4444-9143-cfea08cba1cc
+            Client Secret:  	B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=
+            Title:  	rowm_staging
+            App Domain:  	rowm_staging.hdrinc.com
+            Redirect URI:  	https://rowm_staging.hdrinc.com
+             */
 
             if (_appId == null || _appSecret == null )
             {
-                _appId = "a6fad0e8-3e1f-42eb-89f2-6cb8e1dcb329";
-                _appSecret = "FMMJTzMMkP8CZOsL1IP3JvSoVWAOrF90zGxKVmUc2tc=";
+                //_appId = "a6fad0e8-3e1f-42eb-89f2-6cb8e1dcb329";
+                //_appSecret = "FMMJTzMMkP8CZOsL1IP3JvSoVWAOrF90zGxKVmUc2tc=";
+                _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc";
+                _appSecret = "B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=";
 
             }
 
@@ -286,20 +306,14 @@ namespace SharePointInterface
             return parcelFolderURL;
         }
 
-            public List<string> GetDocTargetPath(string baseFolderName, string parcelFolderName, string docType)
+        public List<string> GetDocTargetPath(string baseFolderName, string parcelFolderName, string docType)
         {
-            string doctypePath = docType;
+            var dt = DocType.Find(docType);
 
-            if (string.IsNullOrWhiteSpace(docType) || !_docTypes.ContainsKey(docType))
-            {
-                //docType = _docTypes.Keys.First<string>();
-                docType = "Other";
-            }
-            // Lookup doctype path
-            if (_docTypes.TryGetValue(docType, out string val))
-            {
-                doctypePath = val;
-            } 
+            if (dt == null)
+                dt = DocType.Default;
+
+            string doctypePath = dt.FolderPath;
 
             doctypePath = String.Format("{0}/{1}/{2}", baseFolderName, parcelFolderName, doctypePath);
             return doctypePath.Split('/').ToList();

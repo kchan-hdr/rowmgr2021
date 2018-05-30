@@ -120,7 +120,8 @@ namespace ROWM.Controllers
         [Route("parcels/{pid}"), HttpGet]
         public async Task<ParcelGraph> GetParcel(string pid)
         {
-            return new ParcelGraph( await _repo.GetParcel(pid));
+            var p = await _repo.GetParcel(pid);
+            return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
         }
         #region offer
         [Route("parcels/{pid}/initialOffer"), HttpPut]
@@ -157,7 +158,7 @@ namespace ROWM.Controllers
             p.LastModified = DateTimeOffset.Now;
             p.ModifiedBy = _APP_NAME;
 
-            return Ok(new ParcelGraph(await _repo.UpdateParcel(p)));
+            return Ok(new ParcelGraph(await _repo.UpdateParcel(p), await _repo.GetDocumentsForParcel(pid)));
         }
 
         [Route("parcels/{pid}/finalOffer"), HttpPut]
@@ -195,7 +196,7 @@ namespace ROWM.Controllers
             p.LastModified = DateTimeOffset.Now;
             p.ModifiedBy = _APP_NAME;
 
-            return Json(new ParcelGraph(await _repo.UpdateParcel(p)));
+            return Json(new ParcelGraph(await _repo.UpdateParcel(p), await _repo.GetDocumentsForParcel(pid)));
         }
         #endregion
         #region parcel status
@@ -225,7 +226,7 @@ namespace ROWM.Controllers
             // p = await _repo.UpdateParcel(p);
             await Task.WhenAll(tks);
 
-            return new ParcelGraph(p);
+            return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
         }
         #endregion
         #region roe status
@@ -254,7 +255,7 @@ namespace ROWM.Controllers
 
             await Task.WhenAll(tks);
 
-            return new ParcelGraph(p);
+            return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
         }
         #endregion
         #endregion
@@ -362,7 +363,7 @@ namespace ROWM.Controllers
         public async Task<IEnumerable<AgentDto>> GetAgents()
         {
             var a = await _repo.GetAgents();
-            return a.Select( ax => new AgentDto(ax));
+            return a.Where(ax => ax.IsActive).Select(ax => new AgentDto(ax));
         }
         #endregion
         #region statistics
@@ -595,7 +596,7 @@ namespace ROWM.Controllers
         public IEnumerable<ContactLogDto> ContactsLog { get; set; }
         public IEnumerable<DocumentHeader> Documents { get; set; }
 
-        internal ParcelGraph( Parcel p)
+        internal ParcelGraph( Parcel p, IEnumerable<Document> d)
         {
             ParcelId = p.ParcelId;
             ParcelStatusCode = p.ParcelStatusCode;
@@ -613,7 +614,7 @@ namespace ROWM.Controllers
 
             Owners = p.Owners.Select( ox => new OwnerDto(ox.Owner));
             ContactsLog =  p.ContactsLog.Select( cx => new ContactLogDto(cx));
-            Documents = p.Documents.Select(dx => new DocumentHeader(dx));
+            Documents = d.Select(dx => new DocumentHeader(dx));
         }
     }
     #endregion

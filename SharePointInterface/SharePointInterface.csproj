@@ -160,5 +160,11 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SharePointUtil_Sunflower\SharePointUtil_Sunflower.csproj">
+      <Project>{20759891-DF1A-4E84-8762-D8A61BF9EC54}</Project>
+      <Name>SharePointUtil_Sunflower</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

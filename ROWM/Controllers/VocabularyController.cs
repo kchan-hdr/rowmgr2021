@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using com.hdr.Rowm.Sunflower;
+using Microsoft.AspNetCore.Mvc;
 using ROWM.Dal;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,9 @@ namespace ROWM.Controllers
 
             return new Vocabulary(agents,channels,purposes,rels, pStatus, rStatus);
         }
+
+        [HttpGet("api/DocTypes")]
+        public IEnumerable<DocType> GetDocTypes() => DocType.Types;
 
         public class Lookup
         {

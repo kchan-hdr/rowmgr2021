@@ -13,23 +13,18 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Http.Features;
 using geographia.ags;
 using SharePointInterface;
-using com.hdr.Rowm.Sunflower;
 
 namespace ROWM
 {
-    public class Startup
+    public class StartupRelease1
     {
-        public Startup(IHostingEnvironment env)
+        public StartupRelease1(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
-            if (env.IsDevelopment())
-            {
-                builder.AddUserSecrets<Startup>();
-            }
             Configuration = builder.Build();
         }
 
@@ -52,16 +47,18 @@ namespace ROWM
                 o.ValueLengthLimit = int.MaxValue;
                 o.MultipartBodyLengthLimit = int.MaxValue;
             });
-
-            services.AddScoped<ROWM.Dal.ROWM_Context>();
-            services.AddScoped<com.hdr.Rowm.Export.RowmEntities>(fac =>
-            {
-               return new com.hdr.Rowm.Export.RowmEntities(ROWM.Dal.DbConnection.GetConnectionString());
-            });
+            //services.AddScoped<ROWM.Dal.ROWM_Context>();
+            services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
+           {
+               var cs = Configuration.GetConnectionString("rowm");
+               return new Dal.ROWM_Context(cs);
+           });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddSingleton<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, SunflowerParcel>();
+            services.AddScoped<IFeatureUpdate, SunflowerParcel>( fac => 
+                new SunflowerParcel("https://gis05s.hdrgateway.com/arcgis/rest/services/California/SunFlower_Parcels_FS/FeatureServer") 
+            );
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
             services.AddSwaggerGen(c =>
@@ -69,9 +66,9 @@ namespace ROWM
                 c.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info { Title = "ROW Manager", Version = "v1" });
             });
             services.ConfigureSwaggerGen(o =>
-            {
+           {
                o.OperationFilter<FileOperation>();
-            });
+           });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -80,16 +77,8 @@ namespace ROWM
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-            }
-
+            app.UseExceptionHandler("/Home/Error");
+ 
             app.UseStaticFiles();
 
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
@@ -109,4 +98,3 @@ namespace ROWM
         }
     }
 }
-

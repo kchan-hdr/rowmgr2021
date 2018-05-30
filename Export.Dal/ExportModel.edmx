@@ -1,0 +1,270 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="rowmModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'rowm.ROWM.AgentLog' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="AgentLog">
+          <Key>
+            <PropertyRef Name="parcelid" />
+            <PropertyRef Name="agentname" />
+            <PropertyRef Name="dateadded" />
+          </Key>
+          <Property Name="parcelid" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="parcelstatuscode" Type="nvarchar" MaxLength="40" />
+          <Property Name="parcelstatus" Type="nvarchar" MaxLength="200" />
+          <Property Name="roestatuscode" Type="nvarchar" MaxLength="40" />
+          <Property Name="roestatus" Type="nvarchar" MaxLength="200" />
+          <Property Name="ownerfirstname" Type="nvarchar" MaxLength="50" />
+          <Property Name="ownerlastname" Type="nvarchar" MaxLength="50" />
+          <Property Name="agentname" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="dateadded" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="contactchannel" Type="nvarchar" MaxLength="20" />
+          <Property Name="projectphase" Type="nvarchar" MaxLength="20" />
+          <Property Name="title" Type="nvarchar" MaxLength="200" />
+          <Property Name="notes" Type="nvarchar(max)" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'rowm.ROWM.ContactList' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="ContactList">
+          <Key>
+            <PropertyRef Name="parcelid" />
+            <PropertyRef Name="ownership_t" />
+            <PropertyRef Name="isprimarycontact" />
+          </Key>
+          <Property Name="parcelid" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="partyname" Type="nvarchar" MaxLength="200" />
+          <Property Name="ownership_t" Type="int" Nullable="false" />
+          <Property Name="isprimarycontact" Type="bit" Nullable="false" />
+          <Property Name="ownerfirstname" Type="nvarchar" MaxLength="50" />
+          <Property Name="ownerlastname" Type="nvarchar" MaxLength="50" />
+          <Property Name="owneremail" Type="nvarchar" MaxLength="256" />
+          <Property Name="ownercellphone" Type="nvarchar(max)" />
+          <Property Name="ownerhomephone" Type="nvarchar(max)" />
+          <Property Name="ownerstreetaddress" Type="nvarchar" MaxLength="400" />
+          <Property Name="ownercity" Type="nvarchar" MaxLength="100" />
+          <Property Name="ownerstate" Type="nvarchar" MaxLength="20" />
+          <Property Name="ownerzip" Type="nvarchar" MaxLength="10" />
+          <Property Name="representation" Type="nvarchar" MaxLength="20" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'rowm.ROWM.DocumentList' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="DocumentList">
+          <Key>
+            <PropertyRef Name="parcelid" />
+          </Key>
+          <Property Name="parcelid" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="title" Type="nvarchar(max)" />
+          <Property Name="contenttype" Type="nvarchar" MaxLength="100" />
+          <Property Name="sentdate" Type="datetimeoffset" Precision="7" />
+          <Property Name="delivereddate" Type="datetimeoffset" Precision="7" />
+          <Property Name="clienttrackingnumber" Type="nvarchar" MaxLength="100" />
+          <Property Name="receiveddate" Type="datetimeoffset" Precision="7" />
+          <Property Name="signeddate" Type="datetimeoffset" Precision="7" />
+          <Property Name="checkno" Type="nvarchar(max)" />
+          <Property Name="daterecorded" Type="datetimeoffset" Precision="7" />
+        </EntityType>
+        <EntityContainer Name="rowmModelStoreContainer">
+          <EntitySet Name="AgentLog" EntityType="Self.AgentLog" store:Type="Views" store:Schema="ROWM">
+            <DefiningQuery>SELECT 
+    [AgentLog].[parcelid] AS [parcelid], 
+    [AgentLog].[parcelstatuscode] AS [parcelstatuscode], 
+    [AgentLog].[parcelstatus] AS [parcelstatus], 
+    [AgentLog].[roestatuscode] AS [roestatuscode], 
+    [AgentLog].[roestatus] AS [roestatus], 
+    [AgentLog].[ownerfirstname] AS [ownerfirstname], 
+    [AgentLog].[ownerlastname] AS [ownerlastname], 
+    [AgentLog].[agentname] AS [agentname], 
+    [AgentLog].[dateadded] AS [dateadded], 
+    [AgentLog].[contactchannel] AS [contactchannel], 
+    [AgentLog].[projectphase] AS [projectphase], 
+    [AgentLog].[title] AS [title], 
+    [AgentLog].[notes] AS [notes]
+    FROM [ROWM].[AgentLog] AS [AgentLog]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="ContactList" EntityType="Self.ContactList" store:Type="Views" store:Schema="ROWM">
+            <DefiningQuery>SELECT 
+    [ContactList].[parcelid] AS [parcelid], 
+    [ContactList].[partyname] AS [partyname], 
+    [ContactList].[ownership_t] AS [ownership_t], 
+    [ContactList].[isprimarycontact] AS [isprimarycontact], 
+    [ContactList].[ownerfirstname] AS [ownerfirstname], 
+    [ContactList].[ownerlastname] AS [ownerlastname], 
+    [ContactList].[owneremail] AS [owneremail], 
+    [ContactList].[ownercellphone] AS [ownercellphone], 
+    [ContactList].[ownerhomephone] AS [ownerhomephone], 
+    [ContactList].[ownerstreetaddress] AS [ownerstreetaddress], 
+    [ContactList].[ownercity] AS [ownercity], 
+    [ContactList].[ownerstate] AS [ownerstate], 
+    [ContactList].[ownerzip] AS [ownerzip], 
+    [ContactList].[representation] AS [representation]
+    FROM [ROWM].[ContactList] AS [ContactList]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="DocumentList" EntityType="Self.DocumentList" store:Type="Views" store:Schema="ROWM">
+            <DefiningQuery>SELECT 
+    [DocumentList].[parcelid] AS [parcelid], 
+    [DocumentList].[title] AS [title], 
+    [DocumentList].[contenttype] AS [contenttype], 
+    [DocumentList].[sentdate] AS [sentdate], 
+    [DocumentList].[delivereddate] AS [delivereddate], 
+    [DocumentList].[clienttrackingnumber] AS [clienttrackingnumber], 
+    [DocumentList].[receiveddate] AS [receiveddate], 
+    [DocumentList].[signeddate] AS [signeddate], 
+    [DocumentList].[checkno] AS [checkno], 
+    [DocumentList].[daterecorded] AS [daterecorded]
+    FROM [ROWM].[DocumentList] AS [DocumentList]</DefiningQuery>
+          </EntitySet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="rowmModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="ContactList">
+          <Key>
+            <PropertyRef Name="parcelid" />
+            <PropertyRef Name="ownership_t" />
+            <PropertyRef Name="isprimarycontact" />
+          </Key>
+          <Property Name="parcelid" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="partyname" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="ownership_t" Type="Int32" Nullable="false" />
+          <Property Name="isprimarycontact" Type="Boolean" Nullable="false" />
+          <Property Name="ownerfirstname" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ownerlastname" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="owneremail" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
+          <Property Name="ownercellphone" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ownerhomephone" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ownerstreetaddress" Type="String" MaxLength="400" FixedLength="false" Unicode="true" />
+          <Property Name="ownercity" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="ownerstate" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="ownerzip" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="representation" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="DocumentList">
+          <Key>
+            <PropertyRef Name="parcelid" />
+          </Key>
+          <Property Name="parcelid" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="title" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="contenttype" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="sentdate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="delivereddate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="clienttrackingnumber" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="receiveddate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="signeddate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="checkno" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="daterecorded" Type="DateTimeOffset" Precision="7" />
+        </EntityType>
+        <EntityContainer Name="Entities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="ContactList" EntityType="Self.ContactList" />
+          <EntitySet Name="DocumentList" EntityType="Self.DocumentList" />
+          <EntitySet Name="AgentLog" EntityType="rowmModel.AgentLog" />
+        </EntityContainer>
+        <EntityType Name="AgentLog">
+          <Key>
+            <PropertyRef Name="parcelid" />
+            <PropertyRef Name="agentname" />
+            <PropertyRef Name="dateadded" />
+          </Key>
+          <Property Name="parcelid" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="parcelstatuscode" Type="String" MaxLength="40" FixedLength="false" Unicode="true" />
+          <Property Name="parcelstatus" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="roestatuscode" Type="String" MaxLength="40" FixedLength="false" Unicode="true" />
+          <Property Name="roestatus" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="ownerfirstname" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ownerlastname" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="agentname" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="dateadded" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="contactchannel" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="projectphase" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="title" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="rowmModelStoreContainer" CdmEntityContainer="Entities">
+          <EntitySetMapping Name="ContactList">
+            <EntityTypeMapping TypeName="rowmModel.ContactList">
+              <MappingFragment StoreEntitySet="ContactList">
+                <ScalarProperty Name="parcelid" ColumnName="parcelid" />
+                <ScalarProperty Name="partyname" ColumnName="partyname" />
+                <ScalarProperty Name="ownership_t" ColumnName="ownership_t" />
+                <ScalarProperty Name="isprimarycontact" ColumnName="isprimarycontact" />
+                <ScalarProperty Name="ownerfirstname" ColumnName="ownerfirstname" />
+                <ScalarProperty Name="ownerlastname" ColumnName="ownerlastname" />
+                <ScalarProperty Name="owneremail" ColumnName="owneremail" />
+                <ScalarProperty Name="ownercellphone" ColumnName="ownercellphone" />
+                <ScalarProperty Name="ownerhomephone" ColumnName="ownerhomephone" />
+                <ScalarProperty Name="ownerstreetaddress" ColumnName="ownerstreetaddress" />
+                <ScalarProperty Name="ownercity" ColumnName="ownercity" />
+                <ScalarProperty Name="ownerstate" ColumnName="ownerstate" />
+                <ScalarProperty Name="ownerzip" ColumnName="ownerzip" />
+                <ScalarProperty Name="representation" ColumnName="representation" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DocumentList">
+            <EntityTypeMapping TypeName="rowmModel.DocumentList">
+              <MappingFragment StoreEntitySet="DocumentList">
+                <ScalarProperty Name="parcelid" ColumnName="parcelid" />
+                <ScalarProperty Name="title" ColumnName="title" />
+                <ScalarProperty Name="contenttype" ColumnName="contenttype" />
+                <ScalarProperty Name="sentdate" ColumnName="sentdate" />
+                <ScalarProperty Name="delivereddate" ColumnName="delivereddate" />
+                <ScalarProperty Name="clienttrackingnumber" ColumnName="clienttrackingnumber" />
+                <ScalarProperty Name="receiveddate" ColumnName="receiveddate" />
+                <ScalarProperty Name="signeddate" ColumnName="signeddate" />
+                <ScalarProperty Name="checkno" ColumnName="checkno" />
+                <ScalarProperty Name="daterecorded" ColumnName="daterecorded" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AgentLog">
+            <EntityTypeMapping TypeName="rowmModel.AgentLog">
+              <MappingFragment StoreEntitySet="AgentLog">
+                <ScalarProperty Name="notes" ColumnName="notes" />
+                <ScalarProperty Name="title" ColumnName="title" />
+                <ScalarProperty Name="projectphase" ColumnName="projectphase" />
+                <ScalarProperty Name="contactchannel" ColumnName="contactchannel" />
+                <ScalarProperty Name="dateadded" ColumnName="dateadded" />
+                <ScalarProperty Name="agentname" ColumnName="agentname" />
+                <ScalarProperty Name="ownerlastname" ColumnName="ownerlastname" />
+                <ScalarProperty Name="ownerfirstname" ColumnName="ownerfirstname" />
+                <ScalarProperty Name="roestatus" ColumnName="roestatus" />
+                <ScalarProperty Name="roestatuscode" ColumnName="roestatuscode" />
+                <ScalarProperty Name="parcelstatus" ColumnName="parcelstatus" />
+                <ScalarProperty Name="parcelstatuscode" ColumnName="parcelstatuscode" />
+                <ScalarProperty Name="parcelid" ColumnName="parcelid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

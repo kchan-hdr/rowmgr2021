@@ -106,6 +106,10 @@
     <Compile Include="Migrations\201710030123091_add non-active bit.Designer.cs">
       <DependentUpon>201710030123091_add non-active bit.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201803280313335_added date recorded.cs" />
+    <Compile Include="Migrations\201803280313335_added date recorded.Designer.cs">
+      <DependentUpon>201803280313335_added date recorded.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Owner.cs" />
     <Compile Include="OwnerRepository.cs" />
@@ -156,6 +160,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201710030123091_add non-active bit.resx">
       <DependentUpon>201710030123091_add non-active bit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201803280313335_added date recorded.resx">
+      <DependentUpon>201803280313335_added date recorded.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
