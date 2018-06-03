@@ -404,26 +404,21 @@ namespace ROWM.Controllers
 
             var pid = p.ParcelId;
 
-            /*
-             * 
-             * TODO: quick fix until the final doctype implementation. 2018.5.10
-             * 
-                Acquisition Offer Package Received by Owner -> Parcel status to Offer Made
-                Acquisition Offer Package Signed -> Parcel status to Easement Signed
-                Acquisition Compensation Check Cut -> Parcel Status to Compensation Check Cut
-                Acquisition Documents Recorded -> Parcel Status to Documents Recorded
-                Acquisition Compensation Received by Owner -> Parcel Status to Compensation Received by Owner
-                Acquisition Offer Package Original -> Parcel status to Offer Made
-            */
-
             switch (dt.DocTypeName)
             {
                 case "Acquisition Offer Package Original": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
-                case "Acquisition Offer Package Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3); break;
-                case "Acquisition Offer Package Signed": tasks.Add(_featureUpdate.UpdateFeature(pid, 4)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(4); break;
-                case "Acquisition Compensation Check": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5); break;
-                case "Acquisition Documents Recorded": tasks.Add(_featureUpdate.UpdateFeature(pid, 6)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(6); break;
-                case "Acquisition Compensation Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 7)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(7); break;
+                case "Acquisition Offer Package Updated": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
+                case "Acquisition Notice of Intent Package": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
+                case "Acquisition Offer Package Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
+                case "Acquisition Final Offer Package": tasks.Add(_featureUpdate.UpdateFeature(pid, 8)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(8);  break;
+                case "Acquisition Offer Package Signed": tasks.Add(_featureUpdate.UpdateFeature(pid, 4)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(4);  break;
+                case "Acquisition Offer Packet Sent to Client": tasks.Add(_featureUpdate.UpdateFeature(pid, 9)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(9);  break;
+                case "Acquisition Compensation Check": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
+                case "Acquisition Documents Recorded": tasks.Add(_featureUpdate.UpdateFeature(pid, 6)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(6);  break;
+                case "Acquisition Compensation Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
+                case "Acquisition Fully Signed Compenation Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
+                case "Acquisition Fully Signed Easement Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 4)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(4);  break;
+                case "Acquisition Recorded Easement Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 6)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(6);  break;
             }
 
             return (await Task.WhenAll(tasks)).All(rt => rt);
