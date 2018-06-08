@@ -68,7 +68,7 @@ namespace ROWM.Controllers
                 return NoContent();
 
             var lines = d.OrderBy(dh => dh.Parcel_ParcelId)
-                .Select(dh => $"=\"{dh.Parcel_ParcelId}\",{dh.Title},{dh.ContentType},{dh.SentDate?.Date.ToShortDateString() ?? ""},{dh.DeliveredDate?.Date.ToShortDateString() ?? ""},{dh.ClientTrackingNumber},{dh.ReceivedDate?.Date.ToShortDateString() ?? ""},{dh.SignedDate?.Date.ToShortDateString() ?? ""},{dh.CheckNo},{dh.DateRecorded?.Date.ToShortDateString() ?? ""},{dh.DocumentId}");
+                .Select(dh => $"=\"{dh.Parcel_ParcelId}\",\"{dh.Title}\",{dh.ContentType},{dh.SentDate?.Date.ToShortDateString() ?? ""},{dh.DeliveredDate?.Date.ToShortDateString() ?? ""},{dh.ClientTrackingNumber},{dh.ReceivedDate?.Date.ToShortDateString() ?? ""},{dh.SignedDate?.Date.ToShortDateString() ?? ""},=\"{dh.CheckNo}\",{dh.DateRecorded?.Date.ToShortDateString() ?? ""},=\"{dh.DocumentId}\"");
 
             using (var s = new MemoryStream())
             {
@@ -185,12 +185,12 @@ namespace ROWM.Controllers
                     ParcelId = p.ParcelId,
                     ParcelStatusCode = p.ParcelStatusCode,
                     RoeStatusCode = p.RoeStatusCode,
-                    ContactName = p.Owners.FirstOrDefault()?.Owner.PartyName ?? "",
+                    ContactName = p.Owners.FirstOrDefault()?.Owner.PartyName?.TrimEnd(',') ?? "",
                     DateAdded = log.DateAdded,
                     ContactChannel = log.ContactChannel,
                     ProjectPhase = log.ProjectPhase,
-                    Title = log.Title,
-                    Notes = log.Notes,
+                    Title = log.Title?.TrimEnd(',') ?? "",
+                    Notes = log.Notes?.TrimEnd(',') ?? "",
                     AgentName = log.ContactAgent.AgentName
                 });
             }
@@ -201,7 +201,7 @@ namespace ROWM.Controllers
             public override string ToString()
             {
                 var n = Notes.Replace('"', '\'');
-                return $"=\"{ParcelId}\",{ParcelStatusCode},{RoeStatusCode},\"{ContactName}\",{DateAdded.Date.ToShortDateString()},{ContactChannel},{ProjectPhase},\"{Title}\",\"{n}\",{AgentName}";
+                return $"=\"{ParcelId}\",{ParcelStatusCode},{RoeStatusCode},\"{ContactName}\",{DateAdded.Date.ToShortDateString()},{ContactChannel},{ProjectPhase},\"{Title}\",\"{n}\",\"{AgentName}\"";
             }
         }
 
@@ -218,6 +218,7 @@ namespace ROWM.Controllers
             public string CellPhone { get; set; }
             public string HomePhone { get; set; }
             public string StreetAddress { get; set; }
+            public string City { get; set; }
             public string State { get; set; }
             public string ZIP { get; set; }
             public string Representation { get; set; }
@@ -229,16 +230,17 @@ namespace ROWM.Controllers
                 var ox = og.First();
                 return ox.Owner.Contacts.Select(cx =>  new ContactExport2
                 {
-                    PartyName = ox.Owner.PartyName,
+                    PartyName = ox.Owner.PartyName?.TrimEnd(',') ?? "",
                     IsPrimary = cx.IsPrimaryContact,
-                    FirstName = cx.OwnerFirstName,
-                    LastName = cx.OwnerLastName,
-                    Email = cx.OwnerEmail,
-                    CellPhone = cx.OwnerCellPhone,
-                    HomePhone = cx.OwnerHomePhone,
-                    StreetAddress = cx.OwnerStreetAddress,
-                    State = cx.OwnerState,
-                    ZIP = cx.OwnerZIP,
+                    FirstName = cx.OwnerFirstName?.TrimEnd(',') ?? "",
+                    LastName = cx.OwnerLastName?.TrimEnd(',') ?? "",
+                    Email = cx.OwnerEmail?.TrimEnd(',') ?? "",
+                    CellPhone = cx.OwnerCellPhone?.TrimEnd(',') ?? "",
+                    HomePhone = cx.OwnerHomePhone?.TrimEnd(',') ?? "",
+                    StreetAddress = cx.OwnerStreetAddress?.TrimEnd(',') ?? "",
+                    City = cx.OwnerCity?.TrimEnd(',') ?? "",
+                    State = cx.OwnerState?.TrimEnd(',') ?? "",
+                    ZIP = cx.OwnerZIP?.TrimEnd(',') ?? "",
                     Representation = cx.Representation,
                     ParcelId = relatedParcels
                 });
@@ -248,10 +250,10 @@ namespace ROWM.Controllers
                 string.Join(",", this.ParcelId.Select(p=> $"=\"{p}\""));
 
             public static string Header() =>
-                "Owner,Is Primary Contact,First Name,Last Name,Email,Cell Phone,Phone,Street Address,State,ZIP,Representation";
+                "Owner,Is Primary Contact,First Name,Last Name,Email,Cell Phone,Phone,Street Address,City,State,ZIP,Representation";
 
             public override string ToString() =>
-                $"\"{PartyName}\",{IsPrimary},{FirstName},{LastName},{Email},{CellPhone},{HomePhone},\"{StreetAddress}\",{State},{ZIP},{Representation},{RelatedParcels}";
+                $"\"{PartyName}\",{IsPrimary},\"{FirstName}\",\"{LastName}\",{Email},{CellPhone},{HomePhone},\"{StreetAddress}\",{City},{State},{ZIP},{Representation},{RelatedParcels}";
         }
 
         public class ContactExport
@@ -265,6 +267,7 @@ namespace ROWM.Controllers
             public string CellPhone { get; set; }
             public string HomePhone { get; set; }
             public string StreetAddress { get; set; }
+            public string City { get; set; }
             public string State { get; set; }
             public string ZIP { get; set; }
             public string Representation { get; set; }
@@ -274,14 +277,15 @@ namespace ROWM.Controllers
                 return op.Owner.Contacts.Select(cx => new ContactExport
                 {
                     ParcelId = op.ParcelId,
-                    PartyName = op.Owner.PartyName,
+                    PartyName = op.Owner.PartyName?.TrimEnd(',') ?? "",
                     IsPrimary = cx.IsPrimaryContact,
-                    FirstName = cx.OwnerFirstName,
-                    LastName = cx.OwnerLastName,
-                    Email = cx.OwnerEmail,
-                    CellPhone = cx.OwnerCellPhone,
-                    HomePhone = cx.OwnerHomePhone,
-                    StreetAddress = cx.OwnerStreetAddress,
+                    FirstName = cx.OwnerFirstName?.TrimEnd(',') ?? "",
+                    LastName = cx.OwnerLastName?.TrimEnd(',') ?? "",
+                    Email = cx.OwnerEmail?.TrimEnd(',') ?? "",
+                    CellPhone = cx.OwnerCellPhone?.TrimEnd(',') ?? "",
+                    HomePhone = cx.OwnerHomePhone?.TrimEnd(',') ?? "",
+                    StreetAddress = cx.OwnerStreetAddress?.TrimEnd(',') ?? "",
+                    City = cx.OwnerCity?.TrimEnd(',') ?? "",
                     State = cx.OwnerState,
                     ZIP = cx.OwnerZIP,
                     Representation = cx.Representation
@@ -289,10 +293,10 @@ namespace ROWM.Controllers
             }
 
             public static string Header() =>
-                "Parcel ID,Owner,Is Primary Contact,First Name,Last Name,Email,Cell Phone,Phone,Street Address,State,ZIP,Representation";
+                "Parcel ID,Owner,Is Primary Contact,First Name,Last Name,Email,Cell Phone,Phone,Street Address,City,State,ZIP,Representation";
 
             public override string ToString() =>
-                $"=\"{ParcelId}\",\"{PartyName}\",{IsPrimary},{FirstName},{LastName},{Email},{CellPhone},{HomePhone},\"{StreetAddress}\",{State},{ZIP},{Representation}";
+                $"=\"{ParcelId}\",\"{PartyName}\",{IsPrimary},\"{FirstName}\",\"{LastName}\",{Email},{CellPhone},{HomePhone},\"{StreetAddress}\",{City},{State},{ZIP},{Representation}";
         }
         #endregion
     }
