@@ -17,7 +17,7 @@ namespace ROWM.Controllers
 
         {
 
-            var boundary = HeaderUtilities.RemoveQuotes(contentType.Boundary);
+            var boundary = HeaderUtilities.RemoveQuotes(contentType.Boundary).Value;
 
             if (string.IsNullOrWhiteSpace(boundary))
 
@@ -69,9 +69,9 @@ namespace ROWM.Controllers
 
                    && contentDisposition.DispositionType.Equals("form-data")
 
-                   && string.IsNullOrEmpty(contentDisposition.FileName)
+                   && string.IsNullOrEmpty(contentDisposition.FileName.Value)
 
-                   && string.IsNullOrEmpty(contentDisposition.FileNameStar);
+                   && string.IsNullOrEmpty(contentDisposition.FileNameStar.Value);
 
         }
 
@@ -87,9 +87,9 @@ namespace ROWM.Controllers
 
                    && contentDisposition.DispositionType.Equals("form-data")
 
-                   && (!string.IsNullOrEmpty(contentDisposition.FileName)
+                   && (!string.IsNullOrEmpty(contentDisposition.FileName.Value)
 
-                       || !string.IsNullOrEmpty(contentDisposition.FileNameStar));
+                       || !string.IsNullOrEmpty(contentDisposition.FileNameStar.Value));
 
         }
 

@@ -130,7 +130,7 @@ namespace ROWM.Controllers
                             // _logger.LogInformation($"Copied the uploaded file '{targetFilePath}'");
                         }
                         sourceContentType = section.ContentType;
-                        sourceFilename = contentDisposition.FileName;
+                        sourceFilename = contentDisposition.FileName.Value;
                     }
                     else if (MultipartRequestHelper.HasFormDataContentDisposition(contentDisposition))
                     {
@@ -155,7 +155,7 @@ namespace ROWM.Controllers
                             {
                                 value = String.Empty;
                             }
-                            formAccumulator.Append(key, value);
+                            formAccumulator.Append(key.Value, value);
 
                             if (formAccumulator.ValueCount > _defaultFormOptions.ValueCountLimit)
                             {
@@ -202,7 +202,7 @@ namespace ROWM.Controllers
 
             header.DocumentId = d.DocumentId;
 
-            sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename);
+            sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename).Value;
             Ownership primaryOwner = myParcel.Ownership.First<Ownership>(o => o.IsPrimary()); // o.Ownership_t == OwnershipType.Primary);
             string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
             try
@@ -270,7 +270,7 @@ namespace ROWM.Controllers
                             // _logger.LogInformation($"Copied the uploaded file '{targetFilePath}'");
                         }
                         sourceContentType = section.ContentType;
-                        sourceFilename = contentDisposition.FileName;
+                        sourceFilename = contentDisposition.FileName.Value;
                     }
                     else if (MultipartRequestHelper.HasFormDataContentDisposition(contentDisposition))
                     {
@@ -295,7 +295,7 @@ namespace ROWM.Controllers
                             {
                                 value = String.Empty;
                             }
-                            formAccumulator.Append(key, value);
+                            formAccumulator.Append(key.Value, value);
 
                             if (formAccumulator.ValueCount > _defaultFormOptions.ValueCountLimit)
                             {
@@ -332,11 +332,11 @@ namespace ROWM.Controllers
             }
 
 
-            var agent = await _repo.GetAgent(header.AgentName);
+            var agent = await _repo.GetAgent(header.AgentName) ?? await _repo.GetDefaultAgent();
 
             // Store Document
-            var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent?.AgentId ?? (await _repo.GetDefaultAgent()).AgentId, bb);
-            // d.Agents.Add(agent); this relationship is not used anymore
+            var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent.AgentId, bb);
+            d.Agent.Add(agent); // this relationship is not used anymore
 
             // Add document to parcels
             var myParcels = header.ParcelIds.Distinct();
@@ -349,7 +349,7 @@ namespace ROWM.Controllers
 
                 header.DocumentId = d.DocumentId;
 
-                sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename);
+                sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename).Value;
                 Ownership primaryOwner = myParcel.Ownership.First<Ownership>(o => o.IsPrimary()); // o.Ownership_t == Ownership.OwnershipType.Primary);
                 string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
                 try
