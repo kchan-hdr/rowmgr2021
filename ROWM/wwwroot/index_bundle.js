@@ -54829,7 +54829,7 @@ var MapArea = function (_super) {
                 // Staging map service: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_MapService_stg/MapServer
                 // Production map service: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_MapService/MapServer
                 var lay = new MapImageLayer({
-                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_MapService_stg/MapServer"
+                    url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_MapService/MapServer"
                 });
                 m.add(lay);
                 m.add(parcelLay);

@@ -371,6 +371,7 @@ namespace ROWM.Dal
 
             var a = _ctx.DocumentActivity.Create();
             a.Document = d;
+            a.ParentDocumentId = d.DocumentId;      //// model-first naming
             a.ActivityDate = DateTimeOffset.Now;
             a.Activity = "Updated Tracking";
             a.Agent = d.Agent.FirstOrDefault();        // TODO:
@@ -398,6 +399,7 @@ namespace ROWM.Dal
             a.ActivityDate = DateTimeOffset.Now;
             a.Activity = "Uploaded";
             a.AgentId = agentId;
+            a.ParentDocumentId = d.DocumentId;
 
             _ctx.Document.Add(d);
             _ctx.DocumentActivity.Add(a);

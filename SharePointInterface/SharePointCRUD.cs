@@ -31,11 +31,11 @@ namespace SharePointInterface
         // staging URL to move to app config
         static readonly string _STAGING_SITE_URL = "https://b2hpm.sharepoint.com/staging";
 
-        static readonly string _DOCUMENT_LIST_BASE = "Parcel Documents";
+        static readonly string _DOCUMENT_LIST_BASE = "Documents"; // "Parcel Documents";
 
         private ClientContext _ctx;
-        private string _parcelsFolderName;
-        private string _parcelsFolderTemplate = "Folder_Template";
+        private string _parcelsFolderName = "HDR Project/14. ROW/14.1 Parcels";
+        private string _parcelsFolderTemplate = "Documents/HDR Project/14. ROW/14.1 Parcels/_County_Parcel ID_LO Name"; // "Folder_Template";
         private string _siteUrl;
         // private Dictionary<string, string> _docTypes;
         private DocType _docTypes;
@@ -45,7 +45,7 @@ namespace SharePointInterface
             _docTypes = d;
 
             //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
-            _siteUrl = _STAGING_SITE_URL; //  "https://hdroneview.sharepoint.com/SF-CH-TS";
+            _siteUrl = "https://b2hpm.sharepoint.com"; //  "https://hdroneview.sharepoint.com/SF-CH-TS";
             //_parcelsFolderTemplate = "Documents/4.0 ROW/4.3 Parcels/_Parcel No_LO Name";
             //if (docTypes == null)
             //{
@@ -104,27 +104,37 @@ namespace SharePointInterface
                 Title:  	rowm_staging
                 App Domain:  	b2hrowmgr.hdrinc.com
                 Redirect URI:  	https://b2hrowmgr.hdrinc.com
+
+
+            The app identifier has been successfully created.
+            Client Id:  	baa9400f-d050-4564-9394-71e71b8feacd
+            Client Secret:  	ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=
+            Title:  	rowm_stg
+            App Domain:  	b2hrowmgr.azurewebsites.net
+            Redirect URI:  	https://b2hrowmgr.azurewebsites.net
              */
 
             if (_appId == null || _appSecret == null )
             {
-                _appId = "3dff29b2-ae04-4ad4-8149-eb703d62b16f";
-                _appSecret = "bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=";
-            }
+                //_appId = "3dff29b2-ae04-4ad4-8149-eb703d62b16f";
+                //_appSecret = "bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=";
+                _appId = "baa9400f-d050-4564-9394-71e71b8feacd";
+                _appSecret = "ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=";
+           }
 
-    // Method using Sharepoint Credentials
-    //_ctx = new ClientContext(_siteUrl);
-    //var passWord = new SecureString();
-    //foreach (char c in "pwd".ToCharArray()) passWord.AppendChar(c);
-    //_ctx.Credentials = new SharePointOnlineCredentials("<sharepoint_user>@hdrinc.com", passWord);
+            // Method using Sharepoint Credentials
+            //_ctx = new ClientContext(_siteUrl);
+            //var passWord = new SecureString();
+            //foreach (char c in "pwd".ToCharArray()) passWord.AppendChar(c);
+            //_ctx.Credentials = new SharePointOnlineCredentials("<sharepoint_user>@hdrinc.com", passWord);
 
-    // Method using AppID
-    // Using OfficeDevPnp.Core
-    // https://github.com/SharePoint/PnP-Sites-Core/blob/master/Core/README.md
-    //string _appId = "APPID";
-    //string _appSecret = "SECRET";
+            // Method using AppID
+            // Using OfficeDevPnp.Core
+            // https://github.com/SharePoint/PnP-Sites-Core/blob/master/Core/README.md
+            //string _appId = "APPID";
+            //string _appSecret = "SECRET";
 
-    AuthenticationManager authManager = new AuthenticationManager();
+            AuthenticationManager authManager = new AuthenticationManager();
             _ctx = authManager.GetAppOnlyAuthenticatedContext(_siteUrl, _appId, _appSecret);
         }
 
@@ -151,7 +161,7 @@ namespace SharePointInterface
         {
             if (String.IsNullOrWhiteSpace(baseFolderName))
             {
-                baseFolderName = string.IsNullOrWhiteSpace(baseFolderName) ? _DOCUMENT_LIST_BASE : $"{_DOCUMENT_LIST_BASE}/{baseFolderName}";
+                baseFolderName = string.IsNullOrWhiteSpace(baseFolderName) ? $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}" : $"{_DOCUMENT_LIST_BASE}/{baseFolderName}";
             }
             if (String.IsNullOrWhiteSpace(folderTemplate))
             {

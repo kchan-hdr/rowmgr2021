@@ -354,7 +354,6 @@ namespace ROWM.Controllers
                 string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
                 try
                 {
-
                     //_sharePointCRUD.UploadParcelDoc(parcelName, "Other", sourceFilename, bb, null);
                     _sharePointCRUD.UploadParcelDoc(parcelName, header.DocumentType, sourceFilename, bb, null);
                     string parcelDocUrl = _sharePointCRUD.GetParcelFolderURL(parcelName, null);
