@@ -24,8 +24,9 @@ namespace ROWM.Controllers
 
             var pStatus = _Context.Parcel_Status.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
             var rStatus = _Context.Roe_Status.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
+            var llScore = _Context.Landowner_Score.Where(s => s.IsActive ?? false).OrderBy(s => s.DisplayOrder);
 
-            return new Vocabulary(agents,channels,purposes,rels, pStatus, rStatus);
+            return new Vocabulary(agents,channels,purposes,rels, pStatus, rStatus, llScore);
         }
 
         [HttpGet("api/DocTypes")]
@@ -46,6 +47,7 @@ namespace ROWM.Controllers
             public IEnumerable<Lookup> RelationTypes { get; set; }
             public IEnumerable<Lookup> ParcelStatus { get; set; }
             public IEnumerable<Lookup> RoeStatus { get; set; }
+            public IEnumerable<Lookup> Score { get; set; }
 
             internal Vocabulary(
                 IEnumerable<Agent> agents, 
@@ -53,7 +55,8 @@ namespace ROWM.Controllers
                 IEnumerable<Contact_Purpose> purposes, 
                 IEnumerable<Repesentation_Type> rels,
                 IEnumerable<Parcel_Status> p,
-                IEnumerable<Roe_Status> r)
+                IEnumerable<Roe_Status> r,
+                IEnumerable<Landowner_Score> s)
             {
                 Agents = agents.Select(a => new Lookup { Code = a.AgentId.ToString(), Description = a.AgentName });
                 Channels = channels.Select(c => new Lookup { Code = c.ContactTypeCode, Description = c.Description, DisplayOrder = c.DisplayOrder });
@@ -62,6 +65,7 @@ namespace ROWM.Controllers
 
                 ParcelStatus = p.Select(c => new Lookup { Code = c.Code, Description = c.Description, DisplayOrder = c.DisplayOrder });
                 RoeStatus = r.Select(c => new Lookup { Code = c.Code, DisplayOrder = c.DisplayOrder, Description = c.Description });
+                Score = s.Select(c => new Lookup { Code = c.Score.ToString(), DisplayOrder = c.DisplayOrder ?? 0, Description = c.Caption });
             }
         }
     }

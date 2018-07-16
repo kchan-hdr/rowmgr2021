@@ -32,6 +32,7 @@ namespace ROWM.Dal
         public System.DateTimeOffset LastModified { get; set; }
         public string ModifiedBy { get; set; }
         public Nullable<System.Guid> Owner_OwnerId { get; set; }
+        public Nullable<int> Landowner_Score { get; set; }
     
         public virtual Agent Agent { get; set; }
         public virtual Owner Owner { get; set; }

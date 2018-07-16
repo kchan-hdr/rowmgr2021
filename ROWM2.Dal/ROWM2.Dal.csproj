@@ -99,6 +99,9 @@
     </Compile>
     <Compile Include="Dto\ParcelGraph_Dto.cs" />
     <Compile Include="Dto\ParcelRepository.cs" />
+    <Compile Include="Landowner_Score.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
     <Compile Include="Model.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

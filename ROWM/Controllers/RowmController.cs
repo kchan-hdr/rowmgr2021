@@ -279,6 +279,8 @@ namespace ROWM.Controllers
                 Trace.TraceWarning($"AddContactLog:: update feature status for '{pid}' failed");
             }
 
+            await UpdateLandownerScore(logRequest.Score, dt, myParcels);
+
             var l = new ContactLog
             {
                 Agent = a,
@@ -291,7 +293,8 @@ namespace ROWM.Controllers
                 LastModified = dt,
                 ModifiedBy = _APP_NAME,
                 Parcel = new List<Parcel> { p },
-                ContactInfo = new List<ContactInfo>()
+                ContactInfo = new List<ContactInfo>(),
+                Landowner_Score = logRequest.Score
             };
 
             var log = await _repo.AddContactLog(myParcels, logRequest.ContactIds, l);
@@ -316,11 +319,16 @@ namespace ROWM.Controllers
             //l.DateAdded = logRequest.DateAdded;
             l.Title = logRequest.Title;
             l.Notes = logRequest.Notes;
+            l.Landowner_Score = logRequest.Score;
             //l.Created = dt;
             l.LastModified = dt;
             l.ModifiedBy = _APP_NAME;
             //l.Parcels = new List<Parcel> { p };
             //l.Contacts = new List<ContactInfo>();
+
+            logRequest.ParcelIds.Add(pid);
+            var myParcels = logRequest.ParcelIds.Distinct();
+            await UpdateLandownerScore(logRequest.Score, dt, myParcels);
 
             var log = await _repo.UpdateContactLog(logRequest.ParcelIds, logRequest.ContactIds, l);
             return Json(new ContactLogDto(log));
@@ -357,7 +365,35 @@ namespace ROWM.Controllers
             return good;
         }
         #endregion
-
+        #region landowner score
+        /// <summary>
+        /// will need to trigger feature update. feature class not ready 2018.7
+        /// </summary>
+        /// <param name="score"></param>
+        /// <param name="ts"></param>
+        /// <param name="parcelIds"></param>
+        /// <returns></returns>
+        async Task<int> UpdateLandownerScore(int score, DateTimeOffset ts, IEnumerable<string> parcelIds)
+        {
+            var touched = 0;
+            if (_statusHelper.IsValidScore(score))
+            {
+                foreach (var pid in parcelIds)
+                {
+                    var p = await _repo.GetParcel(pid);
+                    var oldValue = p.Landowner_Score;
+                    if ( oldValue != score)
+                    {
+                        p.Landowner_Score = score;
+                        p.LastModified = ts;
+                        p.ModifiedBy = _APP_NAME;
+                        touched++;
+                    }
+                }
+            }
+            return touched;
+        }
+        #endregion
         #endregion
         #region agents
         [Route("agents"), HttpGet]
@@ -395,7 +431,7 @@ namespace ROWM.Controllers
         public DateTimeOffset DateAdded { get; set; }
         public string Title { get; set; }
         public string Notes { get; set; }
-
+        public int Score { get; set; }
     }
 
     public class ContactRequest
@@ -463,6 +499,7 @@ namespace ROWM.Controllers
         public string Phase { get; set; }
         public string Title { get; set; }
         public string Notes { get; set; }
+        public int Score { get; set; }
 
         internal ContactLogDto(ContactLog log)
         {
@@ -477,6 +514,7 @@ namespace ROWM.Controllers
             Phase = log.ProjectPhase;
             Title = log.Title;
             Notes = log.Notes;
+            Score = log.Landowner_Score ?? 0;
         }
     }
 
@@ -583,6 +621,7 @@ namespace ROWM.Controllers
         public string ParcelStatusCode { get; set; }
         public string ParcelStatus => this.ParcelStatusCode;        // to be removed
         public string RoeStatusCode { get; set; }
+        public string LandownerScore { get; set; }
         public string SitusAddress { get; set; }
         public double Acreage { get; set; }
 
@@ -677,4 +716,5 @@ namespace ROWM.Controllers
         }
     }
     #endregion
+
 }

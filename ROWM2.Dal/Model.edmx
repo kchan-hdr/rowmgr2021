@@ -79,6 +79,7 @@
           <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
           <Property Name="Owner_OwnerId" Type="uniqueidentifier" />
+          <Property Name="Landowner_Score" Type="int" />
         </EntityType>
         <EntityType Name="Document">
           <Key>
@@ -151,6 +152,16 @@
           <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
         </EntityType>
+        <EntityType Name="Landowner_Score">
+          <Key>
+            <PropertyRef Name="Score" />
+          </Key>
+          <Property Name="Score" Type="int" Nullable="false" />
+          <Property Name="DomainValue" Type="int" />
+          <Property Name="Caption" Type="nvarchar" MaxLength="50" />
+          <Property Name="DisplayOrder" Type="int" />
+          <Property Name="IsActive" Type="bit" />
+        </EntityType>
         <EntityType Name="Owner">
           <Key>
             <PropertyRef Name="OwnerId" />
@@ -216,6 +227,7 @@
           <Property Name="ParcelStatusCode" Type="nvarchar" MaxLength="40" />
           <Property Name="RoeStatusCode" Type="nvarchar" MaxLength="40" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="Landowner_Score" Type="int" />
         </EntityType>
         <EntityType Name="Parcel_Status">
           <Key>
@@ -556,6 +568,7 @@
           <EntitySet Name="DocumentActivity" EntityType="Self.DocumentActivity" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="DocumentAgents" EntityType="Self.DocumentAgents" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="DocumentPackage" EntityType="Self.DocumentPackage" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Landowner_Score" EntityType="Self.Landowner_Score" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Owner" EntityType="Self.Owner" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="OwnerDocuments" EntityType="Self.OwnerDocuments" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Ownership" EntityType="Self.Ownership" Schema="ROWM" store:Type="Tables" />
@@ -729,6 +742,7 @@
           <NavigationProperty Name="Owner" Relationship="Self.FK_ROWM_ContactLog_ROWM_Owner_Owner_OwnerId" FromRole="ContactLog" ToRole="Owner" />
           <NavigationProperty Name="ContactInfo" Relationship="Self.ContactInfoContactLogs" FromRole="ContactLog" ToRole="ContactInfo" />
           <NavigationProperty Name="Parcel" Relationship="Self.ParcelContactLogs" FromRole="ContactLog" ToRole="Parcel" />
+          <Property Name="Landowner_Score" Type="Int32" />
         </EntityType>
         <EntityType Name="Document">
           <Key>
@@ -871,6 +885,7 @@
           <NavigationProperty Name="Document" Relationship="Self.ParcelDocuments" FromRole="Parcel" ToRole="Document" />
           <Property Name="County_Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="Assessor_Parcel_Number" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="Landowner_Score" Type="Int32" />
         </EntityType>
         <EntityType Name="Parcel_Status">
           <Key>
@@ -1145,7 +1160,18 @@
             <End Role="Document" EntitySet="Document" />
             <End Role="Parcel" EntitySet="Parcel" />
           </AssociationSet>
+          <EntitySet Name="Landowner_Score" EntityType="ROWM.Dal.Landowner_Score" />
         </EntityContainer>
+        <EntityType Name="Landowner_Score">
+          <Key>
+            <PropertyRef Name="Score" />
+          </Key>
+          <Property Name="Score" Type="Int32" Nullable="false" />
+          <Property Name="DomainValue" Type="Int32" />
+          <Property Name="Caption" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="DisplayOrder" Type="Int32" />
+          <Property Name="IsActive" Type="Boolean" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1210,6 +1236,7 @@
           <EntitySetMapping Name="ContactLog">
             <EntityTypeMapping TypeName="ROWM.Dal.ContactLog">
               <MappingFragment StoreEntitySet="ContactLog">
+                <ScalarProperty Name="Landowner_Score" ColumnName="Landowner_Score" />
                 <ScalarProperty Name="ContactLogId" ColumnName="ContactLogId" />
                 <ScalarProperty Name="DateAdded" ColumnName="DateAdded" />
                 <ScalarProperty Name="ContactAgentId" ColumnName="ContactAgentId" />
@@ -1319,6 +1346,7 @@
           <EntitySetMapping Name="Parcel">
             <EntityTypeMapping TypeName="ROWM.Dal.Parcel">
               <MappingFragment StoreEntitySet="Parcel">
+                <ScalarProperty Name="Landowner_Score" ColumnName="Landowner_Score" />
                 <ScalarProperty Name="Assessor_Parcel_Number" ColumnName="Assessor_Parcel_Number" />
                 <ScalarProperty Name="County_Name" ColumnName="County_Name" />
                 <ScalarProperty Name="ParcelId" ColumnName="ParcelId" />
@@ -1424,6 +1452,17 @@
               <ScalarProperty Name="ParcelId" ColumnName="Parcel_ParcelId" />
             </EndProperty>
           </AssociationSetMapping>
+          <EntitySetMapping Name="Landowner_Score">
+            <EntityTypeMapping TypeName="ROWM.Dal.Landowner_Score">
+              <MappingFragment StoreEntitySet="Landowner_Score">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
+                <ScalarProperty Name="Caption" ColumnName="Caption" />
+                <ScalarProperty Name="DomainValue" ColumnName="DomainValue" />
+                <ScalarProperty Name="Score" ColumnName="Score" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
