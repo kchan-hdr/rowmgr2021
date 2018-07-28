@@ -27,7 +27,7 @@ namespace ROWM.Dal.Test
             Assert.IsNotNull(d.Content);
         }
 
-        [TestMethod]
+        [TestMethod, Ignore]
         public void Seed()
         {
             var data = File.ReadAllText(@"D:\Sunflower\ROWM\ROWM.Dal\Sample_Data\parcels.json");

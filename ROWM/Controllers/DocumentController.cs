@@ -15,7 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SharePointInterface;
 using geographia.ags;
-using com.hdr.Rowm.Sunflower;
+using Sunflower = com.hdr.Rowm.Sunflower;
 using System.Diagnostics;
 
 namespace ROWM.Controllers
@@ -196,16 +196,16 @@ namespace ROWM.Controllers
 
             var agent = await _repo.GetAgent(header.AgentName) ?? await _repo.GetDefaultAgent();
 
-            // Store Document
-            var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent.AgentId, bb);
-            d.Agents.Add(agent); // this relationship is not used anymore
+            var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent?.AgentId ?? (await _repo.GetDefaultAgent()).AgentId, bb);
+            //d.Agents.Add(agent);
 
-            myParcel.Documents.Add(d);
+            myParcel.Document.Add(d);
+            await _repo.UpdateParcel(myParcel);
 
             header.DocumentId = d.DocumentId;
 
             sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename).Value;
-            Ownership primaryOwner = myParcel.Owners.First<Ownership>(o => o.Ownership_t == Ownership.OwnershipType.Primary);
+            Ownership primaryOwner = myParcel.Ownership.First<Ownership>(o => o.IsPrimary()); // o.Ownership_t == OwnershipType.Primary);
             string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
             try
             {
@@ -287,6 +287,7 @@ namespace ROWM.Controllers
                         // multipart headers length limit is already in effect.
                         var key = HeaderUtilities.RemoveQuotes(contentDisposition.Name);
                         var encoding = GetEncoding(section);
+                        if (encoding == null) continue;
                         using (var streamReader = new StreamReader(
                             section.Body,
                             encoding,
@@ -341,7 +342,7 @@ namespace ROWM.Controllers
 
             // Store Document
             var d = await _repo.Store(header.DocumentTitle, header.DocumentType, sourceContentType, sourceFilename, agent.AgentId, bb);
-            d.Agents.Add(agent); // this relationship is not used anymore
+            d.Agent.Add(agent); // this relationship is not used anymore
 
             // Add document to parcels
             var myParcels = header.ParcelIds.Distinct();
@@ -349,16 +350,16 @@ namespace ROWM.Controllers
             foreach (string pid in myParcels)
             {
                 var myParcel = await _repo.GetParcel(pid);
-                myParcel.Documents.Add(d);
+                myParcel.Document.Add(d);
+                await _repo.UpdateParcel(myParcel);
 
                 header.DocumentId = d.DocumentId;
 
                 sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename).Value;
-                Ownership primaryOwner = myParcel.Owners.First<Ownership>(o => o.Ownership_t == Ownership.OwnershipType.Primary);
+                Ownership primaryOwner = myParcel.Ownership.First<Ownership>(o => o.IsPrimary()); // o.Ownership_t == Ownership.OwnershipType.Primary);
                 string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
                 try
                 {
-
                     //_sharePointCRUD.UploadParcelDoc(parcelName, "Other", sourceFilename, bb, null);
                     _sharePointCRUD.UploadParcelDoc(parcelName, header.DocumentType, sourceFilename, bb, null);
                     string parcelDocUrl = _sharePointCRUD.GetParcelFolderURL(parcelName, null);
@@ -399,10 +400,10 @@ namespace ROWM.Controllers
         {
             var dt = DocType.Find(docType) ?? DocType.Default;
 
-            var tasks = new List<Task<bool>>();
-            tasks.Add(_featureUpdate.UpdateFeatureDocuments(p.ParcelId, parcelDocUrl));
+            var pid = p.Assessor_Parcel_Number;
 
-            var pid = p.ParcelId;
+            var tasks = new List<Task<bool>>();
+            tasks.Add(_featureUpdate.UpdateFeatureDocuments(pid, parcelDocUrl));
 
             switch (dt.DocTypeName)
             {

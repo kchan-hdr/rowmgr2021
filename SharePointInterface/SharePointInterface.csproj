@@ -161,9 +161,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SharePointUtil_Sunflower\SharePointUtil_Sunflower.csproj">
-      <Project>{20759891-DF1A-4E84-8762-D8A61BF9EC54}</Project>
-      <Name>SharePointUtil_Sunflower</Name>
+    <ProjectReference Include="..\ROWM2.Dal\ROWM2.Dal.csproj">
+      <Project>{23D465B8-D88E-4979-AD4E-891B744D6D1E}</Project>
+      <Name>ROWM2.Dal</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

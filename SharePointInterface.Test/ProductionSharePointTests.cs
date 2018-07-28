@@ -40,5 +40,16 @@ namespace SharePointInterface.Test
             }
             Assert.IsTrue(docExists);
         }
+
+        [TestMethod, TestCategory("SharePointCRUD - Destructive")]
+        public void UploadDoc()
+        {
+            string fileName = @"testdata\logs.csv";
+
+            SharePointCRUD spCRUD = new SharePointCRUD(); // _appId, _appSecret);
+            byte[] bytes = System.IO.File.ReadAllBytes(fileName);
+            var good = spCRUD.UploadParcelDoc("test", "test", fileName, bytes);
+            Assert.IsTrue(good);
+        }
     }
 }

@@ -52,7 +52,7 @@ namespace ROWM.Controllers
             var dt = DateTimeOffset.Now;
 
             var o = await _repo.GetOwner(id);
-            o.Contacts.Add(new ContactInfo
+            o.ContactInfo.Add(new ContactInfo
             {
                 OwnerFirstName = info.OwnerFirstName,
                 OwnerLastName = info.OwnerLastName,
@@ -87,7 +87,7 @@ namespace ROWM.Controllers
             var dt = DateTimeOffset.Now;
 
             var o = await _repo.GetOwner(id);
-            var c = o.Contacts.Single(cx => cx.ContactId == cinfo);
+            var c = o.ContactInfo.Single(cx => cx.ContactId == cinfo);
 
             c.OwnerFirstName = info.OwnerFirstName;
             c.OwnerLastName = info.OwnerLastName;
@@ -137,19 +137,19 @@ namespace ROWM.Controllers
             switch( offer_t)
             {
                 case "roe":
-                    p.InitialROEOffer.OfferDate = offer.OfferDate;
-                    p.InitialROEOffer.OfferAmount = offer.Amount;
-                    p.InitialROEOffer.OfferNotes = offer.Notes;
+                    p.InitialROEOffer_OfferDate = offer.OfferDate;
+                    p.InitialROEOffer_OfferAmount = offer.Amount;
+                    p.InitialROEOffer_OfferNotes = offer.Notes;
                     break;
                 case "option":
-                    p.InitialOptionOffer.OfferDate = offer.OfferDate;
-                    p.InitialOptionOffer.OfferAmount = offer.Amount;
-                    p.InitialOptionOffer.OfferNotes = offer.Notes;
+                    p.InitialOptionOffer_OfferDate = offer.OfferDate;
+                    p.InitialOptionOffer_OfferAmount = offer.Amount;
+                    p.InitialOptionOffer_OfferNotes = offer.Notes;
                     break;
                 case "easement":
-                    p.InitialEasementOffer.OfferDate = offer.OfferDate;
-                    p.InitialEasementOffer.OfferAmount = offer.Amount;
-                    p.InitialEasementOffer.OfferNotes = offer.Notes;
+                    p.InitialEasementOffer_OfferDate = offer.OfferDate;
+                    p.InitialEasementOffer_OfferAmount = offer.Amount;
+                    p.InitialEasementOffer_OfferNotes = offer.Notes;
                     break;
                 default:
                     return BadRequest($"Unknown offer type '{offer_t}'");
@@ -175,19 +175,19 @@ namespace ROWM.Controllers
             switch (offer_t)
             {
                 case "roe":
-                    p.FinalROEOffer.OfferDate = offer.OfferDate;
-                    p.FinalROEOffer.OfferAmount = offer.Amount;
-                    p.FinalROEOffer.OfferNotes = offer.Notes;
+                    p.FinalROEOffer_OfferDate = offer.OfferDate;
+                    p.FinalROEOffer_OfferAmount = offer.Amount;
+                    p.FinalROEOffer_OfferNotes = offer.Notes;
                     break;
                 case "option":
-                    p.FinalOptionOffer.OfferDate = offer.OfferDate;
-                    p.FinalOptionOffer.OfferAmount = offer.Amount;
-                    p.FinalOptionOffer.OfferNotes = offer.Notes;
+                    p.FinalOptionOffer_OfferDate = offer.OfferDate;
+                    p.FinalOptionOffer_OfferAmount = offer.Amount;
+                    p.FinalOptionOffer_OfferNotes = offer.Notes;
                     break;
                 case "easement":
-                    p.FinalEasementOffer.OfferDate = offer.OfferDate;
-                    p.FinalEasementOffer.OfferAmount = offer.Amount;
-                    p.FinalEasementOffer.OfferNotes = offer.Notes;
+                    p.FinalEasementOffer_OfferDate = offer.OfferDate;
+                    p.FinalEasementOffer_OfferAmount = offer.Amount;
+                    p.FinalEasementOffer_OfferNotes = offer.Notes;
                     break;
                 default:
                     return BadRequest($"Unknown offer type '{offer_t}'");
@@ -279,9 +279,11 @@ namespace ROWM.Controllers
                 Trace.TraceWarning($"AddContactLog:: update feature status for '{pid}' failed");
             }
 
+            await UpdateLandownerScore(logRequest.Score, dt, myParcels);
+
             var l = new ContactLog
             {
-                ContactAgent = a,
+                Agent = a,
                 ContactChannel = logRequest.Channel,
                 ProjectPhase = logRequest.Phase,
                 DateAdded = logRequest.DateAdded,
@@ -290,8 +292,9 @@ namespace ROWM.Controllers
                 Created = dt,
                 LastModified = dt,
                 ModifiedBy = _APP_NAME,
-                Parcels = new List<Parcel> { p },
-                Contacts = new List<ContactInfo>()
+                Parcel = new List<Parcel> { p },
+                ContactInfo = new List<ContactInfo>(),
+                Landowner_Score = logRequest.Score
             };
 
             var log = await _repo.AddContactLog(myParcels, logRequest.ContactIds, l);
@@ -308,7 +311,7 @@ namespace ROWM.Controllers
 
             var p = await _repo.GetParcel(pid);
             var a = await _repo.GetAgent(logRequest.AgentName);
-            var l = p.ContactsLog.Single(cx => cx.ContactLogId == lid);
+            var l = p.ContactLog.Single(cx => cx.ContactLogId == lid);
 
             //l.ContactAgent = a;
             //l.ContactChannel = logRequest.Channel;
@@ -316,11 +319,16 @@ namespace ROWM.Controllers
             //l.DateAdded = logRequest.DateAdded;
             l.Title = logRequest.Title;
             l.Notes = logRequest.Notes;
+            l.Landowner_Score = logRequest.Score;
             //l.Created = dt;
             l.LastModified = dt;
             l.ModifiedBy = _APP_NAME;
             //l.Parcels = new List<Parcel> { p };
             //l.Contacts = new List<ContactInfo>();
+
+            logRequest.ParcelIds.Add(pid);
+            var myParcels = logRequest.ParcelIds.Distinct();
+            await UpdateLandownerScore(logRequest.Score, dt, myParcels);
 
             var log = await _repo.UpdateContactLog(logRequest.ParcelIds, logRequest.ContactIds, l);
             return Json(new ContactLogDto(log));
@@ -345,18 +353,47 @@ namespace ROWM.Controllers
 
                     // IFeatureUpdate fs = new SunflowerParcel();
                     // we have contact. domain values do not match. need to fix.
-                    if (!await _featureUpdate.UpdateFeature(p.ParcelId, 1))
-                    {
-                        good = false;
-                        Trace.TraceWarning($"update failed 'pid'");
-                    }
+
+                    //////////if (!await _featureUpdate.UpdateFeature(p.ParcelId, 1))
+                    //////////{
+                    //////////    good = false;
+                    //////////    Trace.TraceWarning($"update failed 'pid'");
+                    //////////}
                 }
             }
 
             return good;
         }
         #endregion
-
+        #region landowner score
+        /// <summary>
+        /// will need to trigger feature update. feature class not ready 2018.7
+        /// </summary>
+        /// <param name="score"></param>
+        /// <param name="ts"></param>
+        /// <param name="parcelIds"></param>
+        /// <returns></returns>
+        async Task<int> UpdateLandownerScore(int score, DateTimeOffset ts, IEnumerable<string> parcelIds)
+        {
+            var touched = 0;
+            if (_statusHelper.IsValidScore(score))
+            {
+                foreach (var pid in parcelIds)
+                {
+                    var p = await _repo.GetParcel(pid);
+                    var oldValue = p.Landowner_Score;
+                    if ( oldValue != score)
+                    {
+                        p.Landowner_Score = score;
+                        p.LastModified = ts;
+                        p.ModifiedBy = _APP_NAME;
+                        touched++;
+                    }
+                }
+            }
+            return touched;
+        }
+        #endregion
         #endregion
         #region agents
         [Route("agents"), HttpGet]
@@ -394,7 +431,7 @@ namespace ROWM.Controllers
         public DateTimeOffset DateAdded { get; set; }
         public string Title { get; set; }
         public string Notes { get; set; }
-
+        public int Score { get; set; }
     }
 
     public class ContactRequest
@@ -447,7 +484,7 @@ namespace ROWM.Controllers
         {
             AgentId = a.AgentId;
             AgentName = a.AgentName;
-            ContactsLog = a.Logs.Select(cx => new ContactLogDto(cx));
+            ContactsLog = a.ContactLog.Select(cx => new ContactLogDto(cx));
             // Documents = a.Documents.Select(dx => new DocumentHeader(dx));
         }
     }
@@ -462,20 +499,22 @@ namespace ROWM.Controllers
         public string Phase { get; set; }
         public string Title { get; set; }
         public string Notes { get; set; }
+        public int Score { get; set; }
 
         internal ContactLogDto(ContactLog log)
         {
             ContactLogId = log.ContactLogId;
-            AgentName = log.ContactAgent?.AgentName ?? "";
+            AgentName = log.Agent?.AgentName ?? "";
             DateAdded = log.DateAdded;
             ContactType = log.ContactChannel;
 
-            ParcelIds = log.Parcels.Select(px => px.ParcelId);
-            ContactIds = log.Contacts.Select(cx => new ContactInfoDto(cx));
+            ParcelIds = log.Parcel.Select(px => px.Assessor_Parcel_Number);
+            ContactIds = log.ContactInfo.Select(cx => new ContactInfoDto(cx));
 
             Phase = log.ProjectPhase;
             Title = log.Title;
             Notes = log.Notes;
+            Score = log.Landowner_Score ?? 0;
         }
     }
 
@@ -537,12 +576,12 @@ namespace ROWM.Controllers
         {
             OwnerId = o.OwnerId;
             PartyName = o.PartyName;
-            OwnedParcel = o.OwnParcel.Where(ox=>ox.Parcel.IsActive).Select(ox=> new ParcelHeaderDto(ox));
-            Contacts = o.Contacts.Select(cx => new ContactInfoDto(cx));
-            ContactLogs = o.Contacts
-                .Where( cx => cx.ContactsLog != null )
-                .SelectMany( cx => cx.ContactsLog.Select( cxl => new ContactLogDto(cxl ))); //  o.ContactLogs.Select(cx => new ContactLogDto(cx));
-            Documents = o.Documents.Select(dx => new DocumentHeader(dx));
+            OwnedParcel = o.Ownership.Where(ox=>ox.Parcel.IsActive).Select(ox=> new ParcelHeaderDto(ox));
+            Contacts = o.ContactInfo.Select(cx => new ContactInfoDto(cx));
+            ContactLogs = o.ContactInfo
+                .Where( cx => cx.ContactLog != null )
+                .SelectMany( cx => cx.ContactLog.Select( cxl => new ContactLogDto(cxl ))); //  o.ContactLogs.Select(cx => new ContactLogDto(cx));
+            Documents = o.Document.Select(dx => new DocumentHeader(dx));
         }
     }
 
@@ -561,17 +600,18 @@ namespace ROWM.Controllers
 
         internal ParcelHeaderDto(Ownership o)
         {
-            ParcelId = o.ParcelId;
+            ParcelId = o.Parcel.Assessor_Parcel_Number;
             SitusAddress = o.Parcel.SitusAddress;
-            IsPrimaryOwner = o.Ownership_t == Ownership.OwnershipType.Primary;
+            IsPrimaryOwner = o.IsPrimary(); // .Ownership_t == Ownership.OwnershipType.Primary;
 
-            InitialEasementOffer = o.Parcel.InitialEasementOffer;
-            InitialOptionOffer = o.Parcel.InitialOptionOffer;
-            InitialROEOffer = o.Parcel.InitialROEOffer;
-            FinalEasementOffer = o.Parcel.FinalEasementOffer;
-            FinalOptionOffer = o.Parcel.FinalOptionOffer;
-            FinalROEOffer = o.Parcel.FinalROEOffer;
+            InitialEasementOffer = OfferHelper.MakeCompensation(o.Parcel, "InitialEasement");
+            InitialOptionOffer = OfferHelper.MakeCompensation(o.Parcel, "InitialOption");
+            InitialROEOffer = OfferHelper.MakeCompensation(o.Parcel, "InitialROE");
+            FinalEasementOffer = OfferHelper.MakeCompensation(o.Parcel, "FinalEasement");
+            FinalOptionOffer = OfferHelper.MakeCompensation(o.Parcel, "FinalOption");
+            FinalROEOffer = OfferHelper.MakeCompensation(o.Parcel, "FinalROE");
         }
+
     }
     #endregion
     #region parcel graph
@@ -581,6 +621,7 @@ namespace ROWM.Controllers
         public string ParcelStatusCode { get; set; }
         public string ParcelStatus => this.ParcelStatusCode;        // to be removed
         public string RoeStatusCode { get; set; }
+        public string LandownerScore { get; set; }
         public string SitusAddress { get; set; }
         public double Acreage { get; set; }
 
@@ -598,24 +639,82 @@ namespace ROWM.Controllers
 
         internal ParcelGraph( Parcel p, IEnumerable<Document> d)
         {
-            ParcelId = p.ParcelId;
+            ParcelId = p.Assessor_Parcel_Number;
             ParcelStatusCode = p.ParcelStatusCode;
             //ParcelStatus = Enum.GetName(typeof(Parcel.RowStatus), p.ParcelStatus);
             RoeStatusCode = p.RoeStatusCode;
             SitusAddress = p.SitusAddress;
             
-            Acreage = p.Acreage;
-            InitialROEOffer = p.InitialROEOffer;
-            FinalROEOffer = p.FinalROEOffer;
-            InitialOptionOffer = p.InitialOptionOffer;
-            FinalOptionOffer = p.FinalOptionOffer;
-            InitialEasementOffer = p.InitialEasementOffer;
-            FinalEasementOffer = p.FinalEasementOffer;
+            Acreage = p.Acreage ?? 0;
+            InitialEasementOffer = OfferHelper.MakeCompensation(p, "InitialEasement");
+            InitialOptionOffer = OfferHelper.MakeCompensation(p, "InitialOption");
+            InitialROEOffer = OfferHelper.MakeCompensation(p, "InitialROE");
+            FinalEasementOffer = OfferHelper.MakeCompensation(p, "FinalEasement");
+            FinalOptionOffer = OfferHelper.MakeCompensation(p, "FinalOption");
+            FinalROEOffer = OfferHelper.MakeCompensation(p, "FinalROE");
 
-            Owners = p.Owners.Select( ox => new OwnerDto(ox.Owner));
-            ContactsLog =  p.ContactsLog.Select( cx => new ContactLogDto(cx));
+            Owners = p.Ownership.Select( ox => new OwnerDto(ox.Owner));
+            ContactsLog =  p.ContactLog.Select( cx => new ContactLogDto(cx));
             Documents = d.Select(dx => new DocumentHeader(dx));
         }
     }
     #endregion
+
+    #region offer helper
+    static class OfferHelper
+    {
+        internal static Compensation MakeCompensation(Parcel p, string k)
+        {
+
+            switch (k)
+            {
+                case "InitialEasement":
+                    return new Compensation
+                    {
+                        OfferAmount = p.InitialEasementOffer_OfferAmount ?? 0,
+                        OfferDate = p.InitialEasementOffer_OfferDate ?? DateTimeOffset.MinValue,
+                        OfferNotes = p.InitialEasementOffer_OfferNotes
+                    };
+                case "InitialOption":
+                    return new Compensation
+                    {
+                        OfferAmount = p.InitialOptionOffer_OfferAmount ?? 0,
+                        OfferDate = p.InitialOptionOffer_OfferDate ?? DateTimeOffset.MinValue,
+                        OfferNotes = p.InitialOptionOffer_OfferNotes
+                    };
+                case "InitialROE":
+                    return new Compensation
+                    {
+                        OfferAmount = p.InitialROEOffer_OfferAmount ?? 0,
+                        OfferDate = p.InitialROEOffer_OfferDate ?? DateTimeOffset.MinValue,
+                        OfferNotes = p.InitialROEOffer_OfferNotes
+                    };
+                case "FinalEasement":
+                    return new Compensation
+                    {
+                        OfferAmount = p.FinalEasementOffer_OfferAmount ?? 0,
+                        OfferDate = p.FinalEasementOffer_OfferDate ?? DateTimeOffset.MinValue,
+                        OfferNotes = p.FinalEasementOffer_OfferNotes
+                    };
+                case "FinalOption":
+                    return new Compensation
+                    {
+                        OfferAmount = p.FinalOptionOffer_OfferAmount ?? 0,
+                        OfferDate = p.FinalOptionOffer_OfferDate ?? DateTimeOffset.MinValue,
+                        OfferNotes = p.FinalOptionOffer_OfferNotes
+                    };
+                case "FinalROE":
+                    return new Compensation
+                    {
+                        OfferAmount = p.FinalROEOffer_OfferAmount ?? 0,
+                        OfferDate = p.FinalROEOffer_OfferDate ?? DateTimeOffset.MinValue,
+                        OfferNotes = p.FinalROEOffer_OfferNotes
+                    };
+                default:
+                    throw new IndexOutOfRangeException();
+            }
+        }
+    }
+    #endregion
+
 }

@@ -7,7 +7,7 @@ using System.Security;
 using Microsoft.SharePoint.Client;
 using OfficeDevPnP.Core;
 using System.Text.RegularExpressions;
-using com.hdr.Rowm.Sunflower;
+using ROWM.Dal;
 
 namespace SharePointInterface
 {
@@ -29,11 +29,13 @@ namespace SharePointInterface
     public class SharePointCRUD : ISharePointCRUD
     {
         // staging URL to move to app config
-        static readonly string _STAGING_SITE_URL = "https://hdroneview.sharepoint.com/row_dev";
+        static readonly string _STAGING_SITE_URL = "https://b2hpm.sharepoint.com/staging";
+
+        static readonly string _DOCUMENT_LIST_BASE = "Documents"; // "Parcel Documents";
 
         private ClientContext _ctx;
-        private string _parcelsFolderName;
-        private string _parcelsFolderTemplate;
+        private string _parcelsFolderName = "HDR Project/14. ROW/14.1 Parcels";
+        private string _parcelsFolderTemplate = "Documents/HDR Project/14. ROW/14.1 Parcels/_County_Parcel ID_LO Name"; // "Folder_Template";
         private string _siteUrl;
         // private Dictionary<string, string> _docTypes;
         private DocType _docTypes;
@@ -42,9 +44,9 @@ namespace SharePointInterface
         {
             _docTypes = d;
 
-            _parcelsFolderName = "4.0 ROW/4.3 Parcels";
+            //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
             _siteUrl = _STAGING_SITE_URL; //  "https://hdroneview.sharepoint.com/SF-CH-TS";
-            _parcelsFolderTemplate = "Documents/4.0 ROW/4.3 Parcels/_Parcel No_LO Name";
+            //_parcelsFolderTemplate = "Documents/4.0 ROW/4.3 Parcels/_Parcel No_LO Name";
             //if (docTypes == null)
             //{
             //    _docTypes = new Dictionary<string, string>();
@@ -96,35 +98,43 @@ namespace SharePointInterface
              * STAGING---
              * 
              * The app identifier has been successfully created.
-            Client Id:  	26589ee5-16ef-4444-9143-cfea08cba1cc
-            Client Secret:  	B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=
-            Title:  	rowm_staging
-            App Domain:  	rowm_staging.hdrinc.com
-            Redirect URI:  	https://rowm_staging.hdrinc.com
+                The app identifier has been successfully created.
+                Client Id:  	3dff29b2-ae04-4ad4-8149-eb703d62b16f
+                Client Secret:  	bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=
+                Title:  	rowm_staging
+                App Domain:  	b2hrowmgr.hdrinc.com
+                Redirect URI:  	https://b2hrowmgr.hdrinc.com
+
+
+            The app identifier has been successfully created.
+            Client Id:  	baa9400f-d050-4564-9394-71e71b8feacd
+            Client Secret:  	ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=
+            Title:  	rowm_stg
+            App Domain:  	b2hrowmgr.azurewebsites.net
+            Redirect URI:  	https://b2hrowmgr.azurewebsites.net
              */
 
             if (_appId == null || _appSecret == null )
             {
-                //_appId = "a6fad0e8-3e1f-42eb-89f2-6cb8e1dcb329";
-                //_appSecret = "FMMJTzMMkP8CZOsL1IP3JvSoVWAOrF90zGxKVmUc2tc=";
-                _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc";
-                _appSecret = "B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=";
+                //_appId = "3dff29b2-ae04-4ad4-8149-eb703d62b16f";
+                //_appSecret = "bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=";
+                _appId = "baa9400f-d050-4564-9394-71e71b8feacd";
+                _appSecret = "ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=";
+           }
 
-            }
+            // Method using Sharepoint Credentials
+            //_ctx = new ClientContext(_siteUrl);
+            //var passWord = new SecureString();
+            //foreach (char c in "pwd".ToCharArray()) passWord.AppendChar(c);
+            //_ctx.Credentials = new SharePointOnlineCredentials("<sharepoint_user>@hdrinc.com", passWord);
 
-    // Method using Sharepoint Credentials
-    //_ctx = new ClientContext(_siteUrl);
-    //var passWord = new SecureString();
-    //foreach (char c in "pwd".ToCharArray()) passWord.AppendChar(c);
-    //_ctx.Credentials = new SharePointOnlineCredentials("<sharepoint_user>@hdrinc.com", passWord);
+            // Method using AppID
+            // Using OfficeDevPnp.Core
+            // https://github.com/SharePoint/PnP-Sites-Core/blob/master/Core/README.md
+            //string _appId = "APPID";
+            //string _appSecret = "SECRET";
 
-    // Method using AppID
-    // Using OfficeDevPnp.Core
-    // https://github.com/SharePoint/PnP-Sites-Core/blob/master/Core/README.md
-    //string _appId = "APPID";
-    //string _appSecret = "SECRET";
-
-    AuthenticationManager authManager = new AuthenticationManager();
+            AuthenticationManager authManager = new AuthenticationManager();
             _ctx = authManager.GetAppOnlyAuthenticatedContext(_siteUrl, _appId, _appSecret);
         }
 
@@ -151,7 +161,7 @@ namespace SharePointInterface
         {
             if (String.IsNullOrWhiteSpace(baseFolderName))
             {
-                baseFolderName = "Documents/" + _parcelsFolderName;
+                baseFolderName = string.IsNullOrWhiteSpace(baseFolderName) ? $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}" : $"{_DOCUMENT_LIST_BASE}/{baseFolderName}";
             }
             if (String.IsNullOrWhiteSpace(folderTemplate))
             {
@@ -159,7 +169,7 @@ namespace SharePointInterface
             }
 
             Web web = _ctx.Web;
-            List list = web.Lists.GetByTitle("Documents");
+            List list = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
 
             string targetFolderPath = String.Format("{0}/{1}", baseFolderName, folderName);
             //List <string> pathList = new List<string> { "4.0 ROW", "4.3 Parcels", folderName };
@@ -174,7 +184,7 @@ namespace SharePointInterface
                 Console.WriteLine("Folder {0} exists in {1}", folderName, baseFolderName);
             } else {
                 //EnsureAndGetTargetFolder(_ctx, list, pathList);
-                CopyPasteFolder(folderTemplate, "Documents", baseFolderName, "Documents", folderName);
+                CopyPasteFolder(folderTemplate, _parcelsFolderTemplate, baseFolderName, _DOCUMENT_LIST_BASE, folderName);
             }
 
             Folder newFolder = web.GetFolderByServerRelativeUrl(targetFolderPath);
@@ -209,7 +219,7 @@ namespace SharePointInterface
 
             // Get Parcel folder list
             Web web = _ctx.Web;
-            List parcelFolders = web.Lists.GetByTitle("Documents");
+            List parcelFolders = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
 
             // Get Parcel Folder Name
             string parcelFolderName = GetParcelFolderName(pid);
@@ -244,7 +254,7 @@ namespace SharePointInterface
 
             // Get Parcel folder list
             Web web = _ctx.Web;
-            List parcelFolders = web.Lists.GetByTitle("Documents");
+            List parcelFolders = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
 
             // Get Parcel Folder Name
             string parcelFolderName = GetParcelFolderName(pid);
@@ -287,7 +297,7 @@ namespace SharePointInterface
 
             if (String.IsNullOrWhiteSpace(baseFolderName))
             {
-                baseFolderName = "Documents/" + _parcelsFolderName;
+                baseFolderName = string.IsNullOrWhiteSpace(baseFolderName) ? _DOCUMENT_LIST_BASE : $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}"; //  "Documents/" + _parcelsFolderName;
             }
 
             Web web = _ctx.Web;
@@ -315,8 +325,16 @@ namespace SharePointInterface
 
             string doctypePath = dt.FolderPath;
 
-            doctypePath = String.Format("{0}/{1}/{2}", baseFolderName, parcelFolderName, doctypePath);
-            return doctypePath.Split('/').ToList();
+            var list = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(baseFolderName))
+                list.AddRange(baseFolderName.Split('/'));
+            list.Add(parcelFolderName);
+            list.Add(docType);
+            return list;
+
+            //doctypePath = String.Format("{0}/{1}/{2}", baseFolderName, parcelFolderName, doctypePath);
+            //return doctypePath.Split('/').ToList();
         }
 
         // Doc Exists

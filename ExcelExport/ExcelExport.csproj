@@ -143,6 +143,10 @@
       <Project>{45fcf3b8-2fd3-4ebb-80c9-4cf24ca0500d}</Project>
       <Name>Export.Dal</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ROWM2.Dal\ROWM2.Dal.csproj">
+      <Project>{23d465b8-d88e-4979-ad4e-891b744d6d1e}</Project>
+      <Name>ROWM2.Dal</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
