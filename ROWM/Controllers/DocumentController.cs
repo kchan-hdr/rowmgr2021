@@ -282,6 +282,7 @@ namespace ROWM.Controllers
                         // multipart headers length limit is already in effect.
                         var key = HeaderUtilities.RemoveQuotes(contentDisposition.Name);
                         var encoding = GetEncoding(section);
+                        if (encoding == null) continue;
                         using (var streamReader = new StreamReader(
                             section.Body,
                             encoding,

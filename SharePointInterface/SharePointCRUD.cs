@@ -45,7 +45,7 @@ namespace SharePointInterface
             _docTypes = d;
 
             //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
-            _siteUrl = "https://b2hpm.sharepoint.com"; //  "https://hdroneview.sharepoint.com/SF-CH-TS";
+            _siteUrl = _STAGING_SITE_URL; //  "https://hdroneview.sharepoint.com/SF-CH-TS";
             //_parcelsFolderTemplate = "Documents/4.0 ROW/4.3 Parcels/_Parcel No_LO Name";
             //if (docTypes == null)
             //{
