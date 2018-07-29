@@ -116,10 +116,10 @@ namespace SharePointInterface
 
             if (_appId == null || _appSecret == null )
             {
-                //_appId = "3dff29b2-ae04-4ad4-8149-eb703d62b16f";
-                //_appSecret = "bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=";
-                _appId = "baa9400f-d050-4564-9394-71e71b8feacd";
-                _appSecret = "ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=";
+                _appId = "3dff29b2-ae04-4ad4-8149-eb703d62b16f";
+                _appSecret = "bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=";
+                //_appId = "baa9400f-d050-4564-9394-71e71b8feacd";
+                //_appSecret = "ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=";
            }
 
             // Method using Sharepoint Credentials
@@ -170,7 +170,7 @@ namespace SharePointInterface
 
             Web web = _ctx.Web;
             List list = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
-
+            
             string targetFolderPath = String.Format("{0}/{1}", baseFolderName, folderName);
             //List <string> pathList = new List<string> { "4.0 ROW", "4.3 Parcels", folderName };
             Folder baseFolder = web.GetFolderByServerRelativeUrl(baseFolderName);
@@ -330,7 +330,7 @@ namespace SharePointInterface
             if (!string.IsNullOrWhiteSpace(baseFolderName))
                 list.AddRange(baseFolderName.Split('/'));
             list.Add(parcelFolderName);
-            list.Add(docType);
+            list.Add(doctypePath);
             return list;
 
             //doctypePath = String.Format("{0}/{1}/{2}", baseFolderName, parcelFolderName, doctypePath);
