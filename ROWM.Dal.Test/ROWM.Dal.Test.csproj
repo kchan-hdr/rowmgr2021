@@ -70,9 +70,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ROWM.Dal\ROWM.Dal.csproj">
-      <Project>{b84ba747-f2a6-4804-be7a-5f76d5ed2826}</Project>
-      <Name>ROWM.Dal</Name>
+    <ProjectReference Include="..\ROWM2.Dal\ROWM2.Dal.csproj">
+      <Project>{23d465b8-d88e-4979-ad4e-891b744d6d1e}</Project>
+      <Name>ROWM2.Dal</Name>
     </ProjectReference>
     <ProjectReference Include="..\ROWM\ROWM.csproj">
       <Project>{31360b6a-20fe-4159-a5f6-081e6126d04a}</Project>

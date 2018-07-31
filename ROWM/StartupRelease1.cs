@@ -47,12 +47,17 @@ namespace ROWM
                 o.ValueLengthLimit = int.MaxValue;
                 o.MultipartBodyLengthLimit = int.MaxValue;
             });
+
+            var cs = Configuration.GetConnectionString("rowm");
             //services.AddScoped<ROWM.Dal.ROWM_Context>();
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
-           {
-               var cs = Configuration.GetConnectionString("rowm");
+            {
                return new Dal.ROWM_Context(cs);
-           });
+            });
+            services.AddScoped<com.hdr.Rowm.Export.RowmEntities>(fac =>
+            {
+                return new com.hdr.Rowm.Export.RowmEntities(cs);
+            });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddSingleton<Controllers.ParcelStatusHelper>();
