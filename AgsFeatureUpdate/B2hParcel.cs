@@ -45,91 +45,108 @@ namespace geographia.ags
             return r;
         }
 
-        public async Task<bool> Update(string parcelId, int status)
+        public async Task<IEnumerable<Status_dto>> GetParcels(string pid)
+        {
+            if (string.IsNullOrWhiteSpace(pid))
+                throw new ArgumentNullException("parcel apn");
+
+            var req = $"{_URL}/{_LAYERID}/query?f=json&where=PARCEL_ID%3D'{pid}'&returnGeometry=false&returnIdsOnly=false&outFields=OBJECTID,PARCEL_ID,ParcelStatus,ROE_Status,Documents";
+            var r = await GetAll<Status_dto>(req, (arr) =>
+            {
+                var list = new List<Status_dto>();
+
+                foreach (var f in arr)
+                {
+                    var s = new Status_dto();
+                    s.OBJECTID = f["attributes"].Value<int>("OBJECTID");
+                    s.ParcelId = f["attributes"].Value<string>("PARCEL_ID");
+                    s.ParcelStatus = f["attributes"].Value<string>("ParcelStatus");
+                    s.RoeStatus = f["attributes"].Value<string>("ROE_Status");
+                    s.Documents = f["attributes"].Value<string>("Documents");
+                    list.Add(s);
+                }
+
+                return list;
+            });
+
+            return r;
+        }
+
+        public async Task<bool> Update(IEnumerable<UpdateFeature> u)
+        {
+            var req = JsonConvert.SerializeObject(u);
+            req = $"features={req}&f=json&gdbVersion=&rollbackOnFailure=true";
+            var reqContent = new StringContent(req);
+            reqContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
+            return await base.Update(_LAYERID, reqContent);
+        }
+
+        async Task<bool> IFeatureUpdate.UpdateFeatureDocuments(string parcelId, string documentURL)
         {
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
-
-            if (status < 0)
-                throw new ArgumentNullException(nameof(status));
 
             var oid = await Find(0, $"PARCEL_ID='{parcelId}'");
-            var u = new UpdateFeature[]
+            var u = oid.Select(i => new UpdateFeature
             {
-                new UpdateFeature
+                attributes = new Status_Req
                 {
-                    attributes = new Status_Req
-                    {
-                        OBJECTID = oid,
-                        ParcelStatus = status
-                    }
+                    OBJECTID = i,
+                    Documents = documentURL
                 }
-            };
-
-            var req = JsonConvert.SerializeObject(u);
-            // req = Uri.EscapeDataString(req);
-            req = $"features={req}&f=json&gdbVersion=&rollbackOnFailure=true";
-            var reqContent = new StringContent(req);
-            reqContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
-
-            return await base.Update(_LAYERID, reqContent);
+            });
+            return await this.Update(u);
         }
 
-        public async Task<bool> Update2(string parcelId, Status_Req d)
+        async Task<bool> IFeatureUpdate.UpdateFeature(string parcelId, int status)
         {
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
 
-            var u = new UpdateFeature[]
+            var oid = await Find(0, $"PARCEL_ID='{parcelId}'");
+            var u = oid.Select(i => new UpdateFeature
             {
-                new UpdateFeature
+                attributes = new Status_Req
                 {
-                    attributes = d
+                    OBJECTID = i,
+                    ParcelStatus = status
                 }
-            };
-
-            var req = JsonConvert.SerializeObject(u);
-            req = Uri.EscapeDataString(req);
-            req = $"features={req}&f=json&gdbVersion=&rollbackOnFailure=true";
-            var reqContent = new StringContent(req);
-            reqContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
-
-            return await base.Update(_LAYERID, reqContent);
+            });
+            return await this.Update(u);
         }
-
-        public async Task<bool> UpdateDocumentURL(string parcelId, Documents_Req doc_req)
-        {
-            if (string.IsNullOrWhiteSpace(parcelId))
-                throw new ArgumentNullException(nameof(parcelId));
-
-            var u = new UpdateFeatureDoc[]
-            {
-                new UpdateFeatureDoc
-                {
-                    attributes = doc_req
-                }
-            };
-
-            var req = JsonConvert.SerializeObject(u);
-            req = Uri.EscapeDataString(req);
-            req = $"features={req}&f=json&gdbVersion=&rollbackOnFailure=true";
-            var reqContent = new StringContent(req);
-            reqContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
-
-            return await base.Update(_LAYERID, reqContent);
-        }
-        async Task<bool> IFeatureUpdate.UpdateFeature(string parcelId, int status) => await this.Update(parcelId, status);
         async Task<bool> IFeatureUpdate.UpdateFeatureRoe(string parcelId, int status)
         {
+            if (string.IsNullOrWhiteSpace(parcelId))
+                throw new ArgumentNullException(nameof(parcelId));
+
             var oid = await Find(0, $"PARCEL_ID='{parcelId}'");
-            return await this.Update2(parcelId, new Status_Req { OBJECTID = oid, ROE_Status = status });
-        }
-        async Task<bool> IFeatureUpdate.UpdateFeatureDocuments(string parcelId, string documentsUrl)
-        {
-            var oid = await Find(0, $"PARCEL_ID='{parcelId}'");
-            return await this.UpdateDocumentURL(parcelId, new Documents_Req { OBJECTID = oid, Documents = documentsUrl });
+            var u = oid.Select(i => new UpdateFeature
+            {
+                attributes = new Status_Req
+                {
+                    OBJECTID = i,
+                    ROE_Status = status
+                }
+            });
+            return await this.Update(u);
         }
 
+        async Task<bool> IFeatureUpdate.UpdateRating(string parcelId, int rating)
+        {
+            if (string.IsNullOrWhiteSpace(parcelId))
+                throw new ArgumentNullException(nameof(parcelId));
+
+            var oid = await Find(0, $"PARCEL_ID='{parcelId}'");
+            var u = oid.Select(i => new UpdateFeature
+            {
+                attributes = new Status_Req
+                {
+                    OBJECTID = i,
+                    Landowner_Score = rating
+                }
+            });
+            return await this.Update(u);
+        }
         #region request
         public class UpdateRequest
         {
@@ -149,18 +166,10 @@ namespace geographia.ags
             public int? ParcelStatus { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public int? ROE_Status { get; set; }
-        }
-
-        public class Documents_Req
-        {
-            public int OBJECTID { get; set; }
-            [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public int? Landowner_Score { get; set; }
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Documents { get; set; }
-        }
-
-        public class UpdateFeatureDoc
-        {
-            public Documents_Req attributes { get; set; }
         }
         #endregion
 
@@ -171,6 +180,7 @@ namespace geographia.ags
             public string ParcelId { get; set; }
             public string ParcelStatus { get; set; }
             public string RoeStatus { get; set; }
+            public string Landowner_Score { get; set; }
             public string Documents { get; set; }
         }
         #endregion

@@ -21,7 +21,7 @@ namespace geographia.ags
             _Client = new HttpClient();
         }
 
-        public virtual async Task<int> Find(int layerId, string query)
+        public virtual async Task<IEnumerable<int>> Find(int layerId, string query)
         {
             if (layerId < 0)
                 throw new ArgumentNullException(nameof(layerId));
@@ -42,13 +42,7 @@ namespace geographia.ags
             if (idx.Type == JTokenType.Array)
             {
                 var ids = (JArray)idx;
-                if (ids != null && ids.Count() > 0)
-                {
-                    if (ids.Count() > 1)
-                        Trace.TraceWarning($"'{query}' returned more than 1 record");
-
-                    return (int)ids.First();
-                }
+                return ids.Select<JToken,int>(id => id.Value<int>());
             }
 
             throw new KeyNotFoundException(query);

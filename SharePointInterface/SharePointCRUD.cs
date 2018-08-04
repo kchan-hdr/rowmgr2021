@@ -46,53 +46,6 @@ namespace SharePointInterface
 
             //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
             _siteUrl = _STAGING_SITE_URL; //  "https://hdroneview.sharepoint.com/SF-CH-TS";
-            //_parcelsFolderTemplate = "Documents/4.0 ROW/4.3 Parcels/_Parcel No_LO Name";
-            //if (docTypes == null)
-            //{
-            //    _docTypes = new Dictionary<string, string>();
-            //    _docTypes.Add("Other", "4.3.7 Reference");
-            //    _docTypes.Add("ROE Package Original", "4.3.1 ROE/3 Final Sent to LO");
-            //    _docTypes.Add("ROE Package Updated", "4.3.1 ROE/3 Final Sent to LO");
-            //    _docTypes.Add("ROE Package Received by Owner", "4.3.1 ROE/4 Signed");
-            //    _docTypes.Add("ROE Package Signed", "4.3.1 ROE/4 Signed");
-            //    _docTypes.Add("ROE Sent to Client", "4.3.1 ROE/4 Signed");
-
-            //    _docTypes.Add("Market Study", "4.3.7 Reference");
-            //    _docTypes.Add("Survey", "4.3.7 Reference");
-            //    _docTypes.Add("Appraisal", "4.3.7 Reference");
-
-            //    _docTypes.Add("Option Offer Package Original", "4.3.2 Option Agreement/1 Option Agreement Working");
-            //    _docTypes.Add("Option Offer Package Updated", "4.3.2 Option Agreement/2 Option Agreement QC");
-            //    _docTypes.Add("Option Offer Package Received by Owner", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
-            //    _docTypes.Add("Option Offer Package Signed", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
-            //    _docTypes.Add("Option Offer Package Sent to Client", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
-            //    _docTypes.Add("Option Compensation Check Cut", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
-            //    _docTypes.Add("Option Documents Recorded", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
-            //    _docTypes.Add("Option Compensation Received by Owner", "4.3.2 Option Agreement/4 Option Agreement Signed Recorded Payment");
-
-            //    _docTypes.Add("Acquistion Offer Package Original", "4.3.3 Easement/3 Easement Final Sent to LO");
-            //    _docTypes.Add("Acquistion Offer Package Updated", "4.3.3 Easement/3 Easement Final Sent to LO");
-            //    _docTypes.Add("Acquisition Notice of Intent Package", "4.3.3 Easement/3 Easement Final Sent to LO");
-            //    _docTypes.Add("Acquistion Offer Package Received by Owner", "4.3.3 Easement/4  Easement Signed Recorded Payment");
-            //    _docTypes.Add("Acquisition Final Offer Package", "4.3.3 Easement/3 Easement Final Sent to LO");
-            //    _docTypes.Add("Acquistion Offer Package Signed", "4.3.3 Easement/4  Easement Signed Recorded Payment");
-            //    _docTypes.Add("Acquistion Offer Packet Sent to Client", "4.3.3 Easement/4  Easement Signed Recorded Payment");
-            //    _docTypes.Add("Acquisition Compensation Check Cut", "4.3.3 Easement/4  Easement Signed Recorded Payment");
-            //    _docTypes.Add("Acquisition Documents Recorded", "4.3.3 Easement/4  Easement Signed Recorded Payment");
-            //    _docTypes.Add("Acquisition Compensation Received by Owner", "4.3.3 Easement/4  Easement Signed Recorded Payment");
-
-            //    _docTypes.Add("Construction Damages Packet Original", "4.3.4 Restoration");
-            //    _docTypes.Add("Construction Damages Packet Updated", "4.3.4 Restoration");
-            //    _docTypes.Add("Construction Damages Packet Signed", "4.3.4 Restoration");
-            //    _docTypes.Add("Construction Damages Packet Sent to Client", "4.3.4 Restoration");
-            //    _docTypes.Add("Construction Damages Check Cut", "4.3.4 Restoration");
-            //    _docTypes.Add("Construction Damages Compensation Received by Owner", "4.3.4 Restoration");
-
-            //}
-            //else
-            //{
-            //    _docTypes = docTypes;
-            //}
 
             /*
              * STAGING---
@@ -297,7 +250,7 @@ namespace SharePointInterface
 
             if (String.IsNullOrWhiteSpace(baseFolderName))
             {
-                baseFolderName = string.IsNullOrWhiteSpace(baseFolderName) ? _DOCUMENT_LIST_BASE : $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}"; //  "Documents/" + _parcelsFolderName;
+                baseFolderName = $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}"; //  "Documents/" + _parcelsFolderName;
             }
 
             Web web = _ctx.Web;

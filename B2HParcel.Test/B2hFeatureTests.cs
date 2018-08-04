@@ -32,10 +32,23 @@ namespace B2HParcel.Test
             var good = await ((IFeatureUpdate)h).UpdateFeatureDocuments(pid, url);
             Assert.True(good);
 
-            var dtos = await h.GetAllParcels();
-            var p = dtos.First(px => px.ParcelId.Equals(pid));
-            Assert.Equal(url, p.Documents);
+            var dtos = await h.GetParcels(pid);
+            _log.WriteLine($"found {dtos.Count()}");
+            foreach (var dto in dtos.Where(px => px.ParcelId.Equals(pid)))
+            {
+                _log.WriteLine($"{dto.Documents}");
+                Assert.Equal(url, dto.Documents);
+            }
+        }
 
+        [Theory, Trait("Category", "AGS")]
+        [InlineData("03S36E00500", 4)]
+        public async Task Find_Parts(string pid, int cnt)
+        {
+            var h = new B2hParcel();
+            var dtos = await h.Find(0, $"PARCEL_ID='{pid}'");
+
+            Assert.Equal(cnt, dtos.Count());
         }
     }
 }

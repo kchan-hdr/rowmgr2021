@@ -298,7 +298,7 @@ namespace ROWM.Controllers
             };
 
             var log = await _repo.AddContactLog(myParcels, logRequest.ContactIds, l);
-
+           
             return Json(new ContactLogDto(log));
         }
         [Route("parcels/{pid}/logs/{lid}"), HttpPost]
@@ -343,6 +343,7 @@ namespace ROWM.Controllers
         async Task<bool> RecordParcelFirstContact(IEnumerable<string> parcelIds)
         {
             var good = true;
+            var tasks = new List<Task>();
             foreach( var pid in parcelIds)
             {
                 var p = await _repo.GetParcel(pid);
@@ -351,16 +352,10 @@ namespace ROWM.Controllers
                     p.ParcelStatusCode = "Owner_Contacted";
                     //p.ParcelStatus = Parcel.RowStatus.Owner_Contacted;
 
-                    // IFeatureUpdate fs = new SunflowerParcel();
-                    // we have contact. domain values do not match. need to fix.
-
-                    //////////if (!await _featureUpdate.UpdateFeature(p.ParcelId, 1))
-                    //////////{
-                    //////////    good = false;
-                    //////////    Trace.TraceWarning($"update failed 'pid'");
-                    //////////}
+                    tasks.Add(_featureUpdate.UpdateFeature(p.Assessor_Parcel_Number, 1));
                 }
             }
+            await Task.WhenAll(tasks);
 
             return good;
         }
@@ -378,6 +373,8 @@ namespace ROWM.Controllers
             var touched = 0;
             if (_statusHelper.IsValidScore(score))
             {
+                var tasks = new List<Task>();
+
                 foreach (var pid in parcelIds)
                 {
                     var p = await _repo.GetParcel(pid);
@@ -388,8 +385,13 @@ namespace ROWM.Controllers
                         p.LastModified = ts;
                         p.ModifiedBy = _APP_NAME;
                         touched++;
+
+                        // tasks.Add(_repo.UpdateParcel(p));
+                        tasks.Add(_featureUpdate.UpdateRating(p.Assessor_Parcel_Number, score));
                     }
                 }
+
+                await Task.WhenAll(tasks);
             }
             return touched;
         }
