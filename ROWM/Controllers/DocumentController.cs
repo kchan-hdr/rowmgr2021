@@ -287,7 +287,7 @@ namespace ROWM.Controllers
                         // multipart headers length limit is already in effect.
                         var key = HeaderUtilities.RemoveQuotes(contentDisposition.Name);
                         var encoding = GetEncoding(section);
-                        if (encoding == null) continue;
+                        if (encoding == null) break;
                         using (var streamReader = new StreamReader(
                             section.Body,
                             encoding,
@@ -315,6 +315,9 @@ namespace ROWM.Controllers
                 // reads the headers for the next section.
                 section = await reader.ReadNextSectionAsync();
             }
+
+            if (string.IsNullOrWhiteSpace(targetFilePath))
+                return NoContent();
 
             var bb = System.IO.File.ReadAllBytes(targetFilePath);
 

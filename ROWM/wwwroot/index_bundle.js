@@ -50609,6 +50609,9 @@ var MapArea = __webpack_require__(342);
 var DataServices = __webpack_require__(346); // require("../../mock/dataServices");
 var dSvcs = new DataServices();
 
+var printViewModel = {};
+var exportUrl = "";
+
 // var ownerArr;
 
 var Application = function (_React$Component) {
@@ -50637,8 +50640,14 @@ var Application = function (_React$Component) {
             parcelTotal: null,
             rightPanel: "stats",
             roeStatArray: [],
+            channelArray: [],
+            purposeArray: [],
+            relationArray: [],
             scoreArray: [],
-            agents: []
+            agents: [],
+            doSketch: false,
+            waitingExport: false,
+            hasExport: false
         };
 
         _this.toggleMenu = _this.toggleMenu.bind(_this);
@@ -50681,7 +50690,12 @@ var Application = function (_React$Component) {
 
         // dropdowns
         dSvcs.getLookups().then(function (d) {
-            app.setState({ agents: d.agents, scoreArray: d.score });
+            app.setState({
+                agents: d.agents,
+                relationArray: d.relationTypes,
+                scoreArray: d.score,
+                channelArray: d.channels,
+                purposeArray: d.purposes });
         });
 
         // doc type dropdown
@@ -50736,6 +50750,7 @@ var Application = function (_React$Component) {
     }, {
         key: "setOverlay",
         value: function setOverlay(ol, newVal) {
+            console.log(ol);
             if (newVal != null) {
                 switch (ol) {
                     case "contact-log":
@@ -50756,7 +50771,14 @@ var Application = function (_React$Component) {
                         this.setState({ overlayShowing: ol });break;
                 }
             } else {
-                this.setState({ overlayShowing: ol });
+                switch (ol) {
+                    case "add-contact-log":
+                        this.setState({ overlayShowing: ol, doSketch: true });break;
+                    case "add-markup":
+                        this.setState({ doSketch: true });break;
+                    default:
+                        this.setState({ overlayShowing: ol, doSketch: false });
+                }
             }
         }
 
@@ -50786,7 +50808,7 @@ var Application = function (_React$Component) {
                 }
             };
 
-            xmlHR.open("POST", "/api/addDocument", true);
+            xmlHR.open("POST", dSvcs.baseUrl() + "/addDocument", true);
             xmlHR.send(fData);
         }
     }, {
@@ -50800,11 +50822,12 @@ var Application = function (_React$Component) {
                 var moreParcels = newObj.parcels.splice(1);
 
                 if (type == "logs") {
-                    dSvcs.addContactLog(newObj.agent, newObj.parcels[0], moreParcels, newObj.contacts, newObj.type, newObj.title, newObj.score, newObj.notes, date, newObj.phase).then(function (b) {
+                    app.setState({ doSketch: false });
+                    dSvcs.addContactLog(newObj.agent, newObj.parcels[0], moreParcels, newObj.contacts, newObj.type, newObj.title, newObj.score, newObj.notes, date, newObj.phase, exportUrl).then(function (b) {
                         dSvcs.getParcel(app.state.currentParcel).then(function (d) {
                             app.setState({ currentParcel: app.state.currentParcel, parcelDetails: d });
                         });
-
+                        exportUrl = "";
                         app.uploadAttachment(b, newObj.fileinput, newObj.title, newObj.parcels);
                     });
                 } else {
@@ -50949,13 +50972,13 @@ var Application = function (_React$Component) {
                         setOverlay: this.setOverlay });break;
                 case "add-contact":
                     overlay = React.createElement(AddContact, {
-                        parcel: this.state.parcelDetails,
+                        parcel: this.state.parcelDetails, relationships: this.state.relationArray,
                         setOverlay: this.setOverlay,
                         saveData: this.saveData });break;
                 case "edit-contact":
                     overlay = React.createElement(AddContact, {
                         contact: this.state.contactToEdit,
-                        parcel: this.state.parcelDetails,
+                        parcel: this.state.parcelDetails, relationships: this.state.relationArray,
                         setOverlay: this.setOverlay,
                         saveData: this.saveData });break;
 
@@ -50963,7 +50986,8 @@ var Application = function (_React$Component) {
                     overlay = React.createElement(LogInfoOverlay, {
                         changePanel: this.setRightPanel,
                         data: dSvcs,
-                        log: this.state.logToShow, lookup: this.state.scoreArray,
+                        log: this.state.logToShow,
+                        lookup: this.state.scoreArray,
                         panel: this.state.rightPanel,
                         parcel: this.state.parcelDetails,
                         setOverlay: this.setOverlay });break;
@@ -50998,15 +51022,19 @@ var Application = function (_React$Component) {
 
                 case "add-contact-log":
                     overlay = React.createElement(AddContactLogOverlay, {
-                        owner: this.state.currentOwner, agents: this.state.agents, lookup: this.state.scoreArray, data: dSvcs,
+                        owner: this.state.currentOwner, agents: this.state.agents, data: dSvcs,
+                        purposes: this.state.purposeArray, channels: this.state.channelArray, scores: this.state.scoreArray,
                         panel: this.state.rightPanel,
                         parcel: this.state.currentParcel,
                         parcelDetails: this.state.parcelDetails,
                         saveData: this.saveData,
+                        snapshoot: this._snapMap.bind(this), waitingExport: this.state.waitingExport,
                         setOverlay: this.setOverlay });break;
+
                 case "edit-contact-log":
                     overlay = React.createElement(AddContactLogOverlay, {
-                        log: this.state.logToShow, agents: this.state.agents, lookup: this.state.scoreArray,
+                        log: this.state.logToShow, agents: this.state.agents,
+                        purposes: this.state.purposeArray, channels: this.state.channelArray, scores: this.state.scoreArray,
                         owner: this.state.currentOwner,
                         panel: this.state.rightPanel,
                         parcel: this.state.currentParcel,
@@ -51086,7 +51114,7 @@ var Application = function (_React$Component) {
                     React.createElement(
                         "div",
                         { id: "body-container" },
-                        React.createElement(MapArea, { ident: this._parcel_details }),
+                        React.createElement(MapArea, { ident: this._parcel_details, doSketch: this.state.doSketch, callback: this._loadedMap }),
                         React.createElement(
                             "div",
                             { id: "right-bar" },
@@ -51168,6 +51196,28 @@ var Application = function (_React$Component) {
                     overlay
                 )
             );
+        }
+    }, {
+        key: "_loadedMap",
+        value: function _loadedMap(printvm) {
+            console.log("loaded map view");console.log(printvm);
+            printViewModel = printvm;
+        }
+    }, {
+        key: "_snapMap",
+        value: function _snapMap() {
+            var _this2 = this;
+
+            this.setState({ waitingExport: true });
+            printViewModel.print({ format: "pdf", layout: "map_only", exportOptions: { width: 800, height: 1100, dpi: 96 } }).then(function (d) {
+                console.log(d.url);exportUrl = d.url;_this2.setState({ waitingExport: false });
+            }, function (e) {
+                alert(e.message);_this2.setState({ waitingExport: false });
+            });
+            // not sure which promise Esri is using...
+            // .when( function(d) {
+            //        console.log(d);
+            //    });
         }
     }]);
 
@@ -52277,6 +52327,12 @@ var ParcelPanel = function (_React$Component) {
                         launchOverlay: this.props.launchOverlay,
                         logs: clog,
                         list: clog }),
+                    React.createElement(
+                        "a",
+                        { href: "javascript:void(0);", className: "red-button", style: { float: "left" }, onClick: this.props.launchOverlay.bind(null, "add-markup", null) },
+                        React.createElement("img", { src: "assets/images/icon-pencil.png", alt: "", "aria-hidden": "true" }),
+                        "Add markup"
+                    ),
                     React.createElement(
                         "a",
                         { href: "javascript:void(0);", className: "red-button", onClick: this.props.launchOverlay.bind(null, "add-contact-log", null) },
@@ -53623,7 +53679,7 @@ var DocInfoOverlay = function (_React$Component) {
     }, {
         key: "getDownloadLink",
         value: function getDownloadLink(id) {
-            return "/api/documents/" + id;
+            return this.props.data.baseUrl() + "/documents/" + id;
         }
     }, {
         key: "render",
@@ -53766,7 +53822,7 @@ var DocInfoOverlay = function (_React$Component) {
                         { className: "document-links" },
                         React.createElement(
                             "a",
-                            { href: this.getDownloadLink(list.documentId), target: "_blank" },
+                            { href: this.getDownloadLink(list.documentId), target: "_blank", download: true },
                             "Download"
                         )
                     )
@@ -53892,6 +53948,14 @@ var AddContact = function (_React$Component) {
                 submitFunction = this.saveData.bind(this, "edit-contact");
             }
 
+            var relationDropdown = this.props.relationships.map(function (a) {
+                return React.createElement(
+                    "option",
+                    { id: "{a.code}", key: a.key },
+                    a.description
+                );
+            });
+
             return React.createElement(
                 "div",
                 { id: "add-contact-log-overlay", className: "shorter" },
@@ -53970,36 +54034,7 @@ var AddContact = function (_React$Component) {
                         React.createElement(
                             "select",
                             { id: "add-contact-relationship", name: "add-contact-relationship", defaultValue: editRelationship },
-                            React.createElement(
-                                "option",
-                                { id: "Self" },
-                                "Self"
-                            ),
-                            React.createElement(
-                                "option",
-                                { id: "Spouse" },
-                                "Spouse"
-                            ),
-                            React.createElement(
-                                "option",
-                                { id: "Child" },
-                                "Child"
-                            ),
-                            React.createElement(
-                                "option",
-                                { id: "Tenant" },
-                                "Tenant"
-                            ),
-                            React.createElement(
-                                "option",
-                                { id: "Attorney" },
-                                "Attorney"
-                            ),
-                            React.createElement(
-                                "option",
-                                { id: "Other" },
-                                "Other"
-                            )
+                            relationDropdown
                         )
                     ),
                     React.createElement(
@@ -54331,6 +54366,22 @@ var AddContactLogOverlay = function (_React$Component) {
                 );
             });
 
+            var purposeDropdown = this.props.purposes.map(function (a) {
+                return React.createElement(
+                    "option",
+                    { id: "{a.code}", key: a.code },
+                    a.description
+                );
+            });
+
+            var channelDropdown = this.props.channels.map(function (a) {
+                return React.createElement(
+                    "option",
+                    { id: "{a.code}", key: a.code },
+                    a.description
+                );
+            });
+
             return React.createElement(
                 "div",
                 { id: "add-contact-log-overlay", className: "shorter" },
@@ -54433,51 +54484,7 @@ var AddContactLogOverlay = function (_React$Component) {
                                 React.createElement(
                                     "select",
                                     { id: "add-contact-log-type", name: "add-contact-logo-type", defaultValue: editType },
-                                    React.createElement(
-                                        "option",
-                                        { id: "Email" },
-                                        "Email"
-                                    ),
-                                    React.createElement(
-                                        "option",
-                                        { id: "In-Person" },
-                                        "In-Person"
-                                    ),
-                                    React.createElement(
-                                        "option",
-                                        { id: "Letter" },
-                                        "Letter"
-                                    ),
-                                    React.createElement(
-                                        "option",
-                                        { id: "Note to File" },
-                                        "Note to File"
-                                    ),
-                                    React.createElement(
-                                        "option",
-                                        { id: "Phone Call" },
-                                        "Phone Call"
-                                    ),
-                                    React.createElement(
-                                        "option",
-                                        { id: "Text Message" },
-                                        "Text Message"
-                                    ),
-                                    React.createElement(
-                                        "option",
-                                        { id: "Voicemail" },
-                                        "Voicemail"
-                                    ),
-                                    React.createElement(
-                                        "option",
-                                        { id: "Comment Form" },
-                                        "Comment Form"
-                                    ),
-                                    React.createElement(
-                                        "option",
-                                        { id: "Online Comment" },
-                                        "Online Comment"
-                                    )
+                                    channelDropdown
                                 )
                             ),
                             React.createElement(
@@ -54497,28 +54504,14 @@ var AddContactLogOverlay = function (_React$Component) {
                                 React.createElement(
                                     "select",
                                     { id: "add-contact-log-phase", name: "add-contact-logo-phase", defaultValue: editPhase },
-                                    React.createElement(
-                                        "option",
-                                        { id: "ROE" },
-                                        "ROE"
-                                    ),
-                                    React.createElement(
-                                        "option",
-                                        { id: "Offer" },
-                                        "Offer"
-                                    ),
-                                    React.createElement(
-                                        "option",
-                                        { id: "Negotiation" },
-                                        "Negotiation"
-                                    )
+                                    purposeDropdown
                                 )
                             )
                         ),
                         React.createElement(
                             "div",
                             { className: "panel-input" },
-                            React.createElement(LandownerScore, { score: this.state.score, scores: this.props.lookup, canEdit: canEditRating, onRating: this._onRating.bind(this) }),
+                            React.createElement(LandownerScore, { score: this.state.score, scores: this.props.scores, canEdit: canEditRating, onRating: this._onRating.bind(this) }),
                             React.createElement(
                                 "label",
                                 { htmlFor: "add-contact-log-notes" },
@@ -54533,6 +54526,20 @@ var AddContactLogOverlay = function (_React$Component) {
                         ),
                         React.createElement("br", null),
                         React.createElement("input", { type: "file", name: "File", id: "File" }),
+                        React.createElement("br", null),
+                        React.createElement(
+                            "button",
+                            { type: "button", className: "action-button esri-icon-media", onClick: this.props.snapshoot },
+                            this.props.waitingExport ? React.createElement(
+                                "span",
+                                { style: { fontFamily: "Open Sans Condensed", color: "blue" } },
+                                "  taking map image..."
+                            ) : React.createElement(
+                                "span",
+                                { style: { fontFamily: "Open Sans Condensed" } },
+                                " Add a Map Snapshot"
+                            )
+                        ),
                         React.createElement(
                             "div",
                             { className: "same-row-inputs" },
@@ -55218,7 +55225,7 @@ var AddDocumentOverlay = function (_React$Component) {
                     fData.append("ParcelIds", pcls[i]);
                 }
 
-                xmlHR.open("POST", "/api/addDocument", true);
+                xmlHR.open("POST", this.props.data.baseUrl() + "/addDocument", true);
                 xmlHR.send(fData);
             } else {
                 alert("There were problems with this submission:  " + validate);
@@ -56043,15 +56050,18 @@ module.exports = EditROEStatus;
 
 
 var __extends = undefined && undefined.__extends || function () {
-    var extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function (d, b) {
-        d.__proto__ = b;
-    } || function (d, b) {
-        for (var p in b) {
-            if (b.hasOwnProperty(p)) d[p] = b[p];
-        }
+    var _extendStatics = function extendStatics(d, b) {
+        _extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function (d, b) {
+            d.__proto__ = b;
+        } || function (d, b) {
+            for (var p in b) {
+                if (b.hasOwnProperty(p)) d[p] = b[p];
+            }
+        };
+        return _extendStatics(d, b);
     };
     return function (d, b) {
-        extendStatics(d, b);
+        _extendStatics(d, b);
         function __() {
             this.constructor = d;
         }
@@ -56067,10 +56077,15 @@ var MapArea = function (_super) {
         var _this = _super.call(this, props) || this;
         _this.props = props;
         _this.onEsriApiLoaded = function (e) {
-            esri_loader_1.dojoRequire(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/layers/MapImageLayer", "esri/widgets/BasemapToggle", "esri/widgets/Expand", "esri/widgets/Legend", "esri/widgets/Search", "esri/widgets/LayerList", "esri/widgets/Home"], function (Map, MapView, FeatureLayer, MapImageLayer, BasemapToggle, Expand, Legend, Search, LayerList, Home) {
+            esri_loader_1.dojoRequire(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/layers/MapImageLayer", "esri/widgets/BasemapToggle", "esri/widgets/Expand", "esri/widgets/Legend", "esri/widgets/Search", "esri/widgets/LayerList", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/widgets/Sketch/SketchViewModel", "esri/widgets/Print", "esri/widgets/Print/PrintViewModel", "esri/widgets/Home"], function (Map, MapView, FeatureLayer, MapImageLayer, BasemapToggle, Expand, Legend, Search, LayerList, Graphic, GraphicsLayer, SketchViewModel, Print, PrintViewModel, Home) {
                 var m = new Map({
                     basemap: "topo"
                 });
+                _this.glay = new GraphicsLayer({
+                    title: 'markup',
+                    listMode: 'hide'
+                });
+                m.add(_this.glay);
                 var parcelLay = new FeatureLayer({
                     url: "https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_MapService_stg/MapServer/7",
                     title: "Impacted Parcels",
@@ -56138,8 +56153,78 @@ var MapArea = function (_super) {
                     });
                     v.ui.add(search, "top-right");
                     v.ui.add(exp, "top-right");
+                    _this.svm = new SketchViewModel({
+                        view: v,
+                        layer: _this.glay,
+                        pointSymbol: {
+                            type: 'simple-marker',
+                            style: 'square',
+                            color: 'red',
+                            size: '8px',
+                            outline: {
+                                color: 'red', width: 1
+                            }
+                        },
+                        polylineSymbol: {
+                            type: 'simple-line',
+                            color: 'red',
+                            width: 1,
+                            style: 'solid'
+                        },
+                        polygonSymbol: {
+                            type: 'simple-fill',
+                            color: 'rgba(255,0,0,0.4)',
+                            style: 'solid',
+                            outline: {
+                                color: "red", width: 1
+                            }
+                        }
+                    });
+                    _this.svm.on("create-complete", function (evt) {
+                        var g = new Graphic({
+                            geometry: evt.geometry,
+                            symbol: _this.svm.graphic.symbol
+                        });
+                        _this.glay.add(g);
+                    });
+                    _this.svm.on("update-complete", function (evt) {
+                        evt.graphic.geometry = evt.geometry;
+                        _this.glay.add(evt.graphic);
+                        _this.editGraphic = null;
+                    });
+                    _this.svm.on("update-cancel", function (evt) {
+                        evt.graphic.geometry = evt.geometry;
+                        _this.glay.add(evt.graphic);
+                        _this.editGraphic = null;
+                    });
+                    v.on("click", function (evt) {
+                        v.hitTest(evt).then(function (r) {
+                            var results = r.results;
+                            if (results.length && results[results.length - 1].graphic) {
+                                {
+                                    _this.editGraphic = results[results.length - 1].graphic;
+                                    if (_this.editGraphic.layer.title === 'markup') {
+                                        _this.glay.remove(_this.editGraphic);
+                                        _this.svm.update(_this.editGraphic);
+                                    }
+                                }
+                            }
+                        });
+                    });
+                    var pvm = new PrintViewModel({
+                        view: v,
+                        printServiceUrl: "https://gis05s.hdrgateway.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
+                    });
+                    _this.props.callback(pvm);
                 });
             });
+        };
+        _this._erase = function () {
+            if (_this.svm) _this.svm.reset();
+            if (_this.glay) _this.glay.removeAll();
+        };
+        _this._sketch = function () {
+            _this.svm.create("polygon");
         };
         return _this;
     }
@@ -56152,9 +56237,10 @@ var MapArea = function (_super) {
         var opts = {
             url: "https://js.arcgis.com/4.8/"
         };
+        this.props.doSketch ? this._sketch() : this._erase();
         return React.createElement("div", null, React.createElement(esri_loader_react_1.default, { options: opts, ready: this.onEsriApiLoaded }), React.createElement("div", { ref: function ref(node) {
                 return _this.mapContainer = node;
-            }, style: mapStyle }, "xxx"));
+            }, style: mapStyle }, this.props.doSketch && React.createElement("div", { style: { position: 'absolute', top: '100px', left: '100px', zIndex: '1000' } }, React.createElement("button", { className: 'action-button esri-icon-polygon', id: 'polygonButton', type: 'button', title: 'markup', onClick: this._sketch }), React.createElement("button", { className: 'action-button esri-icon-trash', id: 'eraseButton', type: 'button', title: 'erase', onClick: this._erase }))));
     };
     return MapArea;
 }(React.Component);
@@ -56355,6 +56441,9 @@ __webpack_require__(351);
 var DataServices = function () {
     function DataServices() {
         var _this = this;
+        this.baseUrl = function () {
+            return DataServices._baseUrl;
+        };
         this.getStatistics = function () {
             return _this._getStatistics();
         };
@@ -56423,8 +56512,8 @@ var DataServices = function () {
         this.editContactLog = function (agentname, pid, lid, parcelIds, contactIds, contactType, title, score, notes, date, phase) {
             return _this._editContactLog(agentname, pid, lid, parcelIds, contactIds, contactType, title, score, notes, date, phase);
         };
-        this.addContactLog = function (agentname, pid, parcelIds, contactIds, contactType, title, score, notes, date, phase) {
-            return _this._addContactLog(agentname, pid, parcelIds, contactIds, contactType, title, score, notes, date, phase);
+        this.addContactLog = function (agentname, pid, parcelIds, contactIds, contactType, title, score, notes, date, phase, url) {
+            return _this._addContactLog(agentname, pid, parcelIds, contactIds, contactType, title, score, notes, date, phase, url);
         };
         this.editInitialOffer = function (parcelId, type, date, amount, notes) {
             return _this._initialOffer(parcelId, type, date, amount, notes);
@@ -56599,8 +56688,8 @@ var DataServices = function () {
                 return console.log("ouch " + err);
             });
         };
-        this._addContactLog = function (a, pid, rpids, cids, channel, title, score, notes, date, phase) {
-            var payload = JSON.stringify({ "AgentName": a, "parcelIds": rpids, "contactIds": cids, "DateAdded": date, "channel": channel, "Title": title, "Notes": notes, "Score": score, "Phase": phase });
+        this._addContactLog = function (a, pid, rpids, cids, channel, title, score, notes, date, phase, url) {
+            var payload = JSON.stringify({ "AgentName": a, "parcelIds": rpids, "contactIds": cids, "DateAdded": date, "channel": channel, "Title": title, "Notes": notes, "Score": score, "Phase": phase, "MapExportUrl": url });
             var heads = new Headers();
             heads.append('Access-Control-Allow-Origin', '*');
             heads.append('Accept', 'application/json');

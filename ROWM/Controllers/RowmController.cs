@@ -8,6 +8,7 @@ using ROWM.Dal;
 using System.Diagnostics;
 using System.IO;
 using geographia.ags;
+using SharePointInterface;
 
 namespace ROWM.Controllers
 {
@@ -18,15 +19,17 @@ namespace ROWM.Controllers
         static readonly string _APP_NAME = "ROWM";
 
         #region ctor
-        OwnerRepository _repo;
+        readonly OwnerRepository _repo;
         readonly ParcelStatusHelper _statusHelper;
         readonly IFeatureUpdate _featureUpdate;
+        readonly ISharePointCRUD _spDocument;
 
-        public RowmController(OwnerRepository r, ParcelStatusHelper h, IFeatureUpdate f)
+        public RowmController(OwnerRepository r, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
         {
             _repo = r;
             _statusHelper = h;
             _featureUpdate = f;
+            _spDocument = s;
         }
         #endregion
         #region owner
@@ -299,6 +302,11 @@ namespace ROWM.Controllers
 
             var log = await _repo.AddContactLog(myParcels, logRequest.ContactIds, l);
            
+            if ( !string.IsNullOrWhiteSpace(logRequest.MapExportUrl))
+            {
+                var _helper = new FileAttachmentHelper(_repo, _spDocument);
+                await _helper.Attach(log, logRequest.ParcelIds, logRequest.MapExportUrl);
+            }
             return Json(new ContactLogDto(log));
         }
         [Route("parcels/{pid}/logs/{lid}"), HttpPost]
@@ -433,6 +441,7 @@ namespace ROWM.Controllers
         public DateTimeOffset DateAdded { get; set; }
         public string Title { get; set; }
         public string Notes { get; set; }
+        public string MapExportUrl { get; set; }
         public int Score { get; set; }
     }
 
