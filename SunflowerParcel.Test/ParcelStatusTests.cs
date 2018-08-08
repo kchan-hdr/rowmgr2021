@@ -5,6 +5,7 @@ using System.Linq;
 using System.Diagnostics;
 using ROWM.Controllers;
 using ROWM.Dal;
+using SharePointInterface;
 
 namespace geographia.ags.Test
 {
@@ -59,7 +60,8 @@ namespace geographia.ags.Test
                 var c = new RowmController(
                     new OwnerRepository(),
                     new ParcelStatusHelper(ctx),
-                    new SunflowerParcel());
+                    new SunflowerParcel(),
+                    new SharePointCRUD());
                 var good = await c.UpdateStatus(_test, _test_status);
                 Assert.AreEqual(_test, good.ParcelId);
                 Assert.AreEqual(_test_status, good.ParcelStatusCode);
@@ -88,7 +90,8 @@ namespace geographia.ags.Test
                 var c = new RowmController(
                     new OwnerRepository(),
                     new ParcelStatusHelper(ctx),
-                    new SunflowerParcel());
+                    new SunflowerParcel(),
+                    new SharePointCRUD());
                 var good = await c.UpdateStatus(_test, _test_status);
             }
         }

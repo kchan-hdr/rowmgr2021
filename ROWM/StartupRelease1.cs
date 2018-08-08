@@ -61,8 +61,8 @@ namespace ROWM
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddSingleton<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, SunflowerParcel>( fac => 
-                new SunflowerParcel("https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer") 
+            services.AddScoped<IFeatureUpdate, B2hParcel>( fac => 
+                new B2hParcel("https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer") 
             );
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 

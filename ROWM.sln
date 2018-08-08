@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "B2HParcel.Test", "B2HParcel
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backfill-Sp-folder-url", "Backfill-Sp-folder-url\Backfill-Sp-folder-url.csproj", "{0A54B65C-6B4C-4A3F-B446-7C28AA220985}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tectra", "Tectra\Tectra.csproj", "{715031C0-8AD9-4CA1-B413-949F1A7E43B6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,6 +104,10 @@ Global
 		{0A54B65C-6B4C-4A3F-B446-7C28AA220985}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A54B65C-6B4C-4A3F-B446-7C28AA220985}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A54B65C-6B4C-4A3F-B446-7C28AA220985}.Release|Any CPU.Build.0 = Release|Any CPU
+		{715031C0-8AD9-4CA1-B413-949F1A7E43B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{715031C0-8AD9-4CA1-B413-949F1A7E43B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{715031C0-8AD9-4CA1-B413-949F1A7E43B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{715031C0-8AD9-4CA1-B413-949F1A7E43B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
