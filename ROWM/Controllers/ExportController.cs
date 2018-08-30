@@ -184,7 +184,7 @@ namespace ROWM.Controllers
                 {
                     ParcelId = p.Assessor_Parcel_Number,
                     ParcelStatusCode = p.ParcelStatusCode,
-                    RoeStatusCode = p.RoeStatusCode,
+                    RoeStatusCode = log.Landowner_Score?.ToString() ?? "", // p.RoeStatusCode,
                     ContactName = p.Ownership.FirstOrDefault()?.Owner.PartyName?.TrimEnd(',') ?? "",
                     DateAdded = log.DateAdded,
                     ContactChannel = log.ContactChannel,
@@ -196,7 +196,7 @@ namespace ROWM.Controllers
             }
 
             public static string Header() =>
-                "Parcel ID,Parcel Status,ROE Status,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
+                "Parcel ID,Parcel Status,Landowner Score,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
 
             public override string ToString()
             {
