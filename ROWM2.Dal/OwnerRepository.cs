@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data;
-using System.Data.Entity;
 using System.Diagnostics;
+using System.Data.Entity;
 
 namespace ROWM.Dal
 {
@@ -115,6 +115,7 @@ namespace ROWM.Dal
         #endregion
 
         public IEnumerable<string> GetParcels() => _ctx.Parcel.AsNoTracking().Select(px => px.Assessor_Parcel_Number);
+        public IEnumerable<Parcel> GetParcels2() => _ctx.Parcel.Include(px => px.Ownership.Select( o => o.Owner )).AsNoTracking();
 
         public async Task<Parcel> UpdateParcel (Parcel p)
         {

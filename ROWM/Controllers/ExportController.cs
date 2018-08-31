@@ -86,13 +86,45 @@ namespace ROWM.Controllers
             }
         }
 
+        [HttpGet("export/roe")]
+        public IActionResult ExportRoe(string f)
+        {
+            if ("excel" != f)
+                return BadRequest($"not supported export '{f}'");
+
+            var parcels = this._repo.GetParcels2();
+
+            if (parcels.Count() <= 0)
+                return NoContent();
+
+            using (var s = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(s))
+                {
+                    writer.WriteLine("Parcel ID,Owner,ROE Status,Date");
+
+                    foreach( var p in parcels.OrderBy(px=> px.Assessor_Parcel_Number))
+                    {
+                        var os = p.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
+                        var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
+                        var row = $"{p.Assessor_Parcel_Number},\"{oname}\",{p.Roe_Status.Description},{p.LastModified.Date.ToShortDateString()}";
+                        writer.WriteLine(row);
+                    }
+
+                    writer.Close();
+                }
+
+                return File(s.GetBuffer(), "text/csv", "roe.csv");
+            }
+        }
+
         /// <summary>
         /// support excel only
         /// </summary>
         /// <param name="f"></param>
         /// <returns></returns>
         [HttpGet("export/contacts")]
-        public IActionResult ExportContact(string f)
+        public IActionResult ExportContract(string f)
         {
             if ("excel" != f)
                 return BadRequest($"not supported export '{f}'");
