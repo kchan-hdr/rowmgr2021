@@ -20,13 +20,15 @@ namespace ROWM.Controllers
 
         #region ctor
         readonly OwnerRepository _repo;
+        readonly StatisticsRepository _statistics;
         readonly ParcelStatusHelper _statusHelper;
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
 
-        public RowmController(OwnerRepository r, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
+        public RowmController(OwnerRepository r, StatisticsRepository sr, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
         {
             _repo = r;
+            _statistics = sr;
             _statusHelper = h;
             _featureUpdate = f;
             _spDocument = s;
@@ -57,18 +59,18 @@ namespace ROWM.Controllers
             var o = await _repo.GetOwner(id);
             o.ContactInfo.Add(new ContactInfo
             {
-                OwnerFirstName = info.OwnerFirstName,
-                OwnerLastName = info.OwnerLastName,
+                FirstName = info.OwnerFirstName,
+                LastName = info.OwnerLastName,
 
-                OwnerStreetAddress = info.OwnerStreetAddress,
-                OwnerCity = info.OwnerCity,
-                OwnerState = info.OwnerState,
-                OwnerZIP = info.OwnerZIP,
+                StreetAddress = info.OwnerStreetAddress,
+                City = info.OwnerCity,
+                State = info.OwnerState,
+                ZIP = info.OwnerZIP,
 
-                OwnerEmail = info.OwnerEmail,
-                OwnerCellPhone = info.OwnerCellPhone,
-                OwnerWorkPhone = info.OwnerWorkPhone,
-                OwnerHomePhone = info.OwnerHomePhone,
+                Email = info.OwnerEmail,
+                CellPhone = info.OwnerCellPhone,
+                WorkPhone = info.OwnerWorkPhone,
+                HomePhone = info.OwnerHomePhone,
 
                 IsPrimaryContact = info.IsPrimaryContact,
                 Representation = info.Relations,
@@ -92,18 +94,18 @@ namespace ROWM.Controllers
             var o = await _repo.GetOwner(id);
             var c = o.ContactInfo.Single(cx => cx.ContactId == cinfo);
 
-            c.OwnerFirstName = info.OwnerFirstName;
-            c.OwnerLastName = info.OwnerLastName;
+            c.FirstName = info.OwnerFirstName;
+            c.LastName = info.OwnerLastName;
 
-            c.OwnerStreetAddress = info.OwnerStreetAddress;
-            c.OwnerCity = info.OwnerCity;
-            c.OwnerState = info.OwnerState;
-            c.OwnerZIP = info.OwnerZIP;
+            c.StreetAddress = info.OwnerStreetAddress;
+            c.City = info.OwnerCity;
+            c.State = info.OwnerState;
+            c.ZIP = info.OwnerZIP;
 
-            c.OwnerEmail = info.OwnerEmail;
-            c.OwnerCellPhone = info.OwnerCellPhone;
-            c.OwnerWorkPhone = info.OwnerWorkPhone;
-            c.OwnerHomePhone = info.OwnerHomePhone;
+            c.Email = info.OwnerEmail;
+            c.CellPhone = info.OwnerCellPhone;
+            c.WorkPhone = info.OwnerWorkPhone;
+            c.HomePhone = info.OwnerHomePhone;
 
             c.IsPrimaryContact = info.IsPrimaryContact;
             c.Representation = info.Relations;
@@ -417,13 +419,13 @@ namespace ROWM.Controllers
         [HttpGet("statistics")]
         public async Task<StatisticsDto> GetStatistics()
         {
-            var s = await _repo.Snapshot();
+            var s = await _statistics.Snapshot();
             return new StatisticsDto
             {
                 NumberOfOwners = s.nOwners,
                 NumberOfParcels = s.nParcels,
-                ParcelStatus = await _repo.SnapshotParcelStatus(),
-                RoeStatus = await _repo.SnapshotRoeStatus()
+                ParcelStatus = await _statistics.SnapshotParcelStatus(),
+                RoeStatus = await _statistics.SnapshotRoeStatus()
             };
         }
         #endregion
@@ -479,9 +481,9 @@ namespace ROWM.Controllers
         public int NumberOfParcels { get; set; }
         public int NumberOfOwners { get; set; }
 
-        public IEnumerable<OwnerRepository.SubTotal> ParcelStatus { get; set; }
-        public IEnumerable<OwnerRepository.SubTotal> RoeStatus { get; set; }
-        public IEnumerable<OwnerRepository.SubTotal> Compensations { get; set; }
+        public IEnumerable<StatisticsRepository.SubTotal> ParcelStatus { get; set; }
+        public IEnumerable<StatisticsRepository.SubTotal> RoeStatus { get; set; }
+        public IEnumerable<StatisticsRepository.SubTotal> Compensations { get; set; }
     }
 
     public class AgentDto
@@ -557,20 +559,20 @@ namespace ROWM.Controllers
         internal ContactInfoDto(ContactInfo c)
         {
             ContactId = c.ContactId;
-            ContactName = $"{c.OwnerFirstName ?? ""} {c.OwnerLastName ?? ""}";
+            ContactName = $"{c.FirstName ?? ""} {c.LastName ?? ""}";
             IsPrimary = c.IsPrimaryContact;
             Relations = c.Representation;
 
-            OwnerFirstName = c.OwnerFirstName;
-            OwnerLastName = c.OwnerLastName;
-            OwnerStreetAddress = c.OwnerStreetAddress;
-            OwnerCity = c.OwnerCity;
-            OwnerState = c.OwnerState;
-            OwnerZIP = c.OwnerZIP;
-            OwnerEmail = c.OwnerEmail;
-            OwnerCellPhone = c.OwnerCellPhone;
-            OwnerWorkPhone = c.OwnerWorkPhone;
-            OwnerHomePhone = c.OwnerHomePhone;
+            OwnerFirstName = c.FirstName;
+            OwnerLastName = c.LastName;
+            OwnerStreetAddress = c.StreetAddress;
+            OwnerCity = c.City;
+            OwnerState = c.State;
+            OwnerZIP = c.ZIP;
+            OwnerEmail = c.Email;
+            OwnerCellPhone = c.CellPhone;
+            OwnerWorkPhone = c.WorkPhone;
+            OwnerHomePhone = c.HomePhone;
         }
     }
 

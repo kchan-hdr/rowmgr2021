@@ -52,18 +52,17 @@ namespace ROWM
                 o.MultipartBodyLengthLimit = int.MaxValue;
             });
 
+            var cs = Configuration.GetConnectionString("ROWM_Context");
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {
-               return new ROWM.Dal.ROWM_Context(ROWM.Dal.DbConnection.GetConnectionString());
-            });
-            services.AddScoped<com.hdr.Rowm.Export.RowmEntities>(fac =>
-            {
-               return new com.hdr.Rowm.Export.RowmEntities(ROWM.Dal.DbConnection.GetConnectionString());
+               return new ROWM.Dal.ROWM_Context(cs);
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
+            services.AddScoped<ROWM.Dal.StatisticsRepository>();
+            services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddSingleton<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, B2hParcel>();
+            services.AddScoped<IFeatureUpdate, BlackhillParcel>();
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
             services.AddSwaggerGen(c =>

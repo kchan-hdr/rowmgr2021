@@ -11,8 +11,24 @@ namespace ROWM.Controllers
     public class VocabularyController
     {
         private readonly ROWM_Context _Context;
+        readonly AppRepository _repo;
 
-        public VocabularyController(ROWM_Context c) => _Context = c;
+        public VocabularyController(ROWM_Context c, AppRepository a)
+        {
+            _Context = c;
+            _repo = a;
+        }
+
+        [HttpGet("api/map")]
+        public Map GetMapConfiguration()
+        {
+            var r = new Map();
+
+            r.Parcel_Fc = _repo.GetLayers().Where(lx => lx.LayerType == LayerType.Parcel).FirstOrDefault();
+            r.Reference_MapLayer = _repo.GetLayers().Where(lx => lx.LayerType == LayerType.Reference).FirstOrDefault();
+
+            return r;
+        }
 
         [HttpGet("api/vocabulary")]
         public Vocabulary Get()
@@ -32,6 +48,7 @@ namespace ROWM.Controllers
         [HttpGet("api/DocTypes")]
         public IEnumerable<DocType> GetDocTypes() => DocType.Types;
 
+        #region lookups
         public class Lookup
         {
             public string Code { get; set; }
@@ -68,5 +85,13 @@ namespace ROWM.Controllers
                 Score = s.Select(c => new Lookup { Code = c.Score.ToString(), DisplayOrder = c.DisplayOrder ?? 0, Description = c.Caption });
             }
         }
+        #endregion
+        #region map layers
+        public class Map
+        {
+            public MapConfiguration Parcel_Fc { get; set; }
+            public MapConfiguration Reference_MapLayer { get; set; }
+        }
+        #endregion
     }
 }

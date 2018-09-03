@@ -54,15 +54,11 @@ namespace ROWM
             {
                return new Dal.ROWM_Context(cs);
             });
-            services.AddScoped<com.hdr.Rowm.Export.RowmEntities>(fac =>
-            {
-                return new com.hdr.Rowm.Export.RowmEntities(cs);
-            });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddSingleton<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, B2hParcel>( fac => 
-                new B2hParcel("https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer") 
+            services.AddScoped<IFeatureUpdate, BlackhillParcel>( fac => 
+                new BlackhillParcel("https://gis05s.hdrgateway.com/arcgis/rest/services/California/Blackhills_Parcel_FS/FeatureServer") 
             );
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
