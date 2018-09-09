@@ -185,7 +185,7 @@ namespace ROWM.Dal
 
         public IEnumerable<Ownership> GetContacts() => _ctx.Parcel.Where(p => p.IsActive).SelectMany(p => p.Ownership);
 
-        public IEnumerable<ContactLog> GetLogs() =>_ctx.ContactLog.Where(c => c.Parcel.Any(p => p.IsActive));
+        public IEnumerable<ContactLog> GetLogs() =>_ctx.ContactLog.Include("Parcel").Where(c => c.Parcel.Any(p => p.IsActive));
         public async Task<IEnumerable<DocHead>> GetDocs()
         {
             try
