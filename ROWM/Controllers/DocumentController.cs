@@ -26,17 +26,19 @@ namespace ROWM.Controllers
         static readonly string _APP_NAME = "ROWM";
         private readonly ISharePointCRUD _sharePointCRUD;
         private readonly ParcelStatusHelper _statusHelper;
+        private readonly DocTypes _docTypes;
 
         #region ctor
         OwnerRepository _repo;
         readonly IFeatureUpdate _featureUpdate;
 
-        public DocumentController(OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, IFeatureUpdate f)
+        public DocumentController(OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, IFeatureUpdate f, DocTypes d)
         {
             _repo = r;
             _sharePointCRUD = sp;
             _featureUpdate = f;
             _statusHelper = h;
+            _docTypes = d;
         }
         #endregion
 
@@ -401,7 +403,7 @@ namespace ROWM.Controllers
 
         async Task<bool> ParcelStatusEvent(Parcel p, string parcelDocUrl, string docType)
         {
-            var dt = DocType.Find(docType) ?? DocType.Default;
+            var dt = _docTypes.Find(docType) ?? _docTypes.Default;
 
             var pid = p.Assessor_Parcel_Number;
 

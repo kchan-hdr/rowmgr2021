@@ -14,7 +14,7 @@ namespace ROWM.Dal
         #region ctor
         private readonly ROWM_Context _ctx;
 
-        public OwnerRepository(ROWM_Context c) => _ctx = c ?? new ROWM_Context();
+        public OwnerRepository(ROWM_Context c) => _ctx = c;
         #endregion
 
         public async Task<Owner> GetOwner(Guid uid)

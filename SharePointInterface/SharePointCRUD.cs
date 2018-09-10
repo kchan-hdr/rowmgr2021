@@ -38,9 +38,9 @@ namespace SharePointInterface
         private string _parcelsFolderTemplate = "Documents/HDR Project/14. ROW/14.1 Parcels/_County_Parcel ID_LO Name"; // "Folder_Template";
         private string _siteUrl;
         // private Dictionary<string, string> _docTypes;
-        private DocType _docTypes;
+        private DocTypes _docTypes;
 
-        public SharePointCRUD (string _appId = null, string _appSecret = null, DocType d = null) // Dictionary<string,string> docTypes = null)
+        public SharePointCRUD (string _appId = null, string _appSecret = null, DocTypes d = null) // Dictionary<string,string> docTypes = null)
         {
             _docTypes = d;
 
@@ -272,10 +272,10 @@ namespace SharePointInterface
 
         public List<string> GetDocTargetPath(string baseFolderName, string parcelFolderName, string docType)
         {
-            var dt = DocType.Find(docType);
+            var dt = _docTypes.Find(docType);
 
             if (dt == null)
-                dt = DocType.Default;
+                dt = _docTypes.Default;
 
             string doctypePath = dt.FolderPath;
 

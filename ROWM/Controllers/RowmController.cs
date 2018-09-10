@@ -631,6 +631,7 @@ namespace ROWM.Controllers
     public class ParcelGraph
     {
         public string ParcelId { get; set; }
+        public string TractNo { get; set; }
         public string ParcelStatusCode { get; set; }
         public string ParcelStatus => this.ParcelStatusCode;        // to be removed
         public string RoeStatusCode { get; set; }
@@ -653,6 +654,7 @@ namespace ROWM.Controllers
         internal ParcelGraph( Parcel p, IEnumerable<Document> d)
         {
             ParcelId = p.Assessor_Parcel_Number;
+            TractNo = p.Tracking_Number;
             ParcelStatusCode = p.ParcelStatusCode;
             //ParcelStatus = Enum.GetName(typeof(Parcel.RowStatus), p.ParcelStatus);
             RoeStatusCode = p.RoeStatusCode;

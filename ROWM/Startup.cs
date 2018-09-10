@@ -61,6 +61,7 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddScoped<ROWM.Dal.StatisticsRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
+            services.AddSingleton<ROWM.Dal.DocTypes>();
             services.AddSingleton<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, BlackhillParcel>();
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
