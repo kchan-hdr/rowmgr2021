@@ -8,6 +8,7 @@ using Microsoft.SharePoint.Client;
 using OfficeDevPnP.Core;
 using System.Text.RegularExpressions;
 using ROWM.Dal;
+using System.Diagnostics;
 
 namespace SharePointInterface
 {
@@ -29,13 +30,13 @@ namespace SharePointInterface
     public class SharePointCRUD : ISharePointCRUD
     {
         // staging URL to move to app config
-        static readonly string _STAGING_SITE_URL = "https://b2hpm.sharepoint.com/staging";
+        static readonly string _STAGING_SITE_URL = "https://hdroneview.sharepoint.com/ROW_Dev";
 
         static readonly string _DOCUMENT_LIST_BASE = "Documents"; // "Parcel Documents";
 
         private ClientContext _ctx;
-        private string _parcelsFolderName = "HDR Project/14. ROW/14.1 Parcels";
-        private string _parcelsFolderTemplate = "Documents/HDR Project/14. ROW/14.1 Parcels/_County_Parcel ID_LO Name"; // "Folder_Template";
+        private string _parcelsFolderName = "4.0 ROW/4.3 Parcels";
+        private string _parcelsFolderTemplate = "Documents/4.0 ROW/4.3 Parcels/_Parcel No_LO Name"; // "Folder_Template";
         private string _siteUrl;
         // private Dictionary<string, string> _docTypes;
         private DocTypes _docTypes;
@@ -45,18 +46,18 @@ namespace SharePointInterface
             _docTypes = d;
 
             //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
-            _siteUrl = "https://b2hpm.sharepoint.com";
+            _siteUrl = _STAGING_SITE_URL; //  "https://hdroneview.sharepoint.com/bh_pmp";
 
             /*
              * STAGING---
              * 
              * The app identifier has been successfully created.
-                The app identifier has been successfully created.
-                Client Id:  	3dff29b2-ae04-4ad4-8149-eb703d62b16f
-                Client Secret:  	bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=
-                Title:  	rowm_staging
-                App Domain:  	b2hrowmgr.hdrinc.com
-                Redirect URI:  	https://b2hrowmgr.hdrinc.com
+            Client Id:  	26589ee5-16ef-4444-9143-cfea08cba1cc
+            Client Secret:  	B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=
+            Title:  	rowm_staging
+            App Domain:  	rowm_staging.hdrinc.com
+            Redirect URI:  	https://rowm_staging.hdrinc.com
+             
 
 
             The app identifier has been successfully created.
@@ -69,11 +70,9 @@ namespace SharePointInterface
 
             if (_appId == null || _appSecret == null )
             {
-                _appId = "3dff29b2-ae04-4ad4-8149-eb703d62b16f";
-                _appSecret = "bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=";
+                _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc";
+                _appSecret = "B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=";
 
-                _appId = "baa9400f-d050-4564-9394-71e71b8feacd";
-                _appSecret = "ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=";
             }
 
             // Method using Sharepoint Credentials
@@ -101,7 +100,7 @@ namespace SharePointInterface
 
             _ctx.ExecuteQuery();
 
-            Console.WriteLine(web.Title);
+            Trace.WriteLine(web.Title);
 
             if (!String.IsNullOrWhiteSpace(web.Title)) {
                 title = web.Title;
@@ -135,7 +134,7 @@ namespace SharePointInterface
 
             if (baseFolder.FolderExists(folderName))
             {
-                Console.WriteLine("Folder {0} exists in {1}", folderName, baseFolderName);
+                Trace.WriteLine(string.Format("Folder {0} exists in {1}", folderName, baseFolderName));
             } else {
                 //EnsureAndGetTargetFolder(_ctx, list, pathList);
                 CopyPasteFolder(folderTemplate, _parcelsFolderTemplate, baseFolderName, _DOCUMENT_LIST_BASE, folderName);
@@ -338,11 +337,13 @@ namespace SharePointInterface
             }
             catch(Exception e)
             {
-                Console.WriteLine("Uploading Doc Failed: {0}", e.Message);
+                Trace.WriteLine("Uploading Doc Failed: {0}", e.Message);
             }
     
             return _docExists;
         }
+
+        // private void Trace(string v, string message) => throw new NotImplementedException();
 
         /// <summary>
         /// Will ensure nested folder creation if folders in folderPath don't exist.

@@ -123,10 +123,13 @@ namespace ROWM.Controllers
         
 
         [Route("parcels/{pid}"), HttpGet]
-        public async Task<ParcelGraph> GetParcel(string pid)
+        public async Task<ActionResult<ParcelGraph>> GetParcel(string pid)
         {
             var p = await _repo.GetParcel(pid);
-            return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
+            if (p == null)
+                return BadRequest();
+
+            return Json( new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid)));
         }
         #region offer
         [Route("parcels/{pid}/initialOffer"), HttpPut]
@@ -236,25 +239,41 @@ namespace ROWM.Controllers
         #endregion
         #region roe status
         [HttpPut("parcels/{pid}/roe/{statusCode}")]
-        public async Task<ParcelGraph> UpdateRoeStatus(string pid, string statusCode)
+        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus(string pid, string statusCode) => await UpdateRoeStatusImpl(pid, statusCode, string.Empty);
+
+        [HttpPut("parcels/{pid}/roe")]
+        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus2(string pid, [FromBody] RoeRequest r) => await UpdateRoeStatusImpl(pid, r.StatusCode, r.Condition);
+
+        private async Task<ActionResult<ParcelGraph>> UpdateRoeStatusImpl(string pid, string statusCode, string condition)
         {
             var p = await _repo.GetParcel(pid);
+            if (p == null)
+                return BadRequest();
 
             List<Task> tks = new List<Task>();
 
             try
             {
-
                 var dv = _statusHelper.GetRoeDomainValue(statusCode);
                 tks.Add( _featureUpdate.UpdateFeatureRoe(pid, dv));
             }
             catch( InvalidOperationException )
             {
                 Trace.TraceWarning($"bad roe status domain {statusCode}");
+                return BadRequest();
             }
+
             p.RoeStatusCode = statusCode;
+            if (!string.IsNullOrWhiteSpace(condition))
+            {
+                if ( null == p.Conditions)
+                    p.Conditions = new List<RoeCondition>();
+
+                p.Conditions.Add(new RoeCondition() { Condition = condition, IsActive = true, EffectiveStartDate = DateTimeOffset.Now, EffectiveEndDate = DateTimeOffset.MaxValue });
+            }
             p.LastModified = DateTimeOffset.Now;
             p.ModifiedBy = _APP_NAME;
+
 
             tks.Add( _repo.UpdateParcel(p));
 
@@ -465,6 +484,12 @@ namespace ROWM.Controllers
         public bool IsPrimaryContact { get; set; } = false;
         public string Relations { get; set; } = "";
     }
+
+    public class RoeRequest
+    {
+        public string StatusCode { get; set; }
+        public string Condition { get; set; }
+    }
     #endregion
     #region offer dto
     public class OfferRequest
@@ -635,6 +660,7 @@ namespace ROWM.Controllers
         public string ParcelStatusCode { get; set; }
         public string ParcelStatus => this.ParcelStatusCode;        // to be removed
         public string RoeStatusCode { get; set; }
+        public string RoeCondition { get; set; }
         public string LandownerScore { get; set; }
         public string SitusAddress { get; set; }
         public double Acreage { get; set; }
@@ -658,6 +684,7 @@ namespace ROWM.Controllers
             ParcelStatusCode = p.ParcelStatusCode;
             //ParcelStatus = Enum.GetName(typeof(Parcel.RowStatus), p.ParcelStatus);
             RoeStatusCode = p.RoeStatusCode;
+            RoeCondition = p.Conditions.FirstOrDefault()?.Condition ?? "";
             SitusAddress = p.SitusAddress;
             
             Acreage = p.Acreage ?? 0;

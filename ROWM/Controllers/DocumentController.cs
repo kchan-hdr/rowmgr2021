@@ -208,7 +208,7 @@ namespace ROWM.Controllers
 
             sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename).Value;
             Ownership primaryOwner = myParcel.Ownership.First<Ownership>(o => o.IsPrimary()); // o.Ownership_t == OwnershipType.Primary);
-            string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
+            string parcelName = String.Format("{0} {1}", myParcel.Tracking_Number, primaryOwner.Owner.PartyName);
             try
             {
 
@@ -362,7 +362,7 @@ namespace ROWM.Controllers
 
                 sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename).Value;
                 Ownership primaryOwner = myParcel.Ownership.First<Ownership>(o => o.IsPrimary()); // o.Ownership_t == Ownership.OwnershipType.Primary);
-                string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
+                string parcelName = String.Format("{0} {1}", myParcel.Tracking_Number, primaryOwner.Owner.PartyName);
                 try
                 {
                     //_sharePointCRUD.UploadParcelDoc(parcelName, "Other", sourceFilename, bb, null);
@@ -376,7 +376,10 @@ namespace ROWM.Controllers
                 catch (Exception e)
                 {
                     // TODO: Return error to user?
-                    Console.WriteLine("Error uploading document {0} type {1} to Sharepoint for {2}", sourceFilename, header.DocumentType, parcelName);
+                    Trace.WriteLine(string.Format("Error uploading document {0} type {1} to Sharepoint for {2}", sourceFilename, header.DocumentType, parcelName));
+#if DEBUG
+                    throw;
+#endif
                 }
             }
 

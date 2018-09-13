@@ -74,6 +74,10 @@
     <Compile Include="Migrations\201809030551590_blackhill.Designer.cs">
       <DependentUpon>201809030551590_blackhill.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201809130621343_roe condition.cs" />
+    <Compile Include="Migrations\201809130621343_roe condition.Designer.cs">
+      <DependentUpon>201809130621343_roe condition.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Organization.cs" />
     <Compile Include="Owner.cs" />
@@ -86,10 +90,12 @@
     <Compile Include="Repository\AppRepository.cs" />
     <Compile Include="Repository\OwnerRepository.cs" />
     <Compile Include="Repository\StatisticsRepository.cs" />
+    <Compile Include="RoeCondition.cs" />
     <Compile Include="Roe_Status.cs" />
     <Compile Include="ROWM_Context.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -98,6 +104,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201809030551590_blackhill.resx">
       <DependentUpon>201809030551590_blackhill.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201809130621343_roe condition.resx">
+      <DependentUpon>201809130621343_roe condition.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

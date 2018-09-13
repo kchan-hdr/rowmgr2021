@@ -98,6 +98,7 @@ namespace ROWM.Dal
         public virtual Parcel_Status Parcel_Status { get; set; }
 
         public virtual Roe_Status Roe_Status { get; set; }
+        public virtual ICollection<RoeCondition> Conditions { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ContactLog> ContactLog { get; set; }
