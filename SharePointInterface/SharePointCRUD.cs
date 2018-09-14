@@ -35,8 +35,8 @@ namespace SharePointInterface
         static readonly string _DOCUMENT_LIST_BASE = "Documents"; // "Parcel Documents";
 
         private ClientContext _ctx;
-        private string _parcelsFolderName = "4.0 ROW/4.3 Parcels";
-        private string _parcelsFolderTemplate = "Documents/4.0 ROW/4.3 Parcels/_Parcel No_LO Name"; // "Folder_Template";
+        private string _parcelsFolderName = "Parcels";
+        private string _parcelsFolderTemplate = "Documents/Parcels/_Track_No_LO Name"; // "Folder_Template";
         private string _siteUrl;
         // private Dictionary<string, string> _docTypes;
         private DocTypes _docTypes;
@@ -46,7 +46,7 @@ namespace SharePointInterface
             _docTypes = d;
 
             //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
-            _siteUrl = _STAGING_SITE_URL; //  "https://hdroneview.sharepoint.com/bh_pmp";
+            _siteUrl = "https://hdroneview.sharepoint.com/bh_pmp";
 
             /*
              * STAGING---
@@ -61,11 +61,11 @@ namespace SharePointInterface
 
 
             The app identifier has been successfully created.
-            Client Id:  	baa9400f-d050-4564-9394-71e71b8feacd
-            Client Secret:  	ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=
-            Title:  	rowm_stg
-            App Domain:  	b2hrowmgr.azurewebsites.net
-            Redirect URI:  	https://b2hrowmgr.azurewebsites.net
+            Client Id:  	1bca8e9c-15ac-41b0-9869-1e93d4a5d779
+            Client Secret:  	DPGAdcvJpEC+yzzSgYSs6Szau/Z+GpdOdjjpFnqAS70=
+            Title:  	rowm_prod
+            App Domain:  	blackhill-prod-rowmgr.azurewebsites.net
+            Redirect URI:  	https://blackhill-prod-rowmgr.azurewebsites.net
              */
 
             if (_appId == null || _appSecret == null )
@@ -73,6 +73,8 @@ namespace SharePointInterface
                 _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc";
                 _appSecret = "B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=";
 
+                _appId = "1bca8e9c-15ac-41b0-9869-1e93d4a5d779";
+                _appSecret = "DPGAdcvJpEC+yzzSgYSs6Szau/Z+GpdOdjjpFnqAS70=";
             }
 
             // Method using Sharepoint Credentials

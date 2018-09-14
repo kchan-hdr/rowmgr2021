@@ -48,7 +48,7 @@ namespace ROWM
                 o.MultipartBodyLengthLimit = int.MaxValue;
             });
 
-            var cs = Configuration.GetConnectionString("rowm");
+            var cs = Configuration.GetConnectionString("ROWM_Context");
             //services.AddScoped<ROWM.Dal.ROWM_Context>();
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {
@@ -56,9 +56,12 @@ namespace ROWM
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
-            services.AddSingleton<Controllers.ParcelStatusHelper>();
+            services.AddScoped<ROWM.Dal.StatisticsRepository>();
+            services.AddScoped<ROWM.Dal.AppRepository>();
+            services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
+            services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, BlackhillParcel>( fac => 
-                new BlackhillParcel("https://gis05s.hdrgateway.com/arcgis/rest/services/California/Blackhills_Parcel_FS/FeatureServer") 
+                new BlackhillParcel("https://gis05.hdrgateway.com/arcgis/rest/services/California/Blackhills_Parcel_FS/FeatureServer") 
             );
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
