@@ -239,7 +239,7 @@ namespace ROWM.Controllers
         #endregion
         #region roe status
         [HttpPut("parcels/{pid}/roe/{statusCode}")]
-        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus(string pid, string statusCode) => await UpdateRoeStatusImpl(pid, statusCode, string.Empty);
+        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus(string pid, string statusCode) => await UpdateRoeStatusImpl(pid, statusCode, null);
 
         [HttpPut("parcels/{pid}/roe")]
         public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus2(string pid, [FromBody] RoeRequest r) => await UpdateRoeStatusImpl(pid, r.StatusCode, r.Condition);
@@ -255,7 +255,8 @@ namespace ROWM.Controllers
             try
             {
                 var dv = _statusHelper.GetRoeDomainValue(statusCode);
-                tks.Add( _featureUpdate.UpdateFeatureRoe(pid, dv));
+                tks.Add( null == condition ?
+                    _featureUpdate.UpdateFeatureRoe(pid, dv) : _featureUpdate.UpdateFeatureRoe_Ex(pid, dv, condition));
             }
             catch( InvalidOperationException )
             {
@@ -274,6 +275,13 @@ namespace ROWM.Controllers
             p.LastModified = DateTimeOffset.Now;
             p.ModifiedBy = _APP_NAME;
 
+            // propagate to parcel 
+            // TODO: clean up
+            switch( statusCode )
+            {
+                case "ROE_Obtained": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
+                case "ROE_with_Conditions": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
+            }
 
             tks.Add( _repo.UpdateParcel(p));
 
@@ -391,8 +399,9 @@ namespace ROWM.Controllers
         #endregion
         #region landowner score
         /// <summary>
-        /// will need to trigger feature update. feature class not ready 2018.7
+        /// trigger feature update
         /// </summary>
+        /// <remarks>this is fairly wasteful. TODO: check if project uses Landowner Score</remarks>
         /// <param name="score"></param>
         /// <param name="ts"></param>
         /// <param name="parcelIds"></param>
@@ -415,7 +424,6 @@ namespace ROWM.Controllers
                         p.ModifiedBy = _APP_NAME;
                         touched++;
 
-                        // tasks.Add(_repo.UpdateParcel(p));
                         tasks.Add(_featureUpdate.UpdateRating(p.Assessor_Parcel_Number, score));
                     }
                 }

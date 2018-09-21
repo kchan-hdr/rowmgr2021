@@ -37,6 +37,9 @@ namespace ROWM.Controllers
             var d = await _repo.Store(title, "Other", contentType, fileName, log.ContactAgentId, bb);
             d.Agent.Add(log.Agent); // this relationship is not used anymore
 
+            // add document to log
+            log.Attachments.Add(d);
+
             // Add document to parcels
             var myParcels = parcels.Distinct();
 

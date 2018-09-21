@@ -46,7 +46,7 @@ namespace SharePointInterface
             _docTypes = d;
 
             //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
-            _siteUrl = "https://hdroneview.sharepoint.com/bh_pmp";
+            _siteUrl = _STAGING_SITE_URL; // "https://hdroneview.sharepoint.com/bh_pmp";
 
             /*
              * STAGING---
@@ -73,8 +73,8 @@ namespace SharePointInterface
                 _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc";
                 _appSecret = "B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=";
 
-                _appId = "1bca8e9c-15ac-41b0-9869-1e93d4a5d779";
-                _appSecret = "DPGAdcvJpEC+yzzSgYSs6Szau/Z+GpdOdjjpFnqAS70=";
+                //_appId = "1bca8e9c-15ac-41b0-9869-1e93d4a5d779";
+                //_appSecret = "DPGAdcvJpEC+yzzSgYSs6Szau/Z+GpdOdjjpFnqAS70=";
             }
 
             // Method using Sharepoint Credentials
