@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ROWM.Dal;
+using SharePointInterface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +14,14 @@ namespace ROWM.Controllers
         private readonly ROWM_Context _Context;
         private readonly AppRepository _repo;
         private readonly DocTypes _docTypes;
+        private readonly ISharePointCRUD _sp;
 
-        public VocabularyController(ROWM_Context c, AppRepository a, DocTypes d)
+        public VocabularyController(ROWM_Context c, AppRepository a, DocTypes d, ISharePointCRUD sp)
         {
             _Context = c;
             _repo = a;
             _docTypes = d;
+            _sp = sp;
         }
 
         [HttpGet("api/map")]
@@ -50,6 +53,14 @@ namespace ROWM.Controllers
         [HttpGet("api/DocTypes")]
         public IEnumerable<DocType> GetDocTypes() => _docTypes.Types;
 
+        /// <summary>
+        /// this is for site validation only. 
+        /// </summary>
+        /// <param name="folder"></param>
+        /// <returns></returns>
+        [HttpGet("SharePoint/{folder}")]
+        public string GetSharePoint(string folder) => _sp.GetParcelFolderURL(folder, string.Empty);
+        
         #region lookups
         public class Lookup
         {
