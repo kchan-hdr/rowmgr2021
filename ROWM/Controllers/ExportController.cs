@@ -101,13 +101,14 @@ namespace ROWM.Controllers
             {
                 using (var writer = new StreamWriter(s))
                 {
-                    writer.WriteLine("Parcel ID,Owner,ROE Status,Date");
+                    writer.WriteLine("Parcel ID,Owner,ROE Status,Conditions,Date");
 
                     foreach( var p in parcels.OrderBy(px=> px.Assessor_Parcel_Number))
                     {
                         var os = p.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
                         var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
-                        var row = $"{p.Assessor_Parcel_Number},\"{oname}\",{p.Roe_Status.Description},{p.LastModified.Date.ToShortDateString()}";
+                        var conditions = p.Conditions?.FirstOrDefault()?.Condition ?? "";
+                        var row = $"{p.Assessor_Parcel_Number},\"{oname}\",{p.Roe_Status.Description},{conditions},{p.LastModified.Date.ToShortDateString()}";
                         writer.WriteLine(row);
                     }
 

@@ -65,7 +65,7 @@ namespace ROWM.Dal
         #endregion
 
         public IEnumerable<string> GetParcels() => _ctx.Parcel.AsNoTracking().Select(px => px.Assessor_Parcel_Number);
-        public IEnumerable<Parcel> GetParcels2() => _ctx.Parcel.Include(px => px.Ownership.Select( o => o.Owner )).AsNoTracking();
+        public IEnumerable<Parcel> GetParcels2() => _ctx.Parcel.Include(px => px.Ownership.Select( o => o.Owner )).Include(px => px.Conditions).AsNoTracking();
 
         public async Task<Parcel> UpdateParcel (Parcel p)
         {
