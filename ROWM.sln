@@ -42,6 +42,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ags.Test", "Ags.Test\Ags.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharePointHelper", "SharePointHelper\SharePointHelper.csproj", "{F895F201-0A4F-4D9F-B41E-18A226FAAF22}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlackHillsDocumentToSharePoint", "BlackHillsDocumentToSharePoint\BlackHillsDocumentToSharePoint.csproj", "{F828AD5F-B737-4FBC-82AA-78A384E01D31}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -120,6 +122,10 @@ Global
 		{F895F201-0A4F-4D9F-B41E-18A226FAAF22}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F895F201-0A4F-4D9F-B41E-18A226FAAF22}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F895F201-0A4F-4D9F-B41E-18A226FAAF22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F828AD5F-B737-4FBC-82AA-78A384E01D31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F828AD5F-B737-4FBC-82AA-78A384E01D31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F828AD5F-B737-4FBC-82AA-78A384E01D31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F828AD5F-B737-4FBC-82AA-78A384E01D31}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
