@@ -32,11 +32,11 @@ namespace SharePointInterface
         // staging URL to move to app config
         static readonly string _STAGING_SITE_URL = "https://hdroneview.sharepoint.com/ROW_Dev";
 
-        static readonly string _DOCUMENT_LIST_BASE = "Documents"; // "Parcel Documents";
+        static readonly string _DOCUMENT_LIST_BASE = "Shared Documents"; // "Parcel Documents";
 
         private ClientContext _ctx;
         private string _parcelsFolderName = "Parcels";
-        private string _parcelsFolderTemplate = "Documents/Parcels/_Track_No_LO Name"; // "Folder_Template";
+        private string _parcelsFolderTemplate = "Shared Documents/Parcels/_Track_No_LO Name"; // "Folder_Template";
         private string _siteUrl;
         // private Dictionary<string, string> _docTypes;
         private DocTypes _docTypes;
@@ -46,7 +46,7 @@ namespace SharePointInterface
             _docTypes = d;
 
             //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
-            _siteUrl = _STAGING_SITE_URL; // "https://hdroneview.sharepoint.com/bh_pmp";
+            _siteUrl = "https://hdroneview.sharepoint.com/bh_pmp";
 
             /*
              * STAGING---
@@ -73,8 +73,8 @@ namespace SharePointInterface
                 _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc";
                 _appSecret = "B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=";
 
-                //_appId = "1bca8e9c-15ac-41b0-9869-1e93d4a5d779";
-                //_appSecret = "DPGAdcvJpEC+yzzSgYSs6Szau/Z+GpdOdjjpFnqAS70=";
+                _appId = "1bca8e9c-15ac-41b0-9869-1e93d4a5d779";
+                _appSecret = "DPGAdcvJpEC+yzzSgYSs6Szau/Z+GpdOdjjpFnqAS70=";
             }
 
             // Method using Sharepoint Credentials
@@ -124,8 +124,9 @@ namespace SharePointInterface
             }
 
             Web web = _ctx.Web;
-            List list = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
-            
+            //List list = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
+            List list = web.GetListByUrl(_DOCUMENT_LIST_BASE);
+
             string targetFolderPath = String.Format("{0}/{1}", baseFolderName, folderName);
             //List <string> pathList = new List<string> { "4.0 ROW", "4.3 Parcels", folderName };
             Folder baseFolder = web.GetFolderByServerRelativeUrl(baseFolderName);
@@ -133,6 +134,7 @@ namespace SharePointInterface
             _ctx.Load(list);
             _ctx.Load(baseFolder);
             _ctx.ExecuteQuery();
+
 
             if (baseFolder.FolderExists(folderName))
             {
@@ -174,7 +176,8 @@ namespace SharePointInterface
 
             // Get Parcel folder list
             Web web = _ctx.Web;
-            List parcelFolders = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
+            //List parcelFolders = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
+            List parcelFolders = web.GetListByUrl(_DOCUMENT_LIST_BASE);
 
             // Get Parcel Folder Name
             string parcelFolderName = GetParcelFolderName(pid);
@@ -209,7 +212,8 @@ namespace SharePointInterface
 
             // Get Parcel folder list
             Web web = _ctx.Web;
-            List parcelFolders = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
+            //List parcelFolders = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
+            List parcelFolders = web.GetListByUrl(_DOCUMENT_LIST_BASE);
 
             // Get Parcel Folder Name
             string parcelFolderName = GetParcelFolderName(pid);
