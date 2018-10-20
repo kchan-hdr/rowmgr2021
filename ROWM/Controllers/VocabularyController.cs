@@ -11,12 +11,14 @@ namespace ROWM.Controllers
     public class VocabularyController
     {
         private readonly ROWM_Context _Context;
-        readonly AppRepository _repo;
+        private readonly AppRepository _repo;
+        private readonly DocTypes _docTypes;
 
-        public VocabularyController(ROWM_Context c, AppRepository a)
+        public VocabularyController(ROWM_Context c, AppRepository a, DocTypes d)
         {
             _Context = c;
             _repo = a;
+            _docTypes = d;
         }
 
         [HttpGet("api/map")]
@@ -46,7 +48,7 @@ namespace ROWM.Controllers
         }
 
         [HttpGet("api/DocTypes")]
-        public IEnumerable<DocType> GetDocTypes() => DocType.Types;
+        public IEnumerable<DocType> GetDocTypes() => _docTypes.Types;
 
         #region lookups
         public class Lookup

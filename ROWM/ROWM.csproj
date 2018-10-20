@@ -7,6 +7,10 @@
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="Properties\PublishProfiles\ROWM - FTP.pubxml" />
     <None Remove="Properties\PublishProfiles\ROWM - Web Deploy.pubxml" />
@@ -45,6 +49,7 @@
     <ProjectReference Include="..\SharePointUtil_Sunflower\SharePointUtil_Sunflower.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Connected Services\" />
     <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
   <ItemGroup>

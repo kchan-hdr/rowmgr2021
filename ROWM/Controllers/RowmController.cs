@@ -631,6 +631,7 @@ namespace ROWM.Controllers
     public class ParcelGraph
     {
         public string ParcelId { get; set; }
+        public string TractNo { get; set; }
         public string ParcelStatusCode { get; set; }
         public string ParcelStatus => this.ParcelStatusCode;        // to be removed
         public string RoeStatusCode { get; set; }

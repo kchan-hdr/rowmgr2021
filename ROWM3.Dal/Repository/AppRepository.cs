@@ -10,7 +10,7 @@ namespace ROWM.Dal
     {
         readonly ROWM_Context _Context;
 
-        public AppRepository(ROWM_Context c) => this._Context = c ?? new ROWM_Context();
+        public AppRepository(ROWM_Context c) => this._Context = c;
 
         public IEnumerable<MapConfiguration> GetLayers() => this._Context.MapConfiguration.AsNoTracking().ToList();
     }
