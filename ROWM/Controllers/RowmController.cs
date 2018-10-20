@@ -20,13 +20,15 @@ namespace ROWM.Controllers
 
         #region ctor
         readonly OwnerRepository _repo;
+        readonly StatisticsRepository _statistics;
         readonly ParcelStatusHelper _statusHelper;
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
 
-        public RowmController(OwnerRepository r, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
+        public RowmController(OwnerRepository r, StatisticsRepository sr, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
         {
             _repo = r;
+            _statistics = sr;
             _statusHelper = h;
             _featureUpdate = f;
             _spDocument = s;
@@ -417,13 +419,13 @@ namespace ROWM.Controllers
         [HttpGet("statistics")]
         public async Task<StatisticsDto> GetStatistics()
         {
-            var s = await _repo.Snapshot();
+            var s = await _statistics.Snapshot();
             return new StatisticsDto
             {
                 NumberOfOwners = s.nOwners,
                 NumberOfParcels = s.nParcels,
-                ParcelStatus = await _repo.SnapshotParcelStatus(),
-                RoeStatus = await _repo.SnapshotRoeStatus()
+                ParcelStatus = await _statistics.SnapshotParcelStatus(),
+                RoeStatus = await _statistics.SnapshotRoeStatus()
             };
         }
         #endregion
@@ -479,9 +481,9 @@ namespace ROWM.Controllers
         public int NumberOfParcels { get; set; }
         public int NumberOfOwners { get; set; }
 
-        public IEnumerable<OwnerRepository.SubTotal> ParcelStatus { get; set; }
-        public IEnumerable<OwnerRepository.SubTotal> RoeStatus { get; set; }
-        public IEnumerable<OwnerRepository.SubTotal> Compensations { get; set; }
+        public IEnumerable<StatisticsRepository.SubTotal> ParcelStatus { get; set; }
+        public IEnumerable<StatisticsRepository.SubTotal> RoeStatus { get; set; }
+        public IEnumerable<StatisticsRepository.SubTotal> Compensations { get; set; }
     }
 
     public class AgentDto
