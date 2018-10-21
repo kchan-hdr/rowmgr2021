@@ -16,6 +16,8 @@ namespace geographia.ags
         protected string _URL;
         protected int _LAYERID;
 
+        TokenHelper _tokenHelper;
+
         static FeatureService_Base()
         {
             _Client = new HttpClient();
@@ -29,7 +31,7 @@ namespace geographia.ags
             if (string.IsNullOrWhiteSpace(query))
                 throw new ArgumentNullException(nameof(query));
 
-            var q = $"{_URL}/{layerId}/query?returnGeometry=fale&returnIdsOnly=true&f=json&where={query}";
+            var q = await AppendToken($"{_URL}/{layerId}/query?returnGeometry=fale&returnIdsOnly=true&f=json&where={query}");
             var response = await _Client.GetStringAsync(q);
             var r = JObject.Parse(response);
 
@@ -42,7 +44,7 @@ namespace geographia.ags
             if (idx.Type == JTokenType.Array)
             {
                 var ids = (JArray)idx;
-                return ids.Select<JToken,int>(id => id.Value<int>());
+                return ids.Select<JToken, int>(id => id.Value<int>());
             }
 
             throw new KeyNotFoundException(query);
@@ -55,6 +57,8 @@ namespace geographia.ags
 
             if (string.IsNullOrWhiteSpace(query))
                 throw new ArgumentNullException(nameof(query));
+
+            query = await AppendToken(query);
 
             var responseText = await _Client.GetStringAsync(query);
             var obj = JObject.Parse(responseText);
@@ -77,7 +81,7 @@ namespace geographia.ags
             if (reqContent == null)
                 throw new ArgumentNullException(nameof(reqContent));
 
-            var q = $"{_URL}/{layerId}/updateFeatures";
+            var q = await AppendToken($"{_URL}/{layerId}/updateFeatures");
             var response = await _Client.PostAsync(q, reqContent);
             response.EnsureSuccessStatusCode();
             var responseText = await response.Content.ReadAsStringAsync();
@@ -95,5 +99,26 @@ namespace geographia.ags
                 return false;
             }
         }
+
+        #region token
+        public async Task<(string Token, DateTimeOffset Expiration)> Token()
+        {
+            if (_tokenHelper == null) return (string.Empty, DateTimeOffset.MinValue);
+            return await _tokenHelper.Echo();
+        }
+
+        protected void SetSecured()
+        {
+            _tokenHelper = new TokenHelper(_URL, _Client);
+        }
+
+        async Task<string> AppendToken(string query)
+        {
+            if (_tokenHelper == null)
+                return query;
+
+            return query + $"{( query.Contains('?') ? "&" : "?" )}token={await _tokenHelper.GetToken()}";
+        }
+        #endregion
     }
 }

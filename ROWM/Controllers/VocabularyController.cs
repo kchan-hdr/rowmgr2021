@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using geographia.ags;
+using Microsoft.AspNetCore.Mvc;
 using ROWM.Dal;
 using SharePointInterface;
 using System;
@@ -15,22 +16,28 @@ namespace ROWM.Controllers
         private readonly AppRepository _repo;
         private readonly DocTypes _docTypes;
         private readonly ISharePointCRUD _sp;
+        private readonly IFeatureUpdate _ags;
 
-        public VocabularyController(ROWM_Context c, AppRepository a, DocTypes d, ISharePointCRUD sp)
+        public VocabularyController(ROWM_Context c, AppRepository a, DocTypes d, ISharePointCRUD sp, IFeatureUpdate ags)
         {
             _Context = c;
             _repo = a;
             _docTypes = d;
             _sp = sp;
+            _ags = ags;
         }
 
         [HttpGet("api/map")]
-        public Map GetMapConfiguration()
+        public async Task<Map> GetMapConfiguration()
         {
             var r = new Map();
 
             r.Parcel_Fc = _repo.GetLayers().Where(lx => lx.LayerType == LayerType.Parcel).FirstOrDefault();
             r.Reference_MapLayer = _repo.GetLayers().Where(lx => lx.LayerType == LayerType.Reference).FirstOrDefault();
+
+            var ( t,d) = await _ags.Token();
+            r.Token = t;
+            r.Expiration = d;
 
             return r;
         }
@@ -104,6 +111,8 @@ namespace ROWM.Controllers
         {
             public MapConfiguration Parcel_Fc { get; set; }
             public MapConfiguration Reference_MapLayer { get; set; }
+            public string Token { get; set; }
+            public DateTimeOffset Expiration { get; set; }
         }
         #endregion
     }

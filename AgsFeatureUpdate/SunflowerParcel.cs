@@ -18,6 +18,8 @@ namespace geographia.ags
                 : url;
 
             _LAYERID = 0;
+
+            SetSecured();
         }
 
         public async Task<IEnumerable<Status_dto>> GetAllParcels()
