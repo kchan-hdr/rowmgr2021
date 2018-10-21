@@ -267,10 +267,11 @@ namespace ROWM.Controllers
             p.RoeStatusCode = statusCode;
             if (!string.IsNullOrWhiteSpace(condition))
             {
-                if ( null == p.Conditions)
-                    p.Conditions = new List<RoeCondition>();
+                // db doesn't have condition
+                //if ( null == p.Conditions)
+                //    p.Conditions = new List<RoeCondition>();
 
-                p.Conditions.Add(new RoeCondition() { Condition = condition, IsActive = true, EffectiveStartDate = DateTimeOffset.Now, EffectiveEndDate = DateTimeOffset.MaxValue });
+                //p.Conditions.Add(new RoeCondition() { Condition = condition, IsActive = true, EffectiveStartDate = DateTimeOffset.Now, EffectiveEndDate = DateTimeOffset.MaxValue });
             }
             p.LastModified = DateTimeOffset.Now;
             p.ModifiedBy = _APP_NAME;

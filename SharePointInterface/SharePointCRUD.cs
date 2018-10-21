@@ -28,7 +28,7 @@ namespace SharePointInterface
         // staging URL to move to app config
         static readonly string _STAGING_SITE_URL = "https://b2hpm.sharepoint.com/staging";
 
-        static readonly string _DOCUMENT_LIST_BASE = "Shared Documents"; // "Parcel Documents";
+        static readonly string _DOCUMENT_LIST_BASE = "Documents"; // "Parcel Documents";
 
         private ClientContext _ctx;
         private string _parcelsFolderName = "HDR Project/14. ROW/14.1 Parcels";

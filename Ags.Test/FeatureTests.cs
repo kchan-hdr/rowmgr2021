@@ -36,7 +36,7 @@ namespace Ags.Test
             Trace.WriteLine($"token {t} expiration {d}");
 
             Assert.IsNotNull(parcels);
-            Assert.AreEqual(255, parcels.Count());
+            Assert.AreEqual(64, parcels.Count());
 
             foreach (var p in parcels)
             {

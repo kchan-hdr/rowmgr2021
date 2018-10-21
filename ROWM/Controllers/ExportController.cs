@@ -124,7 +124,7 @@ namespace ROWM.Controllers
         /// <param name="f"></param>
         /// <returns></returns>
         [HttpGet("export/contacts")]
-        public IActionResult ExportContract(string f)
+        public IActionResult ExportContact(string f)
         {
             if ("excel" != f)
                 return BadRequest($"not supported export '{f}'");
@@ -228,7 +228,7 @@ namespace ROWM.Controllers
             }
 
             public static string Header() =>
-                "Parcel ID,Landowner Score,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
+                "Parcel ID,RGI,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
 
             public override string ToString()
             {

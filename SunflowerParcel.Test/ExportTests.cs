@@ -10,7 +10,7 @@ namespace SunflowerParcel.Test
         [TestMethod]
         public void Test_Export_Contacts()
         {
-            var rep = new ROWM.Dal.OwnerRepository();
+            var rep = new ROWM.Dal.OwnerRepository(null);
             var ctrl = new ExportController(rep);
 
             dynamic file = ctrl.ExportContact("excel");

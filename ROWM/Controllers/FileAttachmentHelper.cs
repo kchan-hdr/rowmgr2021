@@ -38,7 +38,7 @@ namespace ROWM.Controllers
             d.Agent.Add(log.Agent); // this relationship is not used anymore
 
             // add document to log
-            log.Attachments.Add(d);
+            // log.Attachments.Add(d);
 
             // Add document to parcels
             var myParcels = parcels.Distinct();
