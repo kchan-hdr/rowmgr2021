@@ -28,7 +28,7 @@ namespace SharePointInterface
         // staging URL to move to app config
         static readonly string _STAGING_SITE_URL = "https://b2hpm.sharepoint.com/staging";
 
-        static readonly string _DOCUMENT_LIST_BASE = "Documents"; // "Parcel Documents";
+        static readonly string _DOCUMENT_LIST_BASE = "Shared Documents"; // "Parcel Documents";
 
         private ClientContext _ctx;
         private string _parcelsFolderName = "HDR Project/14. ROW/14.1 Parcels";
@@ -72,7 +72,6 @@ namespace SharePointInterface
 
                 _appId = "baa9400f-d050-4564-9394-71e71b8feacd";
                 _appSecret = "ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=";
-
             }
 
             // Method using Sharepoint Credentials
@@ -122,8 +121,9 @@ namespace SharePointInterface
             }
 
             Web web = _ctx.Web;
-            List list = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
-            
+            //List list = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
+            List list = web.GetListByUrl(_DOCUMENT_LIST_BASE);
+
             string targetFolderPath = String.Format("{0}/{1}", baseFolderName, folderName);
             //List <string> pathList = new List<string> { "4.0 ROW", "4.3 Parcels", folderName };
             Folder baseFolder = web.GetFolderByServerRelativeUrl(baseFolderName);
@@ -131,6 +131,7 @@ namespace SharePointInterface
             _ctx.Load(list);
             _ctx.Load(baseFolder);
             _ctx.ExecuteQuery();
+
 
             if (baseFolder.FolderExists(folderName))
             {
@@ -172,7 +173,8 @@ namespace SharePointInterface
 
             // Get Parcel folder list
             Web web = _ctx.Web;
-            List parcelFolders = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
+            //List parcelFolders = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
+            List parcelFolders = web.GetListByUrl(_DOCUMENT_LIST_BASE);
 
             // Get Parcel Folder Name
             string parcelFolderName = GetParcelFolderName(pid);
@@ -207,7 +209,8 @@ namespace SharePointInterface
 
             // Get Parcel folder list
             Web web = _ctx.Web;
-            List parcelFolders = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
+            //List parcelFolders = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
+            List parcelFolders = web.GetListByUrl(_DOCUMENT_LIST_BASE);
 
             // Get Parcel Folder Name
             string parcelFolderName = GetParcelFolderName(pid);
