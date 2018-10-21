@@ -10,6 +10,7 @@ namespace geographia.ags
     {
         Task<bool> UpdateFeature(string parcelId, int status);
         Task<bool> UpdateFeatureRoe(string parcelId, int status);
+        Task<bool> UpdateFeatureRoe_Ex(string parcelId, int status, string condition);
         Task<bool> UpdateRating(string parcelId, int rating);
         Task<bool> UpdateFeatureDocuments(string parcelId, string documentURL);
     }

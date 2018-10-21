@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.SharePoint.Client;
 using OfficeDevPnP.Core;
 using ROWM.Dal;
+using System.Diagnostics;
 
 namespace SharePointInterface
 {
@@ -43,6 +44,7 @@ namespace SharePointInterface
             //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
             _siteUrl = "https://b2hpm.sharepoint.com";
 
+
             /*
              * STAGING---
              * 
@@ -50,7 +52,7 @@ namespace SharePointInterface
                 The app identifier has been successfully created.
                 Client Id:  	3dff29b2-ae04-4ad4-8149-eb703d62b16f
                 Client Secret:  	bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=
-                Title:  	rowm_staging
+            Title:  	rowm_staging
                 App Domain:  	b2hrowmgr.hdrinc.com
                 Redirect URI:  	https://b2hrowmgr.hdrinc.com
 
@@ -70,6 +72,7 @@ namespace SharePointInterface
 
                 _appId = "baa9400f-d050-4564-9394-71e71b8feacd";
                 _appSecret = "ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=";
+
             }
 
             // Method using Sharepoint Credentials
@@ -97,7 +100,7 @@ namespace SharePointInterface
 
             _ctx.ExecuteQuery();
 
-            Console.WriteLine(web.Title);
+            Trace.WriteLine(web.Title);
 
             if (!String.IsNullOrWhiteSpace(web.Title)) {
                 title = web.Title;
@@ -131,7 +134,7 @@ namespace SharePointInterface
 
             if (baseFolder.FolderExists(folderName))
             {
-                Console.WriteLine("Folder {0} exists in {1}", folderName, baseFolderName);
+                Trace.WriteLine(string.Format("Folder {0} exists in {1}", folderName, baseFolderName));
             } else {
                 //EnsureAndGetTargetFolder(_ctx, list, pathList);
                 CopyPasteFolder(folderTemplate, _parcelsFolderTemplate, baseFolderName, _DOCUMENT_LIST_BASE, folderName);
@@ -334,11 +337,13 @@ namespace SharePointInterface
             }
             catch(Exception e)
             {
-                Console.WriteLine("Uploading Doc Failed: {0}", e.Message);
+                Trace.WriteLine("Uploading Doc Failed: {0}", e.Message);
             }
     
             return _docExists;
         }
+
+        // private void Trace(string v, string message) => throw new NotImplementedException();
 
         /// <summary>
         /// Will ensure nested folder creation if folders in folderPath don't exist.

@@ -123,10 +123,13 @@ namespace ROWM.Controllers
         
 
         [Route("parcels/{pid}"), HttpGet]
-        public async Task<ParcelGraph> GetParcel(string pid)
+        public async Task<ActionResult<ParcelGraph>> GetParcel(string pid)
         {
             var p = await _repo.GetParcel(pid);
-            return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
+            if (p == null)
+                return BadRequest();
+
+            return Json( new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid)));
         }
         #region offer
         [Route("parcels/{pid}/initialOffer"), HttpPut]
@@ -236,25 +239,49 @@ namespace ROWM.Controllers
         #endregion
         #region roe status
         [HttpPut("parcels/{pid}/roe/{statusCode}")]
-        public async Task<ParcelGraph> UpdateRoeStatus(string pid, string statusCode)
+        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus(string pid, string statusCode) => await UpdateRoeStatusImpl(pid, statusCode, null);
+
+        [HttpPut("parcels/{pid}/roe")]
+        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus2(string pid, [FromBody] RoeRequest r) => await UpdateRoeStatusImpl(pid, r.StatusCode, r.Condition);
+
+        private async Task<ActionResult<ParcelGraph>> UpdateRoeStatusImpl(string pid, string statusCode, string condition)
         {
             var p = await _repo.GetParcel(pid);
+            if (p == null)
+                return BadRequest();
 
             List<Task> tks = new List<Task>();
 
             try
             {
-
                 var dv = _statusHelper.GetRoeDomainValue(statusCode);
-                tks.Add( _featureUpdate.UpdateFeatureRoe(pid, dv));
+                tks.Add( null == condition ?
+                    _featureUpdate.UpdateFeatureRoe(pid, dv) : _featureUpdate.UpdateFeatureRoe_Ex(pid, dv, condition));
             }
             catch( InvalidOperationException )
             {
                 Trace.TraceWarning($"bad roe status domain {statusCode}");
+                return BadRequest();
             }
+
             p.RoeStatusCode = statusCode;
+            if (!string.IsNullOrWhiteSpace(condition))
+            {
+                if ( null == p.Conditions)
+                    p.Conditions = new List<RoeCondition>();
+
+                p.Conditions.Add(new RoeCondition() { Condition = condition, IsActive = true, EffectiveStartDate = DateTimeOffset.Now, EffectiveEndDate = DateTimeOffset.MaxValue });
+            }
             p.LastModified = DateTimeOffset.Now;
             p.ModifiedBy = _APP_NAME;
+
+            // propagate to parcel 
+            // TODO: clean up
+            switch( statusCode )
+            {
+                case "ROE_Obtained": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
+                case "ROE_with_Conditions": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
+            }
 
             tks.Add( _repo.UpdateParcel(p));
 
@@ -372,8 +399,9 @@ namespace ROWM.Controllers
         #endregion
         #region landowner score
         /// <summary>
-        /// will need to trigger feature update. feature class not ready 2018.7
+        /// trigger feature update
         /// </summary>
+        /// <remarks>this is fairly wasteful. TODO: check if project uses Landowner Score</remarks>
         /// <param name="score"></param>
         /// <param name="ts"></param>
         /// <param name="parcelIds"></param>
@@ -396,7 +424,6 @@ namespace ROWM.Controllers
                         p.ModifiedBy = _APP_NAME;
                         touched++;
 
-                        // tasks.Add(_repo.UpdateParcel(p));
                         tasks.Add(_featureUpdate.UpdateRating(p.Assessor_Parcel_Number, score));
                     }
                 }
@@ -464,6 +491,12 @@ namespace ROWM.Controllers
 
         public bool IsPrimaryContact { get; set; } = false;
         public string Relations { get; set; } = "";
+    }
+
+    public class RoeRequest
+    {
+        public string StatusCode { get; set; }
+        public string Condition { get; set; }
     }
     #endregion
     #region offer dto
@@ -635,6 +668,7 @@ namespace ROWM.Controllers
         public string ParcelStatusCode { get; set; }
         public string ParcelStatus => this.ParcelStatusCode;        // to be removed
         public string RoeStatusCode { get; set; }
+        public string RoeCondition { get; set; }
         public string LandownerScore { get; set; }
         public string SitusAddress { get; set; }
         public double Acreage { get; set; }

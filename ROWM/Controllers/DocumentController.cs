@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -376,7 +376,10 @@ namespace ROWM.Controllers
                 catch (Exception e)
                 {
                     // TODO: Return error to user?
-                    Console.WriteLine("Error uploading document {0} type {1} to Sharepoint for {2}", sourceFilename, header.DocumentType, parcelName);
+                    Trace.WriteLine(string.Format("Error uploading document {0} type {1} to Sharepoint for {2}", sourceFilename, header.DocumentType, parcelName));
+#if DEBUG
+                    throw;
+#endif
                 }
             }
 

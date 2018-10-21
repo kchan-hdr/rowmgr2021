@@ -116,7 +116,12 @@ namespace geographia.ags
             });
             return await this.Update(u);
         }
-        async Task<bool> IFeatureUpdate.UpdateFeatureRoe(string parcelId, int status)
+
+        async Task<bool> IFeatureUpdate.UpdateFeatureRoe(string parcelId, int status) => await UpdateFeatureRoe_Impl(parcelId, status, "");
+
+        async Task<bool> IFeatureUpdate.UpdateFeatureRoe_Ex(string parcelId, int status, string condition) => await UpdateFeatureRoe_Impl(parcelId, status, condition);
+
+        async Task<bool> UpdateFeatureRoe_Impl(string parcelId, int status, string condition)
         {
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
@@ -127,28 +132,14 @@ namespace geographia.ags
                 attributes = new Status_Req
                 {
                     OBJECTID = i,
-                    ROE_Status = status
+                    ROE_Status = status,
+                    ROE_Condition = condition
                 }
             });
             return await this.Update(u);
         }
 
-        async Task<bool> IFeatureUpdate.UpdateRating(string parcelId, int rating)
-        {
-            if (string.IsNullOrWhiteSpace(parcelId))
-                throw new ArgumentNullException(nameof(parcelId));
-
-            var oid = await Find(0, $"{_PARCEL_KEY}='{parcelId}'");
-            var u = oid.Select(i => new UpdateFeature
-            {
-                attributes = new Status_Req
-                {
-                    OBJECTID = i,
-                    Landowner_Score = rating
-                }
-            });
-            return await this.Update(u);
-        }
+        Task<bool> IFeatureUpdate.UpdateRating(string parcelId, int rating) => Task.FromResult(false); // no op
         #region request
         public class UpdateRequest
         {
@@ -168,6 +159,8 @@ namespace geographia.ags
             public int? ParcelStatus { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public int? ROE_Status { get; set; }
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public string ROE_Condition { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public int? Landowner_Score { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]

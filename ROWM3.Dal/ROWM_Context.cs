@@ -33,6 +33,7 @@ namespace ROWM.Dal
         public virtual DbSet<Parcel_Status> Parcel_Status { get; set; }
         public virtual DbSet<Repesentation_Type> Repesentation_Type { get; set; }
         public virtual DbSet<Roe_Status> Roe_Status { get; set; }
+        public virtual DbSet<RoeCondition> RoeCondition { get; set; }
         public virtual DbSet<Followup> Followup { get; set; }
         public virtual DbSet<Organization> Organization { get; set; }
         public virtual DbSet<MapConfiguration> MapConfiguration { get; set; }
