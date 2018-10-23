@@ -282,6 +282,7 @@ namespace ROWM.Controllers
             {
                 case "ROE_Obtained": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
                 case "ROE_with_Conditions": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
+                case "Access_Granted": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
             }
 
             tks.Add( _repo.UpdateParcel(p));
