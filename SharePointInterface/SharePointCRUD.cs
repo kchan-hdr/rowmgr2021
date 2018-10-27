@@ -32,11 +32,11 @@ namespace SharePointInterface
         // staging URL to move to app config
         static readonly string _STAGING_SITE_URL = "https://hdroneview.sharepoint.com/ROW_Dev";
 
-        static readonly string _DOCUMENT_LIST_BASE = "Shared Documents"; // "Parcel Documents";
+        static readonly string _DOCUMENT_LIST_BASE = "Documents"; // "Shared Documents";
 
         private ClientContext _ctx;
         private string _parcelsFolderName = "Parcels";
-        private string _parcelsFolderTemplate = "Shared Documents/Parcels/_Track_No_LO Name"; // "Folder_Template";
+        private string _parcelsFolderTemplate = "Documents/Parcels/_Track_No_LO Name"; // "Folder_Template";
         private string _siteUrl;
         // private Dictionary<string, string> _docTypes;
         private DocTypes _docTypes;
@@ -46,7 +46,7 @@ namespace SharePointInterface
             _docTypes = d;
 
             //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
-            _siteUrl = "https://hdroneview.sharepoint.com/bh_pmp";
+            _siteUrl = _STAGING_SITE_URL; // "https://hdroneview.sharepoint.com/bh_pmp";
 
             /*
              * STAGING---
@@ -71,10 +71,10 @@ namespace SharePointInterface
             if (_appId == null || _appSecret == null )
             {
                 _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc";
-                _appSecret = "B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=";
+                _appSecret = "d4M24Cq7r4ZcHraDHBmB6LVNfMzs/e6Ya5/TzP4/svk=";
 
-                _appId = "1bca8e9c-15ac-41b0-9869-1e93d4a5d779";
-                _appSecret = "DPGAdcvJpEC+yzzSgYSs6Szau/Z+GpdOdjjpFnqAS70=";
+                //_appId = "1bca8e9c-15ac-41b0-9869-1e93d4a5d779";
+                //_appSecret = "DPGAdcvJpEC+yzzSgYSs6Szau/Z+GpdOdjjpFnqAS70=";
             }
 
             // Method using Sharepoint Credentials
