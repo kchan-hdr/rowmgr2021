@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 
 namespace ExcelExport
 {
-    public class ContactListExport : Exporter
+    public class ContactListExport : Exporter<Object>
     {
+        public ContactListExport(IEnumerable<Object> d) : base(d) { }
+
         public override byte[] Export()
         {
             reportname = "Contacts List";
@@ -41,7 +43,7 @@ namespace ExcelExport
             WriteText(hr, "L", "Contact ZIP");
             WriteText(hr, "M", "Representation");
 
-            foreach (var c in Load())
+            foreach (dynamic c in items)
             {
                 var r = InsertRow(row++, d);
                 WriteText(r, "A", c.parcelid);
@@ -63,15 +65,15 @@ namespace ExcelExport
             bookPart.Workbook.Save();
         }
 
-        List<ContactList> Load()
-        {
-            using (var ctx = new RowmEntities())
-            {
-                var q = ctx.ContactList.AsNoTracking()
-                            .OrderBy(ax => ax.parcelid).ThenByDescending(ax => ax.isprimarycontact).ThenBy(ax=>ax.ownerlastname);
+        //List<ContactList> Load()
+        //{
+        //    using (var ctx = new RowmEntities())
+        //    {
+        //        var q = ctx.ContactList.AsNoTracking()
+        //                    .OrderBy(ax => ax.parcelid).ThenByDescending(ax => ax.isprimarycontact).ThenBy(ax=>ax.ownerlastname);
 
-                return q.ToList();
-            }
-        }
+        //        return q.ToList();
+        //    }
+        //}
     }
 }

@@ -1,5 +1,4 @@
-﻿using com.hdr.Rowm.Export;
-using DocumentFormat.OpenXml.Packaging;
+﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System;
 using System.Collections.Generic;
@@ -9,8 +8,10 @@ using System.Threading.Tasks;
 
 namespace ExcelExport
 {
-    public class AgentLogExport : Exporter
+    public class AgentLogExport : Exporter<AgentLogExport.AgentLog>
     {
+        public AgentLogExport(IEnumerable<AgentLog> d) : base(d) { }
+
         public override byte[] Export()
         {
             reportname = "Agent Log";
@@ -39,7 +40,7 @@ namespace ExcelExport
             WriteText(hr, "J", "Title");
             WriteText(hr, "K", "Notes");
 
-            foreach (var log in Load())
+            foreach (var log in items)
             {
                 var r = InsertRow(row++, d);
                 WriteText(r, "A", log.parcelid);
@@ -59,15 +60,23 @@ namespace ExcelExport
             bookPart.Workbook.Save();
         }
 
-        List<AgentLog> Load()
+        #region report dto
+        public class AgentLog
         {
-            using (var ctx = new RowmEntities())
-            {
-                var q = ctx.AgentLog.AsNoTracking()
-                            .OrderBy(ax => ax.parcelid).ThenBy(ax => ax.dateadded);
-
-                return q.ToList();
-            }
+            public string parcelid { get; set; }
+            public string parcelstatuscode { get; set; }
+            public string parcelstatus { get; set; }
+            public string roestatuscode { get; set; }
+            public string roestatus { get; set; }
+            public string ownerfirstname { get; set; }
+            public string ownerlastname { get; set; }
+            public string agentname { get; set; }
+            public System.DateTimeOffset dateadded { get; set; }
+            public string contactchannel { get; set; }
+            public string projectphase { get; set; }
+            public string title { get; set; }
+            public string notes { get; set; }
         }
+        #endregion
     }
 }

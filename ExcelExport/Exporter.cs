@@ -5,34 +5,57 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ExcelExport
-{
-    using DocumentFormat.OpenXml;
+{   using DocumentFormat.OpenXml;
     using DocumentFormat.OpenXml.Packaging;
     using DocumentFormat.OpenXml.Spreadsheet;
     using System.IO;
 
-    public class Exporter
+    /// <summary>
+    /// output formatted excel for b2h
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class Exporter<T>
     {
+        protected IEnumerable<T> items;
         protected string reportname = "Unknown";
         protected WorkbookPart bookPart;
         protected Sheets sheets;
 
+        public Exporter(IEnumerable<T> data) {
+            items = data;
+        }
+
         virtual public byte[] Export()
         {
-            var path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            path = Path.ChangeExtension(path, "xlsx");
-            var doc = MakeDoc(path);
-            bookPart = doc.AddWorkbookPart();
-            bookPart.Workbook = new Workbook();
-            sheets = doc.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
+            using (var memory = new MemoryStream())
+            {
+                var doc = MakeDoc(memory);
+                bookPart = doc.AddWorkbookPart();
+                bookPart.Workbook = new Workbook();
+                sheets = doc.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
 
-            WriteCoverPage(1, reportname);
-            Write(2);
+                WriteCoverPage(1, reportname);
+                Write(2);
 
-            doc.Close();
-            var b = File.ReadAllBytes(path);
-            File.Delete(path);
-            return b;
+                doc.Close();
+
+                return memory.ToArray();
+            }
+
+            //var path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            //path = Path.ChangeExtension(path, "xlsx");
+            //var doc = MakeDoc(path);
+            //bookPart = doc.AddWorkbookPart();
+            //bookPart.Workbook = new Workbook();
+            //sheets = doc.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
+
+            //WriteCoverPage(1, reportname);
+            //Write(2);
+
+            //doc.Close();
+            //var b = File.ReadAllBytes(path);
+            //File.Delete(path);
+            //return b;
         }
         virtual protected void Write(uint pageId) { }
 
@@ -55,6 +78,8 @@ namespace ExcelExport
         #endregion
 
         #region helpers
+        static SpreadsheetDocument MakeDoc(Stream s) => SpreadsheetDocument.Create(s, SpreadsheetDocumentType.Workbook);
+
         static SpreadsheetDocument MakeDoc(string path) => SpreadsheetDocument.Create(path, SpreadsheetDocumentType.Workbook);
 
         static protected Cell WriteNumber(Row row, string c, string text) => WriteCell(row, c, text, CellValues.Number);

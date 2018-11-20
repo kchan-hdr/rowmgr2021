@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 
 namespace ExcelExport
 {
-    public class DocListExport : Exporter
+    public class DocListExport : Exporter<Object>
     {
+        public DocListExport(IEnumerable<Object> d) : base(d) { }
+
         public override byte[] Export()
         {
             reportname = "Documents List";
@@ -38,7 +40,7 @@ namespace ExcelExport
             WriteText(hr, "I", "Check No");
             WriteText(hr, "J", "Date Recorded");
 
-            foreach (var doc in Load())
+            foreach (dynamic doc in items)
             {
                 var r = InsertRow(row++, d);
                 WriteText(r, "A", doc.parcelid);
@@ -57,15 +59,15 @@ namespace ExcelExport
             bookPart.Workbook.Save();
         }
 
-        List<DocumentList> Load()
-        {
-            using (var ctx = new RowmEntities())
-            {
-                var q = ctx.DocumentList.AsNoTracking()
-                            .OrderBy(ax => ax.parcelid).ThenBy(ax => ax.title);
+        //List<DocumentList> Load()
+        //{
+        //    using (var ctx = new RowmEntities())
+        //    {
+        //        var q = ctx.DocumentList.AsNoTracking()
+        //                    .OrderBy(ax => ax.parcelid).ThenBy(ax => ax.title);
 
-                return q.ToList();
-            }
-        }
+        //        return q.ToList();
+        //    }
+        //}
     }
 }
