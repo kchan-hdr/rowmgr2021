@@ -54,7 +54,7 @@ namespace geographia.ags
             if (string.IsNullOrWhiteSpace(pid))
                 throw new ArgumentNullException("parcel apn");
 
-            var req = $"{_URL}/{_LAYERID}/query?f=json&where=PARCEL_ID%3D'{pid}'&returnGeometry=false&returnIdsOnly=false&outFields=OBJECTID,PARCEL_ID,ParcelStatus,ROE_Status,Documents";
+            var req = $"{_URL}/{_LAYERID}/query?f=json&where={_PARCEL_KEY}%3D'{pid}'&returnGeometry=false&returnIdsOnly=false&outFields=OBJECTID,PARCEL_ID,ParcelStatus,ROE_Status,Documents";
             var r = await GetAll<Status_dto>(req, (arr) =>
             {
                 var list = new List<Status_dto>();
