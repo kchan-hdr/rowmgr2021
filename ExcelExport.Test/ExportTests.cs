@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -35,7 +37,7 @@ namespace ExcelExport.Test
                 parcelstatus = p.Parcel_Status.Description,
                 parcelstatuscode = p.ParcelStatusCode,
                 projectphase = lx.ProjectPhase,
-                roestatus = p.Roe_Status.Description,
+                roestatus = lx.Landowner_Score?.ToString() ?? "", // p.Roe_Status.Description,
                 roestatuscode = p.RoeStatusCode,
                 title = lx.Title?.TrimEnd(',') ?? ""
             }));
@@ -44,6 +46,11 @@ namespace ExcelExport.Test
             var bytes = e.Export();
             Assert.IsNotNull(bytes);
             Assert.AreNotEqual(0, bytes.Length);
+
+            // 
+            var file = Path.ChangeExtension( Path.GetTempFileName(), "xlsx");
+            System.IO.File.WriteAllBytes(file, bytes);
+            Trace.WriteLine(file);
         }
 
         [TestMethod, TestCategory("Export")]

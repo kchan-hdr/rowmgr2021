@@ -131,6 +131,7 @@
   <ItemGroup>
     <Compile Include="AgentLogExport.cs" />
     <Compile Include="ContactListExport.cs" />
+    <Compile Include="RoeListExport.cs" />
     <Compile Include="DocListExport.cs" />
     <Compile Include="Exporter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

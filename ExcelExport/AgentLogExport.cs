@@ -25,35 +25,33 @@ namespace ExcelExport
             p.Worksheet = new Worksheet(d);
 
             uint row = 1;
-        
-            // column heading
+
+            // column heading --                "Parcel ID,RGI,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
             var hr = InsertRow(row++, d);
-            WriteText(hr, "A", "Parcel ID");
-            WriteText(hr, "B", "Status");
-            WriteText(hr, "C", "ROE Status");
-            WriteText(hr, "D", "Contact Firstname");
-            WriteText(hr, "E", "Contact Lastname");
-            WriteText(hr, "F", "Agent Nam");
-            WriteText(hr, "G", "Date");
-            WriteText(hr, "H", "Channel");
-            WriteText(hr, "I", "Type");
-            WriteText(hr, "J", "Title");
-            WriteText(hr, "K", "Notes");
+            var c = 0;
+            WriteText(hr, GetColumnCode(c++), "Parcel ID", 1);
+            WriteText(hr, GetColumnCode(c++), "RGI", 1);
+            WriteText(hr, GetColumnCode(c++), "Contact Name", 1);
+            WriteText(hr, GetColumnCode(c++), "Date", 1);
+            WriteText(hr, GetColumnCode(c++), "Channel", 1);
+            WriteText(hr, GetColumnCode(c++), "Type", 1);
+            WriteText(hr, GetColumnCode(c++), "Title", 1);
+            WriteText(hr, GetColumnCode(c++), "Notes", 1);
+            WriteText(hr, GetColumnCode(c++), "Agent Name", 1);
 
             foreach (var log in items)
             {
                 var r = InsertRow(row++, d);
-                WriteText(r, "A", log.parcelid);
-                WriteText(r, "B", log.parcelstatus);
-                WriteText(r, "C", log.roestatus);
-                WriteText(r, "D", log.ownerfirstname);
-                WriteText(r, "E", log.ownerlastname);
-                WriteText(r, "F", log.agentname);
-                WriteText(r, "G", log.dateadded.Date.ToShortDateString());
-                WriteText(r, "H", log.contactchannel);
-                WriteText(r, "I", log.projectphase);
-                WriteText(r, "J", log.title);
-                WriteText(r, "K", log.notes);
+                c = 0;
+                WriteText(r, GetColumnCode(c++), log.parcelid);
+                WriteText(r, GetColumnCode(c++), log.roestatus);
+                WriteText(r, GetColumnCode(c++), log.ownerfirstname ?? "");     // this is a heck. to do
+                WriteText(r, GetColumnCode(c++), log.dateadded.Date.ToShortDateString());
+                WriteText(r, GetColumnCode(c++), log.contactchannel);
+                WriteText(r, GetColumnCode(c++), log.projectphase);
+                WriteText(r, GetColumnCode(c++), log.title);
+                WriteText(r, GetColumnCode(c++), log.notes);
+                WriteText(r, GetColumnCode(c++), log.agentname);
             }
 
             sheets.Append(new Sheet { Id = bookPart.GetIdOfPart(p), SheetId = pageId, Name = "Contact Log" });

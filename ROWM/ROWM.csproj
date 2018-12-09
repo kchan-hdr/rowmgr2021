@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AgsFeatureUpdate\AgsFeatureUpdate.csproj" />
+    <ProjectReference Include="..\ExcelExport\ExcelExport.csproj" />
     <ProjectReference Include="..\ROWM2.Dal\ROWM2.Dal.csproj" />
     <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj" />
   </ItemGroup>
