@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DenverParcel.cs" />
     <Compile Include="BlackhillParcel.cs" />
     <Compile Include="B2hParcel.cs" />
     <Compile Include="FeatureService.cs" />
