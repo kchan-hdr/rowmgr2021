@@ -51086,6 +51086,12 @@ var Application = function (_React$Component) {
                                 "a",
                                 { onClick: this.setRightPanel.bind(null, "reports") },
                                 "Reports"
+                            ),
+                            "\xA0|\xA0",
+                            React.createElement(
+                                "a",
+                                { href: "assets/IPC B2H Landowner Communication Database Training Manual.pdf", target: "_blank" },
+                                "Help"
                             )
                         )
                     ),
@@ -54251,7 +54257,7 @@ var AddContactLogOverlay = function (_React$Component) {
             var dt = document.getElementById("add-contact-log-date").value;
             var pct = document.getElementById("add-contact-log-phase").value;
             var pcls = this.state.arrays[1].array;
-            var myScore = this.state.score || 0;
+            var myScore = this.state.score || 2;
 
             if (agt == "") {
                 validate += "Please select an agent.  ";
@@ -56085,7 +56091,7 @@ var __extends = undefined && undefined.__extends || function () {
 }();
 var React = __webpack_require__(5);
 var esri_loader_1 = __webpack_require__(342);
-var _AGS = "https://gis05s.hdrgateway.com/arcgis/rest/services";
+var _AGS = "https://gis05.hdrgateway.com/arcgis/rest/services";
 var _PAR = "California/B2H_ROW_Parcels_FS";
 var _MAP = "California/B2H_ROW_MapService";
 var MapArea = function (_super) {
@@ -56144,21 +56150,13 @@ var MapArea = function (_super) {
                     title: "Impacted Parcels",
                     outFields: ["*"]
                 });
-                _this.parcelLay.labelingInfo = [{
-                    labelExpressionInfo: { expression: "$feature.LABEL_ID" },
-                    symbol: {
-                        type: 'text', color: 'brown', haloSize: 1, haloColor: 'white'
-                    }
-                }];
-                _this.parcelLay.labelVisible = true;
                 _this.parcelLay.popupTemplate = {
                     title: "Impacted Parcel",
                     content: "Parcel ID: {PARCEL_ID}<br />{SitusAddre}",
                     actions: [{
-                        id: "row-details", title: "Details"
+                        id: "row-details", title: "Details", className: "esri-icon-link-vertical"
                     }]
                 };
-                m.add(_this.parcelLay);
                 var lay = new MapImageLayer({
                     url: _AGS + "/" + _MAP + "/MapServer",
                     title: "Engineering Data"
@@ -56174,7 +56172,7 @@ var MapArea = function (_super) {
                             title: "Impacted Parcel",
                             content: "Parcel ID: {PARCEL_ID}",
                             actions: [{
-                                id: "row-details", title: "Details"
+                                id: "row-details", title: "Details", className: "esri-icon-link-vertical"
                             }]
                         };
                     }
@@ -56242,7 +56240,7 @@ var MapArea = function (_super) {
                             placeholder: "Search by Owner or Parcel"
                         }, {
                             featureLayer: new FeatureLayer({
-                                url: _AGS + "/" + _MAP + "/MapServer/8",
+                                url: _AGS + "/" + _MAP + "/MapServer/12",
                                 outFields: ["*"]
                             }),
                             searchFields: ["UNIQUE_ID"],
@@ -56256,11 +56254,11 @@ var MapArea = function (_super) {
                             suggestionTemplate: "{UNIQUE_ID}"
                         }, {
                             featureLayer: new FeatureLayer({
-                                url: _AGS + "/" + _MAP + "/MapServer/9",
+                                url: _AGS + "/" + _MAP + "/MapServer/13",
                                 outFields: ["*"]
                             }),
-                            searchFields: ["ROUTE"],
-                            displayField: "ROUTE",
+                            searchFields: ["UNIQUE_ID"],
+                            displayField: "UNIQUE_ID",
                             exactMatch: false,
                             outFields: ["*"],
                             name: "Light-Duty Fly Yard",
@@ -56273,8 +56271,8 @@ var MapArea = function (_super) {
                                 url: _AGS + "/" + _MAP + "/MapServer/11",
                                 outFields: ["*"]
                             },
-                            searchFields: ["ROUTE"],
-                            displayField: "ROUTE",
+                            searchFields: ["UNIQUE_ID"],
+                            displayField: "UNIQUE_ID",
                             exactMatch: false,
                             outFields: ["*"],
                             name: "Multi-Use Areas",
