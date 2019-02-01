@@ -32,11 +32,11 @@ namespace SharePointInterface
         // staging URL to move to app config
         static readonly string _STAGING_SITE_URL = "https://hdroneview.sharepoint.com/ROW_Dev";
 
-        static readonly string _DOCUMENT_LIST_BASE = "Documents"; // "Shared Documents";
+        static readonly string _DOCUMENT_LIST_BASE = "DW_Documents"; // "Shared Documents";
 
         private ClientContext _ctx;
-        private string _parcelsFolderName = "Parcels";
-        private string _parcelsFolderTemplate = "Documents/Parcels/_Track_No_LO Name"; // "Folder_Template";
+        private string _parcelsFolderName = "";
+        private string _parcelsFolderTemplate = "DW_Documents/_Track_No_LO Name"; // "Folder_Template";
         private string _siteUrl;
         // private Dictionary<string, string> _docTypes;
         private DocTypes _docTypes;
@@ -116,7 +116,10 @@ namespace SharePointInterface
         {
             if (String.IsNullOrWhiteSpace(baseFolderName))
             {
-                baseFolderName = string.IsNullOrWhiteSpace(baseFolderName) ? $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}" : $"{_DOCUMENT_LIST_BASE}/{baseFolderName}";
+                // this doesn't make sense
+                // baseFolderName = string.IsNullOrWhiteSpace(baseFolderName) ? $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}" : $"{_DOCUMENT_LIST_BASE}/{baseFolderName}";
+
+                baseFolderName = string.IsNullOrWhiteSpace(_parcelsFolderName) ? _DOCUMENT_LIST_BASE : $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}";
             }
             if (String.IsNullOrWhiteSpace(folderTemplate))
             {

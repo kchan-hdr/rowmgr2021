@@ -16,9 +16,9 @@ using SharePointInterface;
 
 namespace ROWM
 {
-    public class StartupDwRelease1
+    public class StartupDw1
     {
-        public StartupDwRelease1(IHostingEnvironment env)
+        public StartupDw1(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -61,7 +61,7 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, DenverParcel>( fac => 
-                new DenverParcel("https://gis05.hdrgateway.com/arcgis/rest/services/California/DW_Parcel_FS/FeatureServer") 
+                new DenverParcel("https://gis05s.hdrgateway.com/arcgis/rest/services/California/DW_Parcel_FS/FeatureServer") 
             );
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
