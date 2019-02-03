@@ -32,12 +32,16 @@ namespace SharePointInterface
         // staging URL to move to app config
         static readonly string _STAGING_SITE_URL = "https://hdroneview.sharepoint.com/ROW_Dev";
 
-        static readonly string _DOCUMENT_LIST_BASE = "DW_Documents"; // "Shared Documents";
+        // static readonly string _DOCUMENT_LIST_BASE = "DW_Documents"; // "Shared Documents";
+        //private string _parcelsFolderName = "";
+        //private string _parcelsFolderTemplate = "DW_Documents/_Track_No_LO Name"; // "Folder_Template";
+
+        static readonly string _DOCUMENT_LIST_BASE = "Shared Documents";
+        private string _parcelsFolderName = "ROW";
+        private string _parcelsFolderTemplate = "ROW/_Track_No_LO Name"; // "Folder_Template";
 
         private ClientContext _ctx;
-        private string _parcelsFolderName = "";
-        private string _parcelsFolderTemplate = "DW_Documents/_Track_No_LO Name"; // "Folder_Template";
-        private string _siteUrl;
+        private string _siteUrl = _STAGING_SITE_URL;
         // private Dictionary<string, string> _docTypes;
         private DocTypes _docTypes;
 
@@ -46,7 +50,8 @@ namespace SharePointInterface
             _docTypes = d;
 
             //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
-            _siteUrl = _STAGING_SITE_URL; // "https://hdroneview.sharepoint.com/bh_pmp";
+            _siteUrl = "https://hdroneview.sharepoint.com/sites/DW_ROW";
+
 
             /*
              * STAGING---
@@ -61,11 +66,11 @@ namespace SharePointInterface
 
 
             The app identifier has been successfully created.
-            Client Id:  	1bca8e9c-15ac-41b0-9869-1e93d4a5d779
-            Client Secret:  	DPGAdcvJpEC+yzzSgYSs6Szau/Z+GpdOdjjpFnqAS70=
-            Title:  	rowm_prod
-            App Domain:  	blackhill-prod-rowmgr.azurewebsites.net
-            Redirect URI:  	https://blackhill-prod-rowmgr.azurewebsites.net
+Client Id:  	cffcadac-22ec-433f-a045-4a1d79527554
+Client Secret:  	PACWIOp2J6+T9m2mZ3y1mCZ2J77rO8Qa9rFSSFBhoGg=
+Title:  	rowmgr
+App Domain:  	www.denver-rowmgr.com
+Redirect URI:  	https://denver-rowmgr.azurewebsites.net
              */
 
             if (_appId == null || _appSecret == null )
@@ -73,8 +78,8 @@ namespace SharePointInterface
                 _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc";
                 _appSecret = "d4M24Cq7r4ZcHraDHBmB6LVNfMzs/e6Ya5/TzP4/svk=";
 
-                //_appId = "1bca8e9c-15ac-41b0-9869-1e93d4a5d779";
-                //_appSecret = "DPGAdcvJpEC+yzzSgYSs6Szau/Z+GpdOdjjpFnqAS70=";
+                _appId = "cffcadac-22ec-433f-a045-4a1d79527554";
+                _appSecret = "PACWIOp2J6+T9m2mZ3y1mCZ2J77rO8Qa9rFSSFBhoGg=";
             }
 
             // Method using Sharepoint Credentials
