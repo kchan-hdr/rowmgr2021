@@ -8,9 +8,13 @@ namespace ROWM.Controllers
 {
     public class HomeController : Controller
     {
+        SiteDecoration _dec;
+
+        public HomeController(SiteDecoration d) => _dec = d;
+
         public IActionResult Index()
         {
-            return View();
+            return View(_dec);
         }
 
         public IActionResult About()

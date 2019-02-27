@@ -1,15 +1,17 @@
-﻿<!DOCTYPE html>
+﻿@model SiteDecoration
+<!DOCTYPE html>
 @{
     Layout = null;
 }
 <html>
 <head>
-    <title>Black Hills</title>
+    <title>@Model.SiteTitle()</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
 
     <link rel="stylesheet" href="https://js.arcgis.com/4.8/esri/css/main.css">
+    <link rel="stylesheet" href="~/css/index.css" asp-append-version="true" />
 
     <!-- bower:css -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300" rel="stylesheet">
@@ -23,6 +25,6 @@
     <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
 
-    <script type="text/javascript" src="index_bundle.js"></script>
+    <script type="text/javascript" src="~/js/index.js" asp-append-version="true" ></script>
 </body>
 </html>
