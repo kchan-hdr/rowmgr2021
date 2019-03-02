@@ -290,6 +290,15 @@ namespace ROWM.Controllers
             return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
         }
         #endregion
+        #region score
+        [Route("parcels/{pid}/rating/{score}"), HttpPut]
+        public async Task<ActionResult<ParcelGraph>> UpdateParcelScore(string pid, int score)
+        {
+            await UpdateLandownerScore(score, DateTimeOffset.Now, new[] { pid });
+            var p = await _repo.GetParcel(pid);
+            return Json(new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid)));
+        }
+        #endregion
         #endregion
         #region logs
         [Route("parcels/{pid}/logs"), HttpPost]
@@ -409,7 +418,7 @@ namespace ROWM.Controllers
         async Task<int> UpdateLandownerScore(int score, DateTimeOffset ts, IEnumerable<string> parcelIds)
         {
             var touched = 0;
-            if (_statusHelper.IsValidScore(score))
+            if (score >= 0 && score <= 2)
             {
                 var tasks = new List<Task>();
 
@@ -425,6 +434,7 @@ namespace ROWM.Controllers
                         touched++;
 
                         tasks.Add(_featureUpdate.UpdateRating(p.Assessor_Parcel_Number, score));
+                        tasks.Add(_repo.UpdateParcel(p));
                     }
                 }
 
@@ -452,7 +462,8 @@ namespace ROWM.Controllers
                 NumberOfOwners = s.nOwners,
                 NumberOfParcels = s.nParcels,
                 ParcelStatus = await _statistics.SnapshotParcelStatus(),
-                RoeStatus = await _statistics.SnapshotRoeStatus()
+                RoeStatus = await _statistics.SnapshotRoeStatus(),
+                Access = await _statistics.SnapshotAccessLikelihood()
             };
         }
         #endregion
@@ -516,6 +527,7 @@ namespace ROWM.Controllers
 
         public IEnumerable<StatisticsRepository.SubTotal> ParcelStatus { get; set; }
         public IEnumerable<StatisticsRepository.SubTotal> RoeStatus { get; set; }
+        public IEnumerable<StatisticsRepository.SubTotal> Access { get; set; }
         public IEnumerable<StatisticsRepository.SubTotal> Compensations { get; set; }
     }
 
@@ -669,7 +681,7 @@ namespace ROWM.Controllers
         public string ParcelStatus => this.ParcelStatusCode;        // to be removed
         public string RoeStatusCode { get; set; }
         public string RoeCondition { get; set; }
-        public string LandownerScore { get; set; }
+        public int? LandownerScore { get; set; }
         public string SitusAddress { get; set; }
         public double Acreage { get; set; }
 
@@ -694,7 +706,9 @@ namespace ROWM.Controllers
             RoeStatusCode = p.RoeStatusCode;
             RoeCondition = p.Conditions.FirstOrDefault()?.Condition ?? "";
             SitusAddress = p.SitusAddress;
-            
+
+            LandownerScore = p.Landowner_Score;
+
             Acreage = p.Acreage ?? 0;
             InitialEasementOffer = OfferHelper.MakeCompensation(p, "InitialEasement");
             InitialOptionOffer = OfferHelper.MakeCompensation(p, "InitialOption");

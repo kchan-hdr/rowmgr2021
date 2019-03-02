@@ -16,7 +16,7 @@ using SharePointInterface;
 
 namespace ROWM
 {
-    public class StartupReservoir
+    public class StartupBhNBridge
     {
         //public Startup(IHostingEnvironment env)
         //{
@@ -32,7 +32,7 @@ namespace ROWM
         //    Configuration = builder.Build();
         //}
 
-        public StartupReservoir(IConfiguration configuration)
+        public StartupBhNBridge(IConfiguration configuration)
         {
             Configuration = configuration;
         }
@@ -68,10 +68,8 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, ReservoirParcel>();
+            services.AddScoped<IFeatureUpdate, BhNBParcel>();
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
-
-            services.AddSingleton<SiteDecoration, ReserviorSite>();
 
             services.AddSwaggerGen(c =>
             {
