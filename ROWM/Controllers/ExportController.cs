@@ -34,19 +34,51 @@ namespace ROWM.Controllers
             if (logs.Count() <= 0)
                 return NoContent();
 
-            using (var s = new MemoryStream())
+            // to do. inject export engine
+            try
             {
-                using (var writer = new StreamWriter(s))
+                var d = logs.SelectMany(lx => lx.Parcel.Select(p =>
                 {
-                    writer.WriteLine(LogExport.Header());
+                    var rgi = lx.Landowner_Score?.ToString() ?? "";
+                    var l = new ExcelExport.AgentLogExport.AgentLog
+                    {
+                        agentname = lx.Agent.AgentName,
+                        contactchannel = lx.ContactChannel,
+                        dateadded = lx.DateAdded,
+                        notes = lx.Notes?.TrimEnd(',') ?? "",
+                        ownerfirstname = p.Ownership.FirstOrDefault()?.Owner.PartyName?.TrimEnd(',') ?? "",
+                        ownerlastname = p.Ownership.FirstOrDefault()?.Owner.PartyName?.TrimEnd(',') ?? "",
+                        parcelid = p.Assessor_Parcel_Number,
+                        parcelstatus = p.Parcel_Status.Description,
+                        parcelstatuscode = p.ParcelStatusCode,
+                        projectphase = lx.ProjectPhase,
+                        roestatus = rgi, // p.Roe_Status.Description,
+                        roestatuscode = p.RoeStatusCode,
+                        title = lx.Title?.TrimEnd(',') ?? ""
+                    };
+                    return l;
+                }));
 
-                    foreach (var l in logs.SelectMany(l => LogExport.Export(l)))
-                        writer.WriteLine(l);
+                var e = new ExcelExport.AgentLogExport(d);
+                var bytes = e.Export();
+                return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "logs.xlsx");
+            }
+            catch (Exception)
+            {
+                using (var s = new MemoryStream())
+                {
+                    using (var writer = new StreamWriter(s))
+                    {
+                        writer.WriteLine(LogExport.Header());
 
-                    writer.Close();
+                        foreach (var l in logs.SelectMany(l => LogExport.Export(l)))
+                            writer.WriteLine(l);
+
+                        writer.Close();
+                    }
+
+                    return File(s.GetBuffer(), "text/csv", "logs.csv");
                 }
-                
-                return File(s.GetBuffer(), "text/csv", "logs.csv");
             }
         }
 
@@ -67,22 +99,45 @@ namespace ROWM.Controllers
             if (d.Count() <= 0)
                 return NoContent();
 
-            var lines = d.OrderBy(dh => dh.Parcel_ParcelId)
-                .Select(dh => $"=\"{dh.Parcel_ParcelId}\",\"{dh.Title}\",{dh.ContentType},{dh.SentDate?.Date.ToShortDateString() ?? ""},{dh.DeliveredDate?.Date.ToShortDateString() ?? ""},{dh.ClientTrackingNumber},{dh.ReceivedDate?.Date.ToShortDateString() ?? ""},{dh.SignedDate?.Date.ToShortDateString() ?? ""},=\"{dh.CheckNo}\",{dh.DateRecorded?.Date.ToShortDateString() ?? ""},=\"{dh.DocumentId}\"");
-
-            using (var s = new MemoryStream())
+            // to do. inject export engine
+            try
             {
-                using (var writer = new StreamWriter(s))
+                var data = d.OrderBy(dh => dh.Parcel_ParcelId).Select(dh => new ExcelExport.DocListExport.DocumentList
                 {
-                    writer.WriteLine(DOCUMENT_HEADER);
+                    parcelid = dh.Parcel_ParcelId,
+                    title=dh.Title,
+                    contenttype =dh.ContentType,
+                    sentdate=dh.SentDate,
+                    delivereddate=dh.DeliveredDate,
+                    clienttrackingnumber=dh.ClientTrackingNumber,
+                    signeddate = dh.SignedDate,
+                    checkno=dh.CheckNo,
+                    receiveddate=dh.ReceivedDate 
+                });
 
-                    foreach (var l in lines)
-                        writer.WriteLine(l);
+                var e = new ExcelExport.DocListExport(data);
+                var bytes = e.Export();
+                return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "documents.xlsx");
+            }
+            catch (Exception)
+            {
+                var lines = d.OrderBy(dh => dh.Parcel_ParcelId)
+                    .Select(dh => $"=\"{dh.Parcel_ParcelId}\",\"{dh.Title}\",{dh.ContentType},{dh.SentDate?.Date.ToShortDateString() ?? ""},{dh.DeliveredDate?.Date.ToShortDateString() ?? ""},{dh.ClientTrackingNumber},{dh.ReceivedDate?.Date.ToShortDateString() ?? ""},{dh.SignedDate?.Date.ToShortDateString() ?? ""},=\"{dh.CheckNo}\",{dh.DateRecorded?.Date.ToShortDateString() ?? ""},=\"{dh.DocumentId}\"");
 
-                    writer.Close();
+                using (var s = new MemoryStream())
+                {
+                    using (var writer = new StreamWriter(s))
+                    {
+                        writer.WriteLine(DOCUMENT_HEADER);
+
+                        foreach (var l in lines)
+                            writer.WriteLine(l);
+
+                        writer.Close();
+                    }
+
+                    return File(s.GetBuffer(), "text/csv", "documents.csv");
                 }
-
-                return File(s.GetBuffer(), "text/csv", "documents.csv");
             }
         }
 
@@ -97,24 +152,46 @@ namespace ROWM.Controllers
             if (parcels.Count() <= 0)
                 return NoContent();
 
-            using (var s = new MemoryStream())
+            // to do. inject export engine
+            try
             {
-                using (var writer = new StreamWriter(s))
-                {
-                    writer.WriteLine("Parcel ID,Owner,ROE Status,Date");
-
-                    foreach( var p in parcels.OrderBy(px=> px.Assessor_Parcel_Number))
+                var data = parcels.OrderBy(px => px.Assessor_Parcel_Number).Select(px => {
+                    var os = px.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
+                    var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
+                    var p = new ExcelExport.RoeListExport.ParcelList
                     {
-                        var os = p.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
-                        var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
-                        var row = $"{p.Assessor_Parcel_Number},\"{oname}\",{p.Roe_Status.Description},{p.LastModified.Date.ToShortDateString()}";
-                        writer.WriteLine(row);
+                        Parcel_ID = px.Assessor_Parcel_Number,
+                        Owner = oname,
+                        ROE = px.Roe_Status.Description,
+                        Date = px.LastModified
+                    };
+                    return p;
+                });
+                var e = new ExcelExport.RoeListExport(data);
+                var bytes = e.Export();
+                return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "roe.xlsx");
+            }
+            catch (Exception)
+            {
+                using (var s = new MemoryStream())
+                {
+                    using (var writer = new StreamWriter(s))
+                    {
+                        writer.WriteLine("Parcel ID,Owner,ROE Status,Date");
+
+                        foreach (var p in parcels.OrderBy(px => px.Assessor_Parcel_Number))
+                        {
+                            var os = p.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
+                            var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
+                            var row = $"{p.Assessor_Parcel_Number},\"{oname}\",{p.Roe_Status.Description},{p.LastModified.Date.ToShortDateString()}";
+                            writer.WriteLine(row);
+                        }
+
+                        writer.Close();
                     }
 
-                    writer.Close();
+                    return File(s.GetBuffer(), "text/csv", "roe.csv");
                 }
-
-                return File(s.GetBuffer(), "text/csv", "roe.csv");
             }
         }
 
@@ -140,22 +217,52 @@ namespace ROWM.Controllers
             if (cc.Count() <= 0)
                 return NoContent();
 
-            using (var s = new MemoryStream())
+            // to do. inject export engine
+            try
             {
-                using (var writer = new StreamWriter(s))
+                var data = cc.OrderBy(cx => cx.PartyName)
+                                            .ThenByDescending(cx => cx.IsPrimary)
+                                            .ThenBy(cx => cx.LastName)
+                                            .Select(ccx => new ExcelExport.ContactListExport.ContactList
+                                            {
+                                                partyname = ccx.PartyName,
+                                                isprimarycontact = ccx.IsPrimary,
+                                                ownerfirstname = ccx.FirstName,
+                                                ownerlastname = ccx.LastName,
+                                                owneremail = ccx.Email,
+                                                ownercellphone = ccx.CellPhone,
+                                                ownerhomephone = ccx.HomePhone,
+                                                ownerstreetaddress = ccx.StreetAddress,
+                                                ownercity = ccx.City,
+                                                ownerstate = ccx.State,
+                                                ownerzip = ccx.ZIP,
+                                                representation = ccx.Representation,
+                                                parcelid = string.Join(",", ccx.ParcelId)
+                                            });
+
+                var e = new ExcelExport.ContactListExport(data);
+                var bytes = e.Export();
+                return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "contacts.xlsx");
+            }
+            catch (Exception)
+            {
+                using (var s = new MemoryStream())
                 {
-                    writer.WriteLine(ContactExport2.Header());
+                    using (var writer = new StreamWriter(s))
+                    {
+                        writer.WriteLine(ContactExport2.Header());
 
-                    foreach (var l in cc.OrderBy(cx => cx.PartyName)
-                                        .ThenByDescending(cx => cx.IsPrimary)
-                                        .ThenBy(cx => cx.LastName)
-                                        .Select(ccx => ccx.ToString()))
-                        writer.WriteLine(l);
+                        foreach (var l in cc.OrderBy(cx => cx.PartyName)
+                                            .ThenByDescending(cx => cx.IsPrimary)
+                                            .ThenBy(cx => cx.LastName)
+                                            .Select(ccx => ccx.ToString()))
+                            writer.WriteLine(l);
 
-                    writer.Close();
+                        writer.Close();
+                    }
+
+                    return File(s.GetBuffer(), "text/csv", "contacts.csv");
                 }
-
-                return File(s.GetBuffer(), "text/csv", "contacts.csv");
             }
         }
 
