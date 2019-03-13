@@ -208,7 +208,7 @@ namespace ROWM.Controllers
 
             sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename).Value;
             Ownership primaryOwner = myParcel.Ownership.First<Ownership>(o => o.IsPrimary()); // o.Ownership_t == OwnershipType.Primary);
-            string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
+            string parcelName = String.Format("{0} {1}", myParcel.Tracking_Number, primaryOwner.Owner.PartyName);
             try
             {
 
@@ -362,7 +362,7 @@ namespace ROWM.Controllers
 
                 sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename).Value;
                 Ownership primaryOwner = myParcel.Ownership.First<Ownership>(o => o.IsPrimary()); // o.Ownership_t == Ownership.OwnershipType.Primary);
-                string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
+                string parcelName = String.Format("{0} {1}", myParcel.Tracking_Number, primaryOwner.Owner.PartyName);
                 try
                 {
                     //_sharePointCRUD.UploadParcelDoc(parcelName, "Other", sourceFilename, bb, null);
@@ -415,19 +415,28 @@ namespace ROWM.Controllers
 
             switch (dt.DocTypeName)
             {
-                case "Acquisition Offer Package Original": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
-                case "Acquisition Offer Package Updated": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
-                case "Acquisition Notice of Intent Package": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
-                case "Acquisition Offer Package Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
-                case "Acquisition Final Offer Package": tasks.Add(_featureUpdate.UpdateFeature(pid, 8)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(8);  break;
-                case "Acquisition Offer Package Signed": tasks.Add(_featureUpdate.UpdateFeature(pid, 4)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(4);  break;
-                case "Acquisition Offer Packet Sent to Client": tasks.Add(_featureUpdate.UpdateFeature(pid, 9)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(9);  break;
-                case "Acquisition Compensation Check": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
-                case "Acquisition Documents Recorded": tasks.Add(_featureUpdate.UpdateFeature(pid, 6)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(6);  break;
-                case "Acquisition Compensation Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
-                case "Acquisition Fully Signed Compenation Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
-                case "Acquisition Fully Signed Easement Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 4)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(4);  break;
-                case "Acquisition Recorded Easement Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 6)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(6);  break;
+                case "ROE Package Original":
+                    tasks.Add(_featureUpdate.UpdateFeatureRoe(pid, 1));
+                    p.RoeStatusCode = "ROE_In_Progress";
+                    break;
+                case "ROE Package Updated":
+                    tasks.Add(_featureUpdate.UpdateFeatureRoe(pid, 1));
+                    p.RoeStatusCode = "ROE_In_Progress";
+                    break;
+
+                //case "Acquisition Offer Package Original": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
+                //case "Acquisition Offer Package Updated": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
+                //case "Acquisition Notice of Intent Package": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
+                //case "Acquisition Offer Package Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
+                //case "Acquisition Final Offer Package": tasks.Add(_featureUpdate.UpdateFeature(pid, 8)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(8);  break;
+                //case "Acquisition Offer Package Signed": tasks.Add(_featureUpdate.UpdateFeature(pid, 4)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(4);  break;
+                //case "Acquisition Offer Packet Sent to Client": tasks.Add(_featureUpdate.UpdateFeature(pid, 9)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(9);  break;
+                //case "Acquisition Compensation Check": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
+                //case "Acquisition Documents Recorded": tasks.Add(_featureUpdate.UpdateFeature(pid, 6)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(6);  break;
+                //case "Acquisition Compensation Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
+                //case "Acquisition Fully Signed Compenation Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
+                //case "Acquisition Fully Signed Easement Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 4)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(4);  break;
+                //case "Acquisition Recorded Easement Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 6)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(6);  break;
             }
 
             return (await Task.WhenAll(tasks)).All(rt => rt);

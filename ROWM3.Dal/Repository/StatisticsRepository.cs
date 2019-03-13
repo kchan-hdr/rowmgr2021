@@ -22,7 +22,12 @@ namespace ROWM.Dal
 
         Lazy<IEnumerable<SubTotal>> _baseParcels;
         Lazy<IEnumerable<SubTotal>> _baseRoes;
-        
+
+        IEnumerable<SubTotal> _baseAccess = new SubTotal[]{
+            new SubTotal { Title = "0", Caption = "Unknown", Count = 0 },
+            new SubTotal { Title = "2", Caption = "Unlikely", Count = 0 },
+            new SubTotal { Title = "1", Caption = "Likely", Count = 0}};
+
         IQueryable<Parcel> ActiveParcels() => _context.Parcel.Where(px => px.IsActive);
 
         public async Task<(int nParcels, int nOwners)> Snapshot()
@@ -55,6 +60,18 @@ namespace ROWM.Dal
                           select new SubTotal { Title = psg.Key, Count = psg.Count() }).ToArrayAsync();
 
             return from b in _baseRoes.Value
+                   join psg in q on b.Title equals psg.Title into matg
+                   from sub in matg.DefaultIfEmpty()
+                   select new SubTotal { Title = b.Title, Caption = b.Caption, Count = sub?.Count ?? 0 };
+        }
+
+        public async Task<IEnumerable<SubTotal>> SnapshotAccessLikelihood()
+        {
+            var q = await (from p in ActiveParcels()
+                           group p by p.Landowner_Score ?? 0 into psg
+                           select new SubTotal { Title = psg.Key.ToString(), Count = psg.Count() }).ToArrayAsync();
+
+            return from b in _baseAccess
                    join psg in q on b.Title equals psg.Title into matg
                    from sub in matg.DefaultIfEmpty()
                    select new SubTotal { Title = b.Title, Caption = b.Caption, Count = sub?.Count ?? 0 };

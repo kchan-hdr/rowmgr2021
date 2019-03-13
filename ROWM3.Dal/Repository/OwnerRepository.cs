@@ -72,8 +72,7 @@ namespace ROWM.Dal
             if (_ctx.Entry<Parcel>(p).State == EntityState.Detached)
                 _ctx.Entry<Parcel>(p).State = EntityState.Modified;
 
-            if (await WriteDb() <= 0)
-                throw new ApplicationException("update parcel failed");
+            await WriteDb();
 
             return p;
         }

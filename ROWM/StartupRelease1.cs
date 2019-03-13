@@ -49,9 +49,10 @@ namespace ROWM
             });
 
             var cs = Configuration.GetConnectionString("ROWM_Context");
+            //services.AddScoped<ROWM.Dal.ROWM_Context>();
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {
-                return new ROWM.Dal.ROWM_Context(cs);
+               return new Dal.ROWM_Context(cs);
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
