@@ -16,19 +16,27 @@ using SharePointInterface;
 
 namespace ROWM
 {
-    public class StartupRelease1
+    public class StartupB2h
     {
-        public StartupRelease1(IHostingEnvironment env)
-        {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddEnvironmentVariables();
-            Configuration = builder.Build();
-        }
+        //public Startup(IHostingEnvironment env)
+        //{
+        //    var builder = new ConfigurationBuilder()
+        //        .SetBasePath(env.ContentRootPath)
+        //        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        //        .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+        //        .AddEnvironmentVariables();
+        //    if (env.IsDevelopment())
+        //    {
+        //        builder.AddUserSecrets<Startup>();
+        //    }
+        //    Configuration = builder.Build();
+        //}
 
-        public IConfigurationRoot Configuration { get; }
+        public StartupB2h(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -48,11 +56,11 @@ namespace ROWM
                 o.MultipartBodyLengthLimit = int.MaxValue;
             });
 
+            var joke = Configuration["joke"];
             var cs = Configuration.GetConnectionString("ROWM_Context");
-            //services.AddScoped<ROWM.Dal.ROWM_Context>();
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {
-               return new Dal.ROWM_Context(cs);
+               return new ROWM.Dal.ROWM_Context(cs);
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
@@ -60,9 +68,7 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, B2hParcel>( fac => 
-                new B2hParcel("https://gis05.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcel_FS/FeatureServer")
-            );
+            services.AddScoped<IFeatureUpdate, B2hParcel>();
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
             services.AddSingleton<SiteDecoration, B2H>();
@@ -72,9 +78,9 @@ namespace ROWM
                 c.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info { Title = "ROW Manager", Version = "v1" });
             });
             services.ConfigureSwaggerGen(o =>
-           {
+            {
                o.OperationFilter<FileOperation>();
-           });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -82,9 +88,17 @@ namespace ROWM
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+            
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseBrowserLink();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+            }
 
-            app.UseExceptionHandler("/Home/Error");
- 
             app.UseStaticFiles();
 
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
@@ -104,3 +118,4 @@ namespace ROWM
         }
     }
 }
+

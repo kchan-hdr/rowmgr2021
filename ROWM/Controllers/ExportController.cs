@@ -195,6 +195,60 @@ namespace ROWM.Controllers
             }
         }
 
+        [HttpGet("export/rgi")]
+        public IActionResult ExportRgi(string f)
+        {
+            if ("excel" != f)
+                return BadRequest($"not supported export '{f}'");
+
+            var parcels = this._repo.GetParcels2();
+
+            if (parcels.Count() <= 0)
+                return NoContent();
+
+            // to do. inject export engine
+            try
+            {
+                var data = parcels.OrderBy(px => px.Assessor_Parcel_Number).Select(px => {
+                    var os = px.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
+                    var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
+                    var p = new ExcelExport.RgiListExport.ParcelList
+                    {
+                        Parcel_ID = px.Assessor_Parcel_Number,
+                        Owner = oname,
+                        RGI = px.Landowner_Score ?? 0,
+                        Date = px.LastModified
+                    };
+                    return p;
+                });
+                var e = new ExcelExport.RgiListExport(data);
+                var bytes = e.Export();
+                return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "rgi.xlsx");
+            }
+            catch (Exception)
+            {
+                using (var s = new MemoryStream())
+                {
+                    using (var writer = new StreamWriter(s))
+                    {
+                        writer.WriteLine("Parcel ID,Owner,RGI,Date");
+
+                        foreach (var p in parcels.OrderBy(px => px.Assessor_Parcel_Number))
+                        {
+                            var os = p.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
+                            var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
+                            var row = $"{p.Assessor_Parcel_Number},\"{oname}\",{p.Landowner_Score},{p.LastModified.Date.ToShortDateString()}";
+                            writer.WriteLine(row);
+                        }
+
+                        writer.Close();
+                    }
+
+                    return File(s.GetBuffer(), "text/csv", "rgi.csv");
+                }
+            }
+        }
+
         /// <summary>
         /// support excel only
         /// </summary>
@@ -371,15 +425,15 @@ namespace ROWM.Controllers
                 {
                     PartyName = ox.Owner.PartyName?.TrimEnd(',') ?? "",
                     IsPrimary = cx.IsPrimaryContact,
-                    FirstName = cx.FirstName?.TrimEnd(',') ?? "",
-                    LastName = cx.LastName?.TrimEnd(',') ?? "",
-                    Email = cx.Email?.TrimEnd(',') ?? "",
-                    CellPhone = cx.CellPhone?.TrimEnd(',') ?? "",
-                    HomePhone = cx.HomePhone?.TrimEnd(',') ?? "",
-                    StreetAddress = cx.StreetAddress?.TrimEnd(',') ?? "",
-                    City = cx.City?.TrimEnd(',') ?? "",
-                    State = cx.State?.TrimEnd(',') ?? "",
-                    ZIP = cx.ZIP?.TrimEnd(',') ?? "",
+                    FirstName = cx.OwnerFirstName?.TrimEnd(',') ?? "",
+                    LastName = cx.OwnerLastName?.TrimEnd(',') ?? "",
+                    Email = cx.OwnerEmail?.TrimEnd(',') ?? "",
+                    CellPhone = cx.OwnerCellPhone?.TrimEnd(',') ?? "",
+                    HomePhone = cx.OwnerHomePhone?.TrimEnd(',') ?? "",
+                    StreetAddress = cx.OwnerStreetAddress?.TrimEnd(',') ?? "",
+                    City = cx.OwnerCity?.TrimEnd(',') ?? "",
+                    State = cx.OwnerState?.TrimEnd(',') ?? "",
+                    ZIP = cx.OwnerZIP?.TrimEnd(',') ?? "",
                     Representation = cx.Representation,
                     ParcelId = relatedParcels
                 });
@@ -418,15 +472,15 @@ namespace ROWM.Controllers
                     ParcelId = op.Parcel.Assessor_Parcel_Number,
                     PartyName = op.Owner.PartyName?.TrimEnd(',') ?? "",
                     IsPrimary = cx.IsPrimaryContact,
-                    FirstName = cx.FirstName?.TrimEnd(',') ?? "",
-                    LastName = cx.LastName?.TrimEnd(',') ?? "",
-                    Email = cx.Email?.TrimEnd(',') ?? "",
-                    CellPhone = cx.CellPhone?.TrimEnd(',') ?? "",
-                    HomePhone = cx.HomePhone?.TrimEnd(',') ?? "",
-                    StreetAddress = cx.StreetAddress?.TrimEnd(',') ?? "",
-                    City = cx.City?.TrimEnd(',') ?? "",
-                    State = cx.State,
-                    ZIP = cx.ZIP,
+                    FirstName = cx.OwnerFirstName?.TrimEnd(',') ?? "",
+                    LastName = cx.OwnerLastName?.TrimEnd(',') ?? "",
+                    Email = cx.OwnerEmail?.TrimEnd(',') ?? "",
+                    CellPhone = cx.OwnerCellPhone?.TrimEnd(',') ?? "",
+                    HomePhone = cx.OwnerHomePhone?.TrimEnd(',') ?? "",
+                    StreetAddress = cx.OwnerStreetAddress?.TrimEnd(',') ?? "",
+                    City = cx.OwnerCity?.TrimEnd(',') ?? "",
+                    State = cx.OwnerState,
+                    ZIP = cx.OwnerZIP,
                     Representation = cx.Representation
                 });
             }

@@ -14,4 +14,9 @@ namespace ROWM
     {
         public string SiteTitle() => "Sites Reservior";
     }
+
+    public class B2H: SiteDecoration
+    {
+        public string SiteTitle() => "B2H";
+    }
 }

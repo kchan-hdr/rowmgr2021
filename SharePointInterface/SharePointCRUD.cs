@@ -26,13 +26,13 @@ namespace SharePointInterface
     public class SharePointCRUD : ISharePointCRUD
     {
         // staging URL to move to app config
-        static readonly string _STAGING_SITE_URL = "https://hdroneview.sharepoint.com/ROW_Dev";
+        static readonly string _STAGING_SITE_URL = "https://b2hpm.sharepoint.com/staging";
 
-        static readonly string _DOCUMENT_LIST_BASE = "Documents"; // "Shared Documents";
+        static readonly string _DOCUMENT_LIST_BASE = "Documents"; // "Parcel Documents";
 
         private ClientContext _ctx;
-        private string _parcelsFolderName = "Parcels";
-        private string _parcelsFolderTemplate = "Documents/Parcels/_Track_No_LO Name"; // "Folder_Template";
+        private string _parcelsFolderName = "HDR Project/14. ROW/14.1 Parcels";
+        private string _parcelsFolderTemplate = "Documents/HDR Project/14. ROW/14.1 Parcels/_County_Parcel ID_LO Name"; // "Folder_Template";
         private string _siteUrl;
         // private Dictionary<string, string> _docTypes;
         private DocTypes _docTypes;
@@ -42,7 +42,7 @@ namespace SharePointInterface
             _docTypes = d;
 
             //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
-            _siteUrl = _STAGING_SITE_URL; // "https://hdroneview.sharepoint.com/bh_pmp";
+            _siteUrl = _STAGING_SITE_URL; // "https://b2hpm.sharepoint.com";
 
 
             /*
@@ -58,20 +58,20 @@ namespace SharePointInterface
 
 
             The app identifier has been successfully created.
-            Client Id:  	1bca8e9c-15ac-41b0-9869-1e93d4a5d779
-            Client Secret:  	DPGAdcvJpEC+yzzSgYSs6Szau/Z+GpdOdjjpFnqAS70=
-            Title:  	rowm_prod
-            App Domain:  	blackhill-prod-rowmgr.azurewebsites.net
-            Redirect URI:  	https://blackhill-prod-rowmgr.azurewebsites.net
+            Client Id:  	baa9400f-d050-4564-9394-71e71b8feacd
+            Client Secret:  	ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=
+            Title:  	rowm_stg
+            App Domain:  	b2hrowmgr.azurewebsites.net
+            Redirect URI:  	https://b2hrowmgr.azurewebsites.net
              */
 
             if (_appId == null || _appSecret == null )
             {
-                _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc";
-                _appSecret = "d4M24Cq7r4ZcHraDHBmB6LVNfMzs/e6Ya5/TzP4/svk=";
+                _appId = "3dff29b2-ae04-4ad4-8149-eb703d62b16f";
+                _appSecret = "bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=";
 
-                //_appId = "1bca8e9c-15ac-41b0-9869-1e93d4a5d779";
-                //_appSecret = "DPGAdcvJpEC+yzzSgYSs6Szau/Z+GpdOdjjpFnqAS70=";
+                //_appId = "baa9400f-d050-4564-9394-71e71b8feacd";
+                //_appSecret = "ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=";
             }
 
             // Method using Sharepoint Credentials

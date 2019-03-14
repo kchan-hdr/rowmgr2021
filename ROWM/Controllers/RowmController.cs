@@ -59,18 +59,18 @@ namespace ROWM.Controllers
             var o = await _repo.GetOwner(id);
             o.ContactInfo.Add(new ContactInfo
             {
-                FirstName = info.OwnerFirstName,
-                LastName = info.OwnerLastName,
+                OwnerFirstName = info.OwnerFirstName,
+                OwnerLastName = info.OwnerLastName,
 
-                StreetAddress = info.OwnerStreetAddress,
-                City = info.OwnerCity,
-                State = info.OwnerState,
-                ZIP = info.OwnerZIP,
+                OwnerStreetAddress = info.OwnerStreetAddress,
+                OwnerCity = info.OwnerCity,
+                OwnerState = info.OwnerState,
+                OwnerZIP = info.OwnerZIP,
 
-                Email = info.OwnerEmail,
-                CellPhone = info.OwnerCellPhone,
-                WorkPhone = info.OwnerWorkPhone,
-                HomePhone = info.OwnerHomePhone,
+                OwnerEmail = info.OwnerEmail,
+                OwnerCellPhone = info.OwnerCellPhone,
+                OwnerWorkPhone = info.OwnerWorkPhone,
+                OwnerHomePhone = info.OwnerHomePhone,
 
                 IsPrimaryContact = info.IsPrimaryContact,
                 Representation = info.Relations,
@@ -94,18 +94,18 @@ namespace ROWM.Controllers
             var o = await _repo.GetOwner(id);
             var c = o.ContactInfo.Single(cx => cx.ContactId == cinfo);
 
-            c.FirstName = info.OwnerFirstName;
-            c.LastName = info.OwnerLastName;
+            c.OwnerFirstName = info.OwnerFirstName;
+            c.OwnerLastName = info.OwnerLastName;
 
-            c.StreetAddress = info.OwnerStreetAddress;
-            c.City = info.OwnerCity;
-            c.State = info.OwnerState;
-            c.ZIP = info.OwnerZIP;
+            c.OwnerStreetAddress = info.OwnerStreetAddress;
+            c.OwnerCity = info.OwnerCity;
+            c.OwnerState = info.OwnerState;
+            c.OwnerZIP = info.OwnerZIP;
 
-            c.Email = info.OwnerEmail;
-            c.CellPhone = info.OwnerCellPhone;
-            c.WorkPhone = info.OwnerWorkPhone;
-            c.HomePhone = info.OwnerHomePhone;
+            c.OwnerEmail = info.OwnerEmail;
+            c.OwnerCellPhone = info.OwnerCellPhone;
+            c.OwnerWorkPhone = info.OwnerWorkPhone;
+            c.OwnerHomePhone = info.OwnerHomePhone;
 
             c.IsPrimaryContact = info.IsPrimaryContact;
             c.Representation = info.Relations;
@@ -420,7 +420,7 @@ namespace ROWM.Controllers
         async Task<int> UpdateLandownerScore(int score, DateTimeOffset ts, IEnumerable<string> parcelIds)
         {
             var touched = 0;
-            if (score >= 0 && score <= 2)
+            if (score >= 0 && score <= 3)
             {
                 var tasks = new List<Task>();
 
@@ -606,20 +606,20 @@ namespace ROWM.Controllers
         internal ContactInfoDto(ContactInfo c)
         {
             ContactId = c.ContactId;
-            ContactName = $"{c.FirstName ?? ""} {c.LastName ?? ""}";
+            ContactName = $"{c.OwnerFirstName ?? ""} {c.OwnerLastName ?? ""}";
             IsPrimary = c.IsPrimaryContact;
             Relations = c.Representation;
 
-            OwnerFirstName = c.FirstName;
-            OwnerLastName = c.LastName;
-            OwnerStreetAddress = c.StreetAddress;
-            OwnerCity = c.City;
-            OwnerState = c.State;
-            OwnerZIP = c.ZIP;
-            OwnerEmail = c.Email;
-            OwnerCellPhone = c.CellPhone;
-            OwnerWorkPhone = c.WorkPhone;
-            OwnerHomePhone = c.HomePhone;
+            OwnerFirstName = c.OwnerFirstName;
+            OwnerLastName = c.OwnerLastName;
+            OwnerStreetAddress = c.OwnerStreetAddress;
+            OwnerCity = c.OwnerCity;
+            OwnerState = c.OwnerState;
+            OwnerZIP = c.OwnerZIP;
+            OwnerEmail = c.OwnerEmail;
+            OwnerCellPhone = c.OwnerCellPhone;
+            OwnerWorkPhone = c.OwnerWorkPhone;
+            OwnerHomePhone = c.OwnerHomePhone;
         }
     }
 
@@ -702,11 +702,11 @@ namespace ROWM.Controllers
         internal ParcelGraph( Parcel p, IEnumerable<Document> d)
         {
             ParcelId = p.Assessor_Parcel_Number;
-            TractNo = p.Tracking_Number;
+            TractNo = p.Assessor_Parcel_Number;
             ParcelStatusCode = p.ParcelStatusCode;
             //ParcelStatus = Enum.GetName(typeof(Parcel.RowStatus), p.ParcelStatus);
             RoeStatusCode = p.RoeStatusCode;
-            RoeCondition = p.Conditions.FirstOrDefault()?.Condition ?? "";
+            RoeCondition = "";
             SitusAddress = p.SitusAddress;
 
             LandownerScore = p.Landowner_Score;
