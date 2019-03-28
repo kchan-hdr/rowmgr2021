@@ -18,7 +18,7 @@ namespace geographia.ags
             // Staging: http://gis05s.hdrgateway.com/arcgis/rest/services/California/Sites_Parcel_FS_stg/FeatureServer
             // Production: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer
             _URL = string.IsNullOrWhiteSpace(url) ?
-                "https://gis05s.hdrgateway.com/arcgis/rest/services/California/Sites_Parcel_FS/FeatureServer"
+                "https://maps-stg.hdrgateway.com/arcgis/rest/services/California/Sites_Parcel_FS/FeatureServer"
                 : url;
 
             _LAYERID = 0;
