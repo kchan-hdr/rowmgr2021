@@ -1,11 +1,11 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders;
+using ROWM.Dal;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using ROWM.Dal;
-using System.IO;
 
 namespace ROWM.Controllers
 {
@@ -13,10 +13,15 @@ namespace ROWM.Controllers
     public class ExportController : Controller
     {
         OwnerRepository _repo;
+        IFileProvider _file;
+        string LogoPath;
 
-        public ExportController(OwnerRepository repo)
+        public ExportController(OwnerRepository repo, IFileProvider fileProvider)
         {
             _repo = repo;
+            _file = fileProvider;
+
+            LogoPath = GetLogo();
         }
 
         /// <summary>
@@ -59,7 +64,7 @@ namespace ROWM.Controllers
                     return l;
                 }));
 
-                var e = new ExcelExport.AgentLogExport(d);
+                var e = new ExcelExport.AgentLogExport(d, LogoPath);
                 var bytes = e.Export();
                 return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "logs.xlsx");
             }
@@ -115,7 +120,7 @@ namespace ROWM.Controllers
                     receiveddate=dh.ReceivedDate 
                 });
 
-                var e = new ExcelExport.DocListExport(data);
+                var e = new ExcelExport.DocListExport(data, LogoPath);
                 var bytes = e.Export();
                 return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "documents.xlsx");
             }
@@ -167,7 +172,7 @@ namespace ROWM.Controllers
                     };
                     return p;
                 });
-                var e = new ExcelExport.RoeListExport(data);
+                var e = new ExcelExport.RoeListExport(data, LogoPath);
                 var bytes = e.Export();
                 return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "roe.xlsx");
             }
@@ -206,7 +211,6 @@ namespace ROWM.Controllers
             if (parcels.Count() <= 0)
                 return NoContent();
 
-            // to do. inject export engine
             try
             {
                 var data = parcels.OrderBy(px => px.Assessor_Parcel_Number).Select(px => {
@@ -221,7 +225,7 @@ namespace ROWM.Controllers
                     };
                     return p;
                 });
-                var e = new ExcelExport.RgiListExport(data);
+                var e = new ExcelExport.RgiListExport(data, LogoPath);
                 var bytes = e.Export();
                 return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "rgi.xlsx");
             }
@@ -294,7 +298,7 @@ namespace ROWM.Controllers
                                                 parcelid = string.Join(",", ccx.ParcelId)
                                             });
 
-                var e = new ExcelExport.ContactListExport(data);
+                var e = new ExcelExport.ContactListExport(data, LogoPath);
                 var bytes = e.Export();
                 return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "contacts.xlsx");
             }
@@ -355,6 +359,13 @@ namespace ROWM.Controllers
                 return File(s.GetBuffer(), "text/csv", "contacts.csv");
             }
         }
+        #region logo image
+        string GetLogo()
+        {
+            var fileInfo = _file.GetFileInfo("wwwroot/assets/IDP-logo-color.png");
+            return  fileInfo.PhysicalPath;
+        }
+        #endregion
         #region helpers
         public class LogExport
         {

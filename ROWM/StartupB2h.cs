@@ -32,11 +32,13 @@ namespace ROWM
         //    Configuration = builder.Build();
         //}
 
-        public StartupB2h(IConfiguration configuration)
+        public StartupB2h(IHostingEnvironment env, IConfiguration configuration)
         {
             Configuration = configuration;
+            _env = env;
         }
         public IConfiguration Configuration { get; }
+        private readonly IHostingEnvironment _env;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -72,6 +74,11 @@ namespace ROWM
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
             services.AddSingleton<SiteDecoration, B2H>();
+
+            #region local files
+            var filep = _env.ContentRootFileProvider;
+            services.AddSingleton<Microsoft.Extensions.FileProviders.IFileProvider>(filep);
+            #endregion
 
             services.AddSwaggerGen(c =>
             {

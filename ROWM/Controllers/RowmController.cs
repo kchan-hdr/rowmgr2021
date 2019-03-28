@@ -322,7 +322,7 @@ namespace ROWM.Controllers
                 Trace.TraceWarning($"AddContactLog:: update feature status for '{pid}' failed");
             }
 
-            await UpdateLandownerScore(logRequest.Score, dt, myParcels);
+            //await UpdateLandownerScore(logRequest.Score, dt, myParcels); b2h
 
             var l = new ContactLog
             {

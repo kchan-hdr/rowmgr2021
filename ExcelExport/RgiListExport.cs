@@ -11,7 +11,7 @@ namespace ExcelExport
 {
     public class RgiListExport : Exporter<RgiListExport.ParcelList>
     {
-        public RgiListExport(IEnumerable<ParcelList> d) : base(d) { }
+        public RgiListExport(IEnumerable<ParcelList> d, string l) : base(d, l) { }
 
         public override byte[] Export()
         {
@@ -53,10 +53,10 @@ namespace ExcelExport
         {
             switch( rgi )
             {
-            case 1: return "Unlikely to willingly grant a ROW";
-            case 2: return "Unknown whether they are likely to grant a ROW";
-            case 3: return "Likely a ROW will be granted";
-            default:    return "";
+                case 1: return "Unlikely to willingly grant a ROW";
+                case 2: return "Unknown whether they are likely to grant a ROW";
+                case 3: return "Likely a ROW will be granted";
+                default:    return " ";
             }
         }
         #endregion

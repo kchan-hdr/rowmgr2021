@@ -11,7 +11,7 @@ namespace ExcelExport
 {
     public class RoeListExport : Exporter<RoeListExport.ParcelList>
     {
-        public RoeListExport(IEnumerable<ParcelList> d) : base(d) { }
+        public RoeListExport(IEnumerable<ParcelList> d, string l) : base(d, l) { }
 
         public override byte[] Export()
         {

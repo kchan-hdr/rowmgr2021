@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 
 namespace ExcelExport
 {   using DocumentFormat.OpenXml;
+    using DocumentFormat.OpenXml.Drawing;
     using DocumentFormat.OpenXml.Packaging;
     using DocumentFormat.OpenXml.Spreadsheet;
     using System.IO;
+    using Xdr = DocumentFormat.OpenXml.Drawing.Spreadsheet;
+    using A = DocumentFormat.OpenXml.Drawing;
 
     /// <summary>
     /// output formatted excel for b2h
@@ -20,9 +23,16 @@ namespace ExcelExport
         protected string reportname = "Unknown";
         protected WorkbookPart bookPart;
         protected Sheets sheets;
+        protected string logoPath;
 
         public Exporter(IEnumerable<T> data) {
             items = data;
+        }
+
+        public Exporter(IEnumerable<T> data, string logo)
+        {
+            items = data;
+            logoPath = logo;
         }
 
         virtual public byte[] Export()
@@ -53,13 +63,93 @@ namespace ExcelExport
             p.Worksheet = new Worksheet(d);
 
             uint rowId = 1;
+
             var r = InsertRow(rowId, d);
             WriteText(r, "A", name, 1);
             WriteText(r, "B", DateTime.Now.ToLongDateString());
             WriteText(r, "C", DateTime.Now.ToLongTimeString());
 
+            rowId += 2;
+
+            if (!string.IsNullOrWhiteSpace(logoPath))
+            {
+                this.insertLogo(p, logoPath, 1, rowId);
+            }
+        
             sheets.Append(new Sheet { Id = bookPart.GetIdOfPart(p), SheetId = id, Name = name });
             bookPart.Workbook.Save();
+        }
+
+        /// <summary>
+        /// https://code.msdn.microsoft.com/office/How-to-insert-image-into-93964561
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="logoPath"></param>
+        void insertLogo(WorksheetPart p, string logoPath, uint colNumber =1, uint rowNumber = 1)
+        {
+            var drawingsPart = p.AddNewPart<DrawingsPart>();
+            if ( !p.Worksheet.ChildElements.OfType<Drawing>().Any())
+            {
+                p.Worksheet.Append(new Drawing { Id = p.GetIdOfPart(drawingsPart) });
+            }
+
+            if ( drawingsPart.WorksheetDrawing==null)
+            {
+                drawingsPart.WorksheetDrawing = new DocumentFormat.OpenXml.Drawing.Spreadsheet.WorksheetDrawing();
+            }
+
+            var worksheetDrawing = drawingsPart.WorksheetDrawing;
+            var imagePart = drawingsPart.AddImagePart(ImagePartType.Png);   // PNG
+            using (var s = new FileStream(logoPath, FileMode.Open))
+            {
+                imagePart.FeedData(s);
+            }
+
+            // bogus
+            var bm = new System.Drawing.Bitmap(logoPath);
+            var extents = new DocumentFormat.OpenXml.Drawing.Extents();
+            var extentsCx = (long)bm.Width * (long)((float)914400 / bm.HorizontalResolution);
+            var extentsCy = (long)bm.Height * (long)((float)914400 / bm.VerticalResolution);
+            bm.Dispose();
+
+            var colOffset = 0;
+            var rowOffset = 0;
+
+            var nvps = worksheetDrawing.Descendants<Xdr.NonVisualDrawingProperties>();
+            var nvpId = nvps.Count() > 0 ?
+                (UInt32Value)worksheetDrawing.Descendants<Xdr.NonVisualDrawingProperties>().Max(prop => prop.Id.Value) + 1 :
+                1U;
+
+            var oneCellAnchor = new Xdr.OneCellAnchor(
+                new Xdr.FromMarker
+                {
+                    ColumnId = new Xdr.ColumnId((colNumber - 1).ToString()),
+                    RowId = new Xdr.RowId((rowNumber - 1).ToString()),
+                    ColumnOffset = new Xdr.ColumnOffset(colOffset.ToString()),
+                    RowOffset = new Xdr.RowOffset(rowOffset.ToString())
+                },
+                new Xdr.Extent { Cx = extentsCx, Cy = extentsCy },
+                new Xdr.Picture(
+                    new Xdr.NonVisualPictureProperties(
+                        new Xdr.NonVisualDrawingProperties { Id = nvpId, Name = "Picture " + nvpId, Description = logoPath },
+                        new Xdr.NonVisualPictureDrawingProperties(new A.PictureLocks { NoChangeAspect = true })
+                    ),
+                    new Xdr.BlipFill(
+                        new A.Blip { Embed = drawingsPart.GetIdOfPart(imagePart), CompressionState = A.BlipCompressionValues.Print },
+                        new A.Stretch(new A.FillRectangle())
+                    ),
+                    new Xdr.ShapeProperties(
+                        new A.Transform2D(
+                            new A.Offset { X = 0, Y = 0 },
+                            new A.Extents { Cx = extentsCx, Cy = extentsCy }
+                        ),
+                        new A.PresetGeometry { Preset = A.ShapeTypeValues.Rectangle }
+                    )
+                ),
+                new Xdr.ClientData()
+            );
+
+            worksheetDrawing.Append(oneCellAnchor);
         }
         #endregion
 
@@ -139,11 +229,11 @@ namespace ExcelExport
             var font0 = new Font();
             var font1 = new Font();
             font1.Append(new Bold());
-            var fonts = new Fonts();
+            var fonts = new DocumentFormat.OpenXml.Spreadsheet.Fonts();
             fonts.Append(font0);
             fonts.Append(font1);
 
-            var fill0 = new Fill();
+            var fill0 = new DocumentFormat.OpenXml.Spreadsheet.Fill();
             var fills = new Fills();
             fills.Append(fill0);
 

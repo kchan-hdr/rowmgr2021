@@ -10,7 +10,7 @@ namespace ExcelExport
 {
     public class AgentLogExport : Exporter<AgentLogExport.AgentLog>
     {
-        public AgentLogExport(IEnumerable<AgentLog> d) : base(d) { }
+        public AgentLogExport(IEnumerable<AgentLog> d, string l) : base(d, l) { }
 
         public override byte[] Export()
         {

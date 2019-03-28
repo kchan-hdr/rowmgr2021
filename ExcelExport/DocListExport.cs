@@ -11,7 +11,7 @@ namespace ExcelExport
 {
     public class DocListExport : Exporter<DocListExport.DocumentList>
     {
-        public DocListExport(IEnumerable<DocumentList> d) : base(d) { }
+        public DocListExport(IEnumerable<DocumentList> d, string l) : base(d, l) { }
 
         public override byte[] Export()
         {

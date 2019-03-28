@@ -11,7 +11,7 @@ namespace ExcelExport
 {
     public class ContactListExport : Exporter<ContactListExport.ContactList>
     {
-        public ContactListExport(IEnumerable<ContactListExport.ContactList> d) : base(d) { }
+        public ContactListExport(IEnumerable<ContactListExport.ContactList> d, string l) : base(d, l) { }
 
         public override byte[] Export()
         {
