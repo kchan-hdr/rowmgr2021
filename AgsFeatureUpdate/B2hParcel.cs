@@ -144,7 +144,7 @@ namespace geographia.ags
                 attributes = new Status_Req
                 {
                     OBJECTID = i,
-                    Landowner_Score = rating
+                    LandOwnerScore = rating
                 }
             });
             return await this.Update(u);
@@ -171,7 +171,7 @@ namespace geographia.ags
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public int? ROE_Status { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public int? Landowner_Score { get; set; }
+            public int? LandOwnerScore { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Documents { get; set; }
         }
