@@ -27,6 +27,8 @@ namespace ExcelExport
 
             uint row = 1;
 
+            row = WriteLogo(row, p, d, reportname);
+
             var hr = InsertRow(row++, d);
             var c = 0;
             WriteText(hr, GetColumnCode(c++), "Parcel ID", 1);

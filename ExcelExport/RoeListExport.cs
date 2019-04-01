@@ -27,6 +27,8 @@ namespace ExcelExport
 
             uint row = 1;
 
+            row = WriteLogo(row, p, d, reportname);
+
             // column heading --             Parcel ID,Owner,ROE Status,Date
             var hr = InsertRow(row++, d);
             var c = 0;

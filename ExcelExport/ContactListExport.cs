@@ -27,6 +27,8 @@ namespace ExcelExport
 
             uint row = 1;
 
+            row = WriteLogo(row, p, d, reportname);
+
             // column heading --Owner,Is Primary Contact,First Name,Last Name,Email,Cell Phone,Phone,Street Address,City,State,ZIP,Representation
             var hr = InsertRow(row++, d);
             var c = 0;

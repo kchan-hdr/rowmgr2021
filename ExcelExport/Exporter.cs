@@ -80,6 +80,23 @@ namespace ExcelExport
             bookPart.Workbook.Save();
         }
 
+        protected uint WriteLogo(uint rowId, WorksheetPart p, SheetData d, string name)
+        {
+            var r = InsertRow(rowId++, d);
+            WriteText(r, "A", name, 1);
+            WriteText(r, "B", DateTime.Now.ToLongDateString());
+            WriteText(r, "C", DateTime.Now.ToLongTimeString());
+
+            r = InsertRow(rowId++, d);
+
+            if (!string.IsNullOrWhiteSpace(logoPath))
+            {
+                this.insertLogo(p, logoPath, 1, rowId);
+            }
+
+            return rowId += 5;
+        }
+
         /// <summary>
         /// https://code.msdn.microsoft.com/office/How-to-insert-image-into-93964561
         /// </summary>

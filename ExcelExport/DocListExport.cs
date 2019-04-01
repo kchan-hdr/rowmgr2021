@@ -27,6 +27,8 @@ namespace ExcelExport
 
             uint row = 1;
 
+            row = WriteLogo(row, p, d, reportname);
+
             // column heading --             const string DOCUMENT_HEADER = "Parcel Id,Title,Content Type,Date Sent,Date Delivered,Client Tracking Number,Date Received,Date Signed,Check No,Date Recorded,Document ID";
             var hr = InsertRow(row++, d);
             var c = 0;
