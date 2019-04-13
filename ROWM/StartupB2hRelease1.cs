@@ -18,17 +18,14 @@ namespace ROWM
 {
     public class StartupB2hRelease1
     {
-        public StartupB2hRelease1(IHostingEnvironment env)
+        public StartupB2hRelease1(IHostingEnvironment env, IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = configuration;
+            _env = env;
         }
 
-        public IConfigurationRoot Configuration { get; }
+        public IConfiguration Configuration { get; }
+        private readonly IHostingEnvironment _env;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -61,11 +58,16 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, B2hParcel>( fac => 
-                new B2hParcel("https://gis05.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcel_FS/FeatureServer")
+                new B2hParcel("https://gis05.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer")
             );
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
             services.AddSingleton<SiteDecoration, B2H>();
+
+            #region local files
+            var filep = _env.ContentRootFileProvider;
+            services.AddSingleton<Microsoft.Extensions.FileProviders.IFileProvider>(filep);
+            #endregion
 
             services.AddSwaggerGen(c =>
             {
