@@ -68,10 +68,10 @@ namespace SharePointInterface
             if (_appId == null || _appSecret == null )
             {
                 _appId = "3dff29b2-ae04-4ad4-8149-eb703d62b16f";
-                _appSecret = "bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=";
+                _appSecret = "oif0sPwxh6sYljG3IPGAIZJiG6ed40FcFci7AOaJDUQ=";// "bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=";
 
                 //_appId = "baa9400f-d050-4564-9394-71e71b8feacd";
-                //_appSecret = "ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=";
+                //_appSecret = "OZErYD66RxGIVU8nss+w5v8izHMSOkHf8wB+bBwO9Vw="; // "ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=";
             }
 
             // Method using Sharepoint Credentials

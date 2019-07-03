@@ -5,9 +5,14 @@
     <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
     <UserSecretsId>4e6ae26c-e0fb-4704-956e-f3b98b5888da</UserSecretsId>
     <LangVersion>7.3</LangVersion>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
