@@ -16,7 +16,7 @@ using SharePointInterface;
 
 namespace ROWM
 {
-    public class StartupReservoirRelease1
+    public class StartupAtc6943
     {
         //public Startup(IHostingEnvironment env)
         //{
@@ -32,7 +32,7 @@ namespace ROWM
         //    Configuration = builder.Build();
         //}
 
-        public StartupReservoirRelease1(IConfiguration configuration)
+        public StartupAtc6943(IConfiguration configuration)
         {
             Configuration = configuration;
         }
@@ -68,12 +68,11 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, ReservoirParcel>(fac=> 
-                new ReservoirParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/California/Sites_Parcel_FS/FeatureServer")
-            );
+            services.AddScoped<IFeatureUpdate, ReservoirParcel>(fac =>
+                new ReservoirParcel("https://gis05.hdrgateway.com/arcgis/rest/services/California/Blackhills_Parcel_FS/MapServer"));
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
-            services.AddSingleton<SiteDecoration, ReserviorSite>();
+            services.AddSingleton<SiteDecoration, Atc6943>();
 
             services.AddSwaggerGen(c =>
             {
