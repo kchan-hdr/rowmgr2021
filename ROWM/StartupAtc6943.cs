@@ -69,7 +69,7 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, ReservoirParcel>(fac =>
-                new ReservoirParcel("https://gis05.hdrgateway.com/arcgis/rest/services/California/Blackhills_Parcel_FS/MapServer"));
+                new ReservoirParcel("https://gis05s.hdrgateway.com/arcgis/rest/services/California/ATC_Line6943_Parcel_FS/FeatureServer"));
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
             services.AddSingleton<SiteDecoration, Atc6943>();
