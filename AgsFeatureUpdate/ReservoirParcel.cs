@@ -13,10 +13,10 @@ namespace geographia.ags
     {
         static readonly string _PARCEL_KEY = "Assessor_Parcel_Number";
 
+        static readonly int _ContactInfoTable = 8;
+
         public ReservoirParcel(string url = "")
         {
-            // Staging: http://gis05s.hdrgateway.com/arcgis/rest/services/California/Sites_Parcel_FS_stg/FeatureServer
-            // Production: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer
             _URL = string.IsNullOrWhiteSpace(url) ?
                 "https://maps-stg.hdrgateway.com/arcgis/rest/services/California/Sites_Parcel_FS/FeatureServer"
                 : url;
@@ -148,7 +148,7 @@ namespace geographia.ags
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
 
-            var oid = await Find(0, $"{_PARCEL_KEY}='{parcelId}'");
+            var oid = await Find(_LAYERID, $"{_PARCEL_KEY}='{parcelId}'");
             var u = oid.Select(i => new UpdateFeature
             {
                 attributes = new Status_Req
@@ -159,6 +159,72 @@ namespace geographia.ags
             });
             return await this.Update(u);
         }
+
+
+        #region off-label
+        public async Task<bool> Update(ContactInfo_dto dto)
+        {
+            if (dto == null)
+                return false;
+
+            var oid = await Find(_ContactInfoTable, $"ContactId='{dto.ContactId}'");
+
+            string action = string.Empty;
+            ContactAttribute[] edits;
+            if (oid != null && oid.Any())
+            {
+                dto.ESRI_OID = oid.First();
+                edits = new ContactAttribute[] { new ContactAttribute() { attributes = dto } };
+                action = "updates";
+            }
+            else
+            {
+                edits = new ContactAttribute[] { new ContactAttribute { attributes = dto } };
+                action = "adds";
+            }
+
+            var req = JsonConvert.SerializeObject(edits);
+            req = $"{action}={req}&f=json&gdbVersion=&rollbackOnFailure=true";
+            var reqContent = new StringContent(req);
+            reqContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
+
+            return await base.Edit(_ContactInfoTable, reqContent);
+        }
+
+        public class Edits
+        {
+            public string f { get; set; } = "json";
+            public ContactAttribute[] adds { get; set; }
+            public ContactAttribute[] updates { get; set; }
+        }
+
+        public class ContactAttribute
+        { 
+            public ContactInfo_dto attributes { get; set; }
+        }
+
+        public class ContactInfo_dto
+        {
+            public int? ESRI_OID { get; set; } = null;
+            public string ContactId { get; set; }
+            public bool IsPrimaryContact { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+            public string StreetAddress { get; set; }
+            public string City { get; set; }
+            public string State { get; set; }
+            public string ZIP { get; set; }
+            public string Email { get; set; }
+            public string HomePhone { get; set; }
+            public string CellPhone { get; set; }
+            public string WorkPhone { get; set; }
+            public string ContactOwnerId { get; set; }
+            public DateTimeOffset Created { get; set; }
+            public DateTimeOffset? LastModified { get; set; }
+            public string ModifiedBy { get; set; }
+            public string Representation { get; set; }
+        }
+        #endregion
 
         #region request
         public class UpdateRequest
@@ -187,8 +253,6 @@ namespace geographia.ags
             public string Documents { get; set; }
         }
         #endregion
-
-
         #region dto
         public class Status_dto
         {
@@ -210,6 +274,5 @@ namespace geographia.ags
             }
         }
         #endregion
-
     }
 }

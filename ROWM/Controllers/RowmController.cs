@@ -57,7 +57,7 @@ namespace ROWM.Controllers
             var dt = DateTimeOffset.Now;
 
             var o = await _repo.GetOwner(id);
-            o.ContactInfo.Add(new ContactInfo
+            var newc = new ContactInfo
             {
                 FirstName = info.OwnerFirstName,
                 LastName = info.OwnerLastName,
@@ -78,9 +78,16 @@ namespace ROWM.Controllers
                 Created = dt,
                 LastModified = dt,
                 ModifiedBy = _APP_NAME
-            });
+            };
+            o.ContactInfo.Add(newc);
 
-            return Json(new OwnerDto(await _repo.UpdateOwner(o)));
+            var newo = await _repo.UpdateOwner(o);
+
+            var sites = _featureUpdate as ReservoirParcel;
+            if (sites != null)
+                await sites.Update(Convert(newc));
+
+            return Json(new OwnerDto(newo));
         }
 
         [Route("owners/{id:Guid}/contacts/{cinfo}"), HttpPut]
@@ -113,8 +120,36 @@ namespace ROWM.Controllers
             c.LastModified = dt;
             c.ModifiedBy = _APP_NAME;
 
-            return Json(new ContactInfoDto(await _repo.UpdateContact(c)));
+            var newc = await _repo.UpdateContact(c);
+
+            var sites = _featureUpdate as ReservoirParcel;
+            if (sites != null)
+                await sites.Update(Convert(newc));
+
+            return Json(new ContactInfoDto(newc));
         }
+
+        static geographia.ags.ReservoirParcel.ContactInfo_dto Convert(ContactInfo c) =>
+            new ReservoirParcel.ContactInfo_dto
+            {
+                CellPhone = c.CellPhone,
+                City = c.City,
+                ContactId = c.ContactId.ToString("B"),
+                ContactOwnerId = c.ContactOwnerId.ToString("B"),
+                Created = c.Created,
+                Email = c.Email,
+                FirstName = c.FirstName,
+                IsPrimaryContact = c.IsPrimaryContact,
+                HomePhone = c.HomePhone,
+                LastModified = c.LastModified,
+                LastName = c.LastName,
+                ModifiedBy = c.ModifiedBy,
+                Representation = c.Representation,
+                State = c.State,
+                StreetAddress = c.StreetAddress,
+                WorkPhone = c.WorkPhone,
+                ZIP = c.ZIP
+            };
         #endregion
         #endregion
         #region parcel
@@ -780,5 +815,4 @@ namespace ROWM.Controllers
         }
     }
     #endregion
-
 }

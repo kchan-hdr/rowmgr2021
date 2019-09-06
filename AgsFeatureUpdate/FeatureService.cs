@@ -47,7 +47,8 @@ namespace geographia.ags
                 return ids.Select<JToken, int>(id => id.Value<int>());
             }
 
-            throw new KeyNotFoundException(query);
+            return default;
+            //throw new KeyNotFoundException(query);
         }
 
         public virtual async Task<IEnumerable<T>> GetAll<T>(string query, Func<JArray, IEnumerable<T>> parser)
@@ -82,6 +83,33 @@ namespace geographia.ags
                 throw new ArgumentNullException(nameof(reqContent));
 
             var q = await AppendToken($"{_URL}/{layerId}/updateFeatures");
+            var response = await _Client.PostAsync(q, reqContent);
+            response.EnsureSuccessStatusCode();
+            var responseText = await response.Content.ReadAsStringAsync();
+
+            var obj = JObject.Parse(responseText);
+
+            var rst = obj["updateResults"];
+            if (rst.Type == JTokenType.Array)
+            {
+                var results = (JArray)rst;
+                return results.All(rx => rx["success"].Value<bool>());
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public virtual async Task<bool> Edit(int layerId, HttpContent reqContent)
+        {
+            if (layerId < 0)
+                throw new ArgumentNullException(nameof(layerId));
+
+            if (reqContent == null)
+                throw new ArgumentNullException(nameof(reqContent));
+
+            var q = await AppendToken($"{_URL}/{layerId}/applyEdits");
             var response = await _Client.PostAsync(q, reqContent);
             response.EnsureSuccessStatusCode();
             var responseText = await response.Content.ReadAsStringAsync();
