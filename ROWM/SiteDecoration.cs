@@ -14,4 +14,9 @@ namespace ROWM
     {
         public string SiteTitle() => "Sites Reservior";
     }
+
+    public class Atc6943: SiteDecoration
+    {
+        public string SiteTitle() => "ATC Line 6943";
+    }
 }
