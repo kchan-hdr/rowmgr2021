@@ -85,7 +85,12 @@ namespace ROWM.Controllers
 
             var sites = _featureUpdate as ReservoirParcel;
             if (sites != null)
-                await sites.Update(Convert(newc));
+            {
+                var apns = o.Ownership.Select(ox => ox.Parcel.Assessor_Parcel_Number);
+                var payload = Convert(newc);
+                payload.APN = apns; 
+                await sites.Update(payload);
+            }
 
             return Json(new OwnerDto(newo));
         }
@@ -342,7 +347,6 @@ namespace ROWM.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(this.ModelState);
 
-
             var dt = DateTimeOffset.Now;
 
             var p = await _repo.GetParcel(pid);
@@ -355,7 +359,7 @@ namespace ROWM.Controllers
                 Trace.TraceWarning($"AddContactLog:: update feature status for '{pid}' failed");
             }
 
-            await UpdateLandownerScore(logRequest.Score, dt, myParcels);
+            // await UpdateLandownerScore(logRequest.Score, dt, myParcels);
 
             var l = new ContactLog
             {
@@ -374,7 +378,15 @@ namespace ROWM.Controllers
             };
 
             var log = await _repo.AddContactLog(myParcels, logRequest.ContactIds, l);
-           
+
+            var sites = _featureUpdate as ReservoirParcel;
+            if (sites != null)
+            {
+                var logx = Convert(log);
+                logx.APN = myParcels.ToArray();
+                await sites.Update(logx);
+            }
+
             if ( !string.IsNullOrWhiteSpace(logRequest.MapExportUrl))
             {
                 var _helper = new FileAttachmentHelper(_repo, _spDocument);
@@ -393,7 +405,7 @@ namespace ROWM.Controllers
             var p = await _repo.GetParcel(pid);
             var a = await _repo.GetAgent(logRequest.AgentName);
             var l = p.ContactLog.Single(cx => cx.ContactLogId == lid);
-
+            
             //l.ContactAgent = a;
             //l.ContactChannel = logRequest.Channel;
             //l.ProjectPhase = logRequest.Phase;
@@ -412,7 +424,28 @@ namespace ROWM.Controllers
             await UpdateLandownerScore(logRequest.Score, dt, myParcels);
 
             var log = await _repo.UpdateContactLog(logRequest.ParcelIds, logRequest.ContactIds, l);
+
+            var sites = _featureUpdate as ReservoirParcel;
+            if (sites != null)
+            {
+                var logx = Convert(log);
+                logx.APN = logRequest.ParcelIds.ToArray(); 
+                await sites.Update(logx);
+            }
             return Json(new ContactLogDto(log));
+        }
+
+        static ReservoirParcel.ContactLog_dto Convert(ContactLog log)
+        {
+            return new ReservoirParcel.ContactLog_dto
+            {
+                ContactChannel = log.ContactChannel,
+                ContactLogId = log.ContactLogId.ToString("B"),
+                ModifiedBy = log.ModifiedBy,
+                Notes = log.Notes,
+                ProjectPhase = log.ProjectPhase,
+                Title = log.Title
+            };
         }
         #region contact status helper
         /// <summary>

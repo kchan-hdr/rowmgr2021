@@ -133,6 +133,7 @@ namespace ROWM.Dal
 
             return c;
         }
+        public async Task<ContactInfo> GetContact(Guid c) => await _ctx.ContactInfo.FindAsync(c);
 
         public IEnumerable<Ownership> GetContacts() => _ctx.Parcel.Where(p => p.IsActive).SelectMany(p => p.Ownership);
 

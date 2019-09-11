@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AgsSchema.cs" />
     <Compile Include="BhNBParcel.cs" />
     <Compile Include="BlackhillParcel.cs" />
     <Compile Include="B2hParcel.cs" />

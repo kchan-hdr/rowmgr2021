@@ -23,6 +23,14 @@ namespace geographia.ags
             _Client = new HttpClient();
         }
 
+        public virtual async Task<T> Layers<T>( )
+        {
+            var q = await AppendToken($"{_URL}?f=json");
+            var response = await _Client.GetStringAsync(q);
+            var r = JObject.Parse(response);
+            return r.ToObject<T>();
+        }
+
         public virtual async Task<IEnumerable<int>> Find(int layerId, string query)
         {
             if (layerId < 0)
@@ -40,7 +48,8 @@ namespace geographia.ags
                 Trace.TraceWarning("missing OID field name");
             }
 
-            var idx = r["objectIds"];
+            //var idx = r["objectIds"];
+            var idx = CheckError(r, "objectIds");
             if (idx.Type == JTokenType.Array)
             {
                 var ids = (JArray)idx;
@@ -63,7 +72,8 @@ namespace geographia.ags
 
             var responseText = await _Client.GetStringAsync(query);
             var obj = JObject.Parse(responseText);
-            var ff = obj["features"];
+            //var ff = obj["features"];
+            var ff = CheckError(obj, "features");
             if (ff.Type == JTokenType.Array)
             {
                 return parser((JArray)ff);
@@ -89,7 +99,8 @@ namespace geographia.ags
 
             var obj = JObject.Parse(responseText);
 
-            var rst = obj["updateResults"];
+            //var rst = obj["updateResults"];
+            var rst = CheckError(obj, "updateResults");
             if (rst.Type == JTokenType.Array)
             {
                 var results = (JArray)rst;
@@ -116,7 +127,8 @@ namespace geographia.ags
 
             var obj = JObject.Parse(responseText);
 
-            var rst = obj["updateResults"];
+            //var rst = obj["updateResults"];
+            var rst = CheckError(obj, "updateResults");
             if (rst.Type == JTokenType.Array)
             {
                 var results = (JArray)rst;
@@ -128,6 +140,16 @@ namespace geographia.ags
             }
         }
 
+        #region error helper
+        static JToken CheckError(JObject j, string key)
+        {
+            var tk = j[key];
+            if (tk != null) return tk;
+            Trace.WriteLine($"bad ags response: <{j}>");
+
+            return JToken.FromObject(false);
+        }
+        #endregion
         #region token
         public async Task<(string Token, DateTimeOffset Expiration)> Token()
         {

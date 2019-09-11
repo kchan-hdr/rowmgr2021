@@ -13,7 +13,15 @@ namespace geographia.ags
     {
         static readonly string _PARCEL_KEY = "Assessor_Parcel_Number";
 
-        static readonly int _ContactInfoTable = 8;
+        #region service info
+        readonly string _parcel_outlines = "parcel outlines";
+        readonly string _parcel_status = "parcel status";
+        readonly string _powner = "sites_row.dbo.owner";
+        readonly string _clog = "sites_row.dbo.contactlog";
+        readonly string _cinfo = "sites_row.dbo.contactinfo";
+        #endregion
+
+        AgsSchema _layers;
 
         public ReservoirParcel(string url = "")
         {
@@ -24,11 +32,14 @@ namespace geographia.ags
             _LAYERID = 0;
 
             SetSecured();
+
+            _layers = new AgsSchema(this);
         }
 
         public async Task<IEnumerable<Status_dto>> GetAllParcels()
         {
-            var req = $"{_URL}/{_LAYERID}/query?f=json&where=OBJECTID is not null&returnGeometry=false&returnIdsOnly=false&outFields=OBJECTID,PARCEL_ID,ParcelStatus,ROE_Status,Documents";
+            var lid = await _layers.GetId(_parcel_outlines);
+            var req = $"{_URL}/{lid}/query?f=json&where=OBJECTID is not null&returnGeometry=false&returnIdsOnly=false&outFields=OBJECTID,PARCEL_ID,ParcelStatus,ROE_Status,Documents";
             var r = await GetAll<Status_dto>(req, (arr) =>
             {
                 var list = new List<Status_dto>();
@@ -56,7 +67,8 @@ namespace geographia.ags
             if (string.IsNullOrWhiteSpace(pid))
                 throw new ArgumentNullException("parcel apn");
 
-            var req = $"{_URL}/{_LAYERID}/query?f=json&where={_PARCEL_KEY}%3D'{pid}'&returnGeometry=false&returnIdsOnly=false&outFields=OBJECTID,{_PARCEL_KEY},ParcelStatus,ROE_Status,Documents";
+            var lid = await _layers.GetId(_parcel_outlines);
+            var req = $"{_URL}/{lid}/query?f=json&where={_PARCEL_KEY}%3D'{pid}'&returnGeometry=false&returnIdsOnly=false&outFields=OBJECTID,{_PARCEL_KEY},ParcelStatus,ROE_Status,Documents";
             var r = await GetAll<Status_dto>(req, (arr) =>
             {
                 var list = new List<Status_dto>();
@@ -78,13 +90,15 @@ namespace geographia.ags
 
             return r;
         }
-        public async Task<bool> Update(IEnumerable<UpdateFeature> u)
+        public async Task<bool> Update(IEnumerable<UpdateFeature> u, int lid = -1)
         {
+            if (lid < 0) lid = await _layers.GetId(_parcel_outlines);
+
             var req = JsonConvert.SerializeObject(u);
             req = $"features={req}&f=json&gdbVersion=&rollbackOnFailure=true";
             var reqContent = new StringContent(req);
             reqContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
-            return await base.Update(_LAYERID, reqContent);
+            return await base.Update(lid, reqContent);
         }
 
         async Task<bool> IFeatureUpdate.UpdateFeatureDocuments(string parcelId, string documentURL)
@@ -109,7 +123,8 @@ namespace geographia.ags
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
 
-            var oid = await Find(0, $"{_PARCEL_KEY}='{parcelId}'");
+            var lid = await _layers.GetId(_parcel_outlines);
+            var oid = await Find(lid, $"{_PARCEL_KEY}='{parcelId}'");
             var u = oid.Select(i => new UpdateFeature
             {
                 attributes = new Status_Req
@@ -130,7 +145,8 @@ namespace geographia.ags
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
 
-            var oid = await Find(0, $"{_PARCEL_KEY}='{parcelId}'");
+            var lid = await _layers.GetId(_parcel_outlines);
+            var oid = await Find(lid, $"{_PARCEL_KEY}='{parcelId}'");
             var u = oid.Select(i => new UpdateFeature
             {
                 attributes = new Status_Req
@@ -148,7 +164,10 @@ namespace geographia.ags
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
 
-            var oid = await Find(_LAYERID, $"{_PARCEL_KEY}='{parcelId}'");
+            var t = new List<Task<bool>>();
+            var po = await _layers.GetId(_parcel_outlines);
+
+            var oid = await Find(po, $"{_PARCEL_KEY}='{parcelId}'");
             var u = oid.Select(i => new UpdateFeature
             {
                 attributes = new Status_Req
@@ -157,19 +176,65 @@ namespace geographia.ags
                     Likelihood = rating
                 }
             });
-            return await this.Update(u);
+            t.Add(this.Update(u, po));
+
+
+            var ps = await _layers.GetId(_parcel_status);
+            var soid = await Find(ps, $"{_PARCEL_KEY}='{parcelId}'");
+            var su = oid.Select(i => new UpdateFeature
+            {
+                attributes = new Status_Req
+                {
+                    OBJECTID = i,
+                    Access_Likelihood = Enum.GetName(typeof( Status_dto.Likelihood_Domain), rating)
+                }
+            });
+            t.Add(this.Update(su, ps));
+
+            var good = await Task.WhenAll(t);
+            return good.All(g => g);
         }
 
 
         #region off-label
+        async Task<string> GetGlobalId(int lid, string q)
+        {
+            const string _pg = "GlobalID";
+
+            var req = $"{_URL}/{lid}/query?f=json&where={q}&returnGeometry=false&returnIdsOnly=false&outFields=*";
+            var r = await GetAll<string>(req, (arr) =>
+            {
+                var list = new List<string>();
+
+                foreach (var f in arr)
+                {
+                    try
+                    {
+                        var attr = f["attributes"];
+                        var pg = attr.Value<string>(_pg);
+
+                        list.Add(pg);
+                    } 
+                    catch ( Exception e )
+                    {
+                        throw e;
+                    }
+                }
+
+                return list;
+            });
+
+            return r.FirstOrDefault();
+        }
         public async Task<bool> Update(ContactInfo_dto dto)
         {
             if (dto == null)
                 return false;
 
+            var _ContactInfoTable = await _layers.GetId(_cinfo);
             var oid = await Find(_ContactInfoTable, $"ContactId='{dto.ContactId}'");
 
-            string action = string.Empty;
+            string action;
             ContactAttribute[] edits;
             if (oid != null && oid.Any())
             {
@@ -179,7 +244,28 @@ namespace geographia.ags
             }
             else
             {
-                edits = new ContactAttribute[] { new ContactAttribute { attributes = dto } };
+                // new parcel and owner
+                var oLayerId = await _layers.GetId(_powner);
+                var og = await GetGlobalId(oLayerId, $"OwnerId='{dto.ContactOwnerId}'");
+
+                if (dto.APN == null || !dto.APN.Any())
+                {
+                    Trace.WriteLine("missing parcels");
+                    return false;
+                }
+
+                var t = dto.APN.Select(async apn =>
+                {
+                    var g = await GetGlobalId(await _layers.GetId(_parcel_outlines), $"{_PARCEL_KEY}='{apn}'");
+                    var dtx = dto.Clone() as ContactInfo_dto;
+                    dtx.ParentParcel_gid = g;
+                    dtx.ContactOwner_gid = og;
+
+                    return new ContactAttribute() { attributes = dtx };
+                });
+
+                var payload = await Task.WhenAll(t);
+                edits = payload;
                 action = "adds";
             }
 
@@ -191,11 +277,51 @@ namespace geographia.ags
             return await base.Edit(_ContactInfoTable, reqContent);
         }
 
-        public class Edits
+        public async Task<bool> Update(ContactLog_dto dto)
+        {
+            if (dto == null)
+                return false;
+
+            var lay = await _layers.GetId(_clog);
+            var oid = await Find(lay, $"ContactLogId='{dto.ContactLogId}'");
+
+            string action;
+            var edits = new List<ContactLogAttribute>();
+
+            if (oid != null && oid.Any())
+            {
+                dto.ESRI_OID = oid.First();
+                edits.Add(new ContactLogAttribute() { attributes = dto });
+                action = "updates";
+            }
+            else
+            {
+                action = "adds";
+                var t = dto.APN.Select(async apn =>
+                {
+                   var dtx = dto.Clone() as ContactLog_dto;
+                   var g = await GetGlobalId(await _layers.GetId(_parcel_outlines), $"{_PARCEL_KEY}='{apn}'");
+                   dtx.ParentParcel_gid = g;
+
+                   return new ContactLogAttribute() { attributes = dtx };
+                });
+
+                var payload = await Task.WhenAll(t);
+                edits.AddRange(payload);
+            }
+
+            var req = JsonConvert.SerializeObject(edits);
+            req = $"{action}={req}&f=json&gdbVersion=&rollbackOnFailure=true";
+            var reqContent = new StringContent(req);
+            reqContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
+            return await base.Edit(lay, reqContent);
+        }
+
+        public class Edits<T>
         {
             public string f { get; set; } = "json";
-            public ContactAttribute[] adds { get; set; }
-            public ContactAttribute[] updates { get; set; }
+            public T[] adds { get; set; }
+            public T[] updates { get; set; }
         }
 
         public class ContactAttribute
@@ -203,8 +329,9 @@ namespace geographia.ags
             public ContactInfo_dto attributes { get; set; }
         }
 
-        public class ContactInfo_dto
+        public class ContactInfo_dto : ICloneable
         {
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public int? ESRI_OID { get; set; } = null;
             public string ContactId { get; set; }
             public bool IsPrimaryContact { get; set; }
@@ -223,6 +350,46 @@ namespace geographia.ags
             public DateTimeOffset? LastModified { get; set; }
             public string ModifiedBy { get; set; }
             public string Representation { get; set; }
+
+            [JsonProperty("REL_ParcelGlobalID")]
+            public string ParentParcel_gid { get; set; }
+
+            [JsonProperty("REL_OwnerGlobalID")]
+            public string ContactOwner_gid { get; set; }
+
+            [JsonIgnore]
+            public IEnumerable<string> APN { get; set; }
+
+            public object Clone() => this.MemberwiseClone();
+        }
+
+        public class ContactLogAttribute
+        {
+            public ContactLog_dto attributes { get; set; }
+        }
+
+        public class ContactLog_dto : ICloneable
+        {
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public int? ESRI_OID { get; set; }
+            public string Title { get; set; } = string.Empty;
+            public string ContactChannel { get; set; } = string.Empty;
+            public string ProjectPhase { get; set; } = string.Empty;
+            public string Notes { get; set; } = string.Empty;
+            public string ModifiedBy { get; set; } = string.Empty;
+
+            public string ContactLogId { get; set; }
+
+            [JsonProperty("REL_ParcelGlobalID")]
+            public string ParentParcel_gid { get; set; }
+
+            [JsonIgnore]
+            public IEnumerable<string> APN { get; set; }
+
+            [JsonIgnore]
+            public IEnumerable<Guid> Contacts { get; set; }
+
+            public object Clone() => this.MemberwiseClone();
         }
         #endregion
 
@@ -248,7 +415,9 @@ namespace geographia.ags
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string ROE_Condition { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public int Likelihood { get; set; }
+            public int? Likelihood { get; set; }
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public string Access_Likelihood { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Documents { get; set; }
         }
