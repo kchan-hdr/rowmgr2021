@@ -86,9 +86,9 @@ namespace ROWM.Controllers
             var sites = _featureUpdate as ReservoirParcel;
             if (sites != null)
             {
-                var apns = o.Ownership.Select(ox => ox.Parcel.Assessor_Parcel_Number);
+                // var apns = o.Ownership.Select(ox => ox.Parcel.Assessor_Parcel_Number);
                 var payload = Convert(newc);
-                payload.APN = apns; 
+                // payload.APN = apns;          no need to denormalize. mobile fixed. geodatabase still broken
                 await sites.Update(payload);
             }
 
