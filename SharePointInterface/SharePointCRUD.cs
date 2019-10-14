@@ -32,75 +32,60 @@ namespace SharePointInterface
         // staging URL to move to app config
         static readonly string _STAGING_SITE_URL = "https://hdroneview.sharepoint.com/ROW_Dev";
 
-        static readonly string _DOCUMENT_LIST_BASE = "Documents"; // "Shared Documents";
+        static readonly string _DOCUMENT_LIST_BASE = "Shared Documents";
 
         private ClientContext _ctx;
         private string _parcelsFolderName = "Parcels";
-        private string _parcelsFolderTemplate = "Documents/Parcels/_Track_No_LO Name"; // "Folder_Template";
+        private string _parcelsFolderTemplate = "Shared Documents/Parcels/_Track_No_LO Name"; // "Folder_Template";
         private string _siteUrl;
         // private Dictionary<string, string> _docTypes;
         private DocTypes _docTypes;
 
-        public SharePointCRUD (string _appId = null, string _appSecret = null, DocTypes d = null) // Dictionary<string,string> docTypes = null)
+        private string _appId = "";
+        private string _appSecret = "";
+
+        public SharePointCRUD (string __appId = null, string __appSecret = null, string _url = null, DocTypes d = null) // Dictionary<string,string> docTypes = null)
         {
             _docTypes = d;
 
             //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
-            _siteUrl = _STAGING_SITE_URL; // "https://hdroneview.sharepoint.com/bh_pmp";
+            _siteUrl = string.IsNullOrWhiteSpace(_url) ? _STAGING_SITE_URL : _url;
 
-            /*
-             * STAGING---
-             * 
-             * The app identifier has been successfully created.
-            Client Id:  	26589ee5-16ef-4444-9143-cfea08cba1cc
-            Client Secret:  	B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=
-            Title:  	rowm_staging
-            App Domain:  	rowm_staging.hdrinc.com
-            Redirect URI:  	https://rowm_staging.hdrinc.com
-             
-
-
-            The app identifier has been successfully created.
-            Client Id:  	1bca8e9c-15ac-41b0-9869-1e93d4a5d779
-            Client Secret:  	DPGAdcvJpEC+yzzSgYSs6Szau/Z+GpdOdjjpFnqAS70=
-            Title:  	rowm_prod
-            App Domain:  	blackhill-prod-rowmgr.azurewebsites.net
-            Redirect URI:  	https://blackhill-prod-rowmgr.azurewebsites.net
-             */
-
-            if (_appId == null || _appSecret == null )
+            if (__appId == null || __appSecret == null )
             {
-                _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc";
-                _appSecret = "d4M24Cq7r4ZcHraDHBmB6LVNfMzs/e6Ya5/TzP4/svk=";
-
-                //_appId = "1bca8e9c-15ac-41b0-9869-1e93d4a5d779";
-                //_appSecret = "DPGAdcvJpEC+yzzSgYSs6Szau/Z+GpdOdjjpFnqAS70=";
+                _appId = "e8d38b84-11bb-43df-b07d-a549b05eab19";
+                _appSecret = "/kzpHsp4A8NXWYyhGOGI8LmA8jdBwZCtKjqLrfN3W3A=";
+                _siteUrl = "https://atcpmp.sharepoint.com/line6943";
             }
+            else
+            {
+                _appId = __appId;
+                _appSecret = __appSecret;
+                _siteUrl = _url;
+            }
+        }
 
-            // Method using Sharepoint Credentials
-            //_ctx = new ClientContext(_siteUrl);
-            //var passWord = new SecureString();
-            //foreach (char c in "pwd".ToCharArray()) passWord.AppendChar(c);
-            //_ctx.Credentials = new SharePointOnlineCredentials("<sharepoint_user>@hdrinc.com", passWord);
-
-            // Method using AppID
-            // Using OfficeDevPnp.Core
-            // https://github.com/SharePoint/PnP-Sites-Core/blob/master/Core/README.md
-            //string _appId = "APPID";
-            //string _appSecret = "SECRET";
+        ClientContext MyContext()
+        {
+            if (_ctx != null)
+                return _ctx;
 
             AuthenticationManager authManager = new AuthenticationManager();
             _ctx = authManager.GetAppOnlyAuthenticatedContext(_siteUrl, _appId, _appSecret);
+
+            return _ctx;
         }
 
         public string GetSiteTitle()
         {
+            var ctx = MyContext();
+
             string title = "NA";
-            Web web = _ctx.Web;
+            Web web = ctx.Web;
 
-            _ctx.Load(web);
+            ctx.Load(web);
 
-            _ctx.ExecuteQuery();
+            ctx.ExecuteQuery();
 
             Trace.WriteLine(web.Title);
 
@@ -123,17 +108,18 @@ namespace SharePointInterface
                 folderTemplate = _parcelsFolderTemplate;
             }
 
-            Web web = _ctx.Web;
+            var ctx = MyContext();
+            Web web = ctx.Web;
             //List list = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
             List list = web.GetListByUrl(_DOCUMENT_LIST_BASE);
 
             string targetFolderPath = String.Format("{0}/{1}", baseFolderName, folderName);
             //List <string> pathList = new List<string> { "4.0 ROW", "4.3 Parcels", folderName };
             Folder baseFolder = web.GetFolderByServerRelativeUrl(baseFolderName);
-            _ctx.Load(web);
-            _ctx.Load(list);
-            _ctx.Load(baseFolder);
-            _ctx.ExecuteQuery();
+            ctx.Load(web);
+            ctx.Load(list);
+            ctx.Load(baseFolder);
+            ctx.ExecuteQuery();
 
 
             if (baseFolder.FolderExists(folderName))
@@ -145,8 +131,8 @@ namespace SharePointInterface
             }
 
             Folder newFolder = web.GetFolderByServerRelativeUrl(targetFolderPath);
-            _ctx.Load(newFolder);
-            _ctx.ExecuteQuery();
+            ctx.Load(newFolder);
+            ctx.ExecuteQuery();
 
             return newFolder;
         }
@@ -155,12 +141,13 @@ namespace SharePointInterface
         // List All Lists
         public ListCollection ListAllLists()
         {
+            var ctx = MyContext();
             // Get folder list
-            Web web = _ctx.Web;
-            _ctx.Load(web.Lists,
+            Web web = ctx.Web;
+            ctx.Load(web.Lists,
                 lists => lists.Include(list => list.Title,
                     list => list.Id));
-            _ctx.ExecuteQuery();
+            ctx.ExecuteQuery();
 
             return web.Lists;
         }
@@ -168,14 +155,15 @@ namespace SharePointInterface
         // Upload Parcel Doc
         public bool UploadParcelDoc(string pid, string docType, string docName, byte[] docBytes, string baseFolderName = "")
         {
-
             if (String.IsNullOrWhiteSpace(baseFolderName))
             {
                 baseFolderName = _parcelsFolderName;
             }
 
+            var ctx = MyContext();
+
             // Get Parcel folder list
-            Web web = _ctx.Web;
+            Web web = ctx.Web;
             //List parcelFolders = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
             List parcelFolders = web.GetListByUrl(_DOCUMENT_LIST_BASE);
 
@@ -188,7 +176,7 @@ namespace SharePointInterface
 
             // Check if Parcel & Doc Type Folder Exists
             List<string> targetPath = GetDocTargetPath(baseFolderName, parcelFolderName, docType);
-            Folder docFolder = EnsureAndGetTargetFolder(_ctx, parcelFolders, targetPath);
+            Folder docFolder = EnsureAndGetTargetFolder(ctx, parcelFolders, targetPath);
 
             if (string.IsNullOrWhiteSpace(docName))
                 docName = "Unkonwn";
@@ -210,8 +198,10 @@ namespace SharePointInterface
                 baseFolderName = _parcelsFolderName;
             }
 
+            var ctx = MyContext();
+
             // Get Parcel folder list
-            Web web = _ctx.Web;
+            Web web = ctx.Web;
             //List parcelFolders = web.Lists.GetByTitle(_DOCUMENT_LIST_BASE);
             List parcelFolders = web.GetListByUrl(_DOCUMENT_LIST_BASE);
 
@@ -223,12 +213,12 @@ namespace SharePointInterface
 
             // Check if Parcel & Doc Type Folder Exists
             List<string> targetPath = GetDocTargetPath(baseFolderName, parcelFolderName, docType);
-            Folder docFolder = EnsureAndGetTargetFolder(_ctx, parcelFolders, targetPath);
+            Folder docFolder = EnsureAndGetTargetFolder(ctx, parcelFolders, targetPath);
 
             File doc = docFolder.GetFile(docName);
-            _ctx.Load(doc);
+            ctx.Load(doc);
             ClientResult<System.IO.Stream> fileStream = doc.OpenBinaryStream();
-            _ctx.ExecuteQuery();
+            ctx.ExecuteQuery();
 
             return fileStream.Value;
         }
@@ -259,11 +249,12 @@ namespace SharePointInterface
                 baseFolderName = $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}"; //  "Documents/" + _parcelsFolderName;
             }
 
-            Web web = _ctx.Web;
+            var ctx = MyContext();
+            Web web = ctx.Web;
             Folder baseFolder = web.GetFolderByServerRelativeUrl(baseFolderName);
-            _ctx.Load(web);
-            _ctx.Load(baseFolder);
-            _ctx.ExecuteQuery();
+            ctx.Load(web);
+            ctx.Load(baseFolder);
+            ctx.ExecuteQuery();
 
             pid = GetParcelFolderName(pid);
             if (baseFolder.FolderExists(pid))
@@ -316,6 +307,8 @@ namespace SharePointInterface
 
             try
             {
+                var ctx = MyContext();
+
                 using (System.IO.Stream ms = new System.IO.MemoryStream(docBytes))
                 {
                     var info = new FileCreationInformation
@@ -329,14 +322,14 @@ namespace SharePointInterface
                     File file = folder.Files.Add(info);
 
                     folder.Update();
-                    _ctx.Load(file, f => f.ListItemAllFields);
-                    _ctx.ExecuteQuery();
-                    _ctx.Load(file);
+                    ctx.Load(file, f => f.ListItemAllFields);
+                    ctx.ExecuteQuery();
+                    ctx.Load(file);
 
                     ListItem item = file.ListItemAllFields;
                     item["Title"] = "Title";
                     item.Update();
-                    _ctx.ExecuteQuery();
+                    ctx.ExecuteQuery();
 
                     _docExists = true;
                 }
