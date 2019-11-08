@@ -19,14 +19,16 @@ namespace ROWM.Controllers
         static readonly string _APP_NAME = "ROWM";
 
         #region ctor
+        readonly ROWM_Context _context;
         readonly OwnerRepository _repo;
         readonly StatisticsRepository _statistics;
         readonly ParcelStatusHelper _statusHelper;
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
 
-        public RowmController(OwnerRepository r, StatisticsRepository sr, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
+        public RowmController(ROWM_Context c, OwnerRepository r, StatisticsRepository sr, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
         {
+            _context = c;
             _repo = r;
             _statistics = sr;
             _statusHelper = h;
@@ -47,6 +49,33 @@ namespace ROWM.Controllers
             return (await _repo.FindOwner(name))
                 .Select(ox => new OwnerDto(ox));
         }
+
+        [HttpPut("owners/{id:Guid}")]
+        public async Task<ActionResult<OwnerDto>> UpdateOwner(Guid id, [FromBody]OwnerRequest o)
+        {
+            var ow = await _repo.GetOwner(id);
+            if (ow == null)
+                return BadRequest();
+
+            ow.PartyName = o.PartyName;
+            ow.OwnerType = o.OwnerType;
+
+            ow = await _repo.UpdateOwner(ow);
+
+            return new OwnerDto(ow);
+        }
+        [HttpPost("parcels/{pid}/owners")]
+        public async Task<ActionResult<ParcelGraph>> SetOwner(string pid, [FromBody]OwnerRequest o)
+        {
+            var p = await _repo.GetParcel(pid);
+
+            var update = new UpdateParcelOwner(this._context, p, o.PartyName, o.OwnerType);
+            update.ModifiedBy = User?.Identity?.Name ?? _APP_NAME;
+            p = await update.Apply();
+
+            return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
+        }
+
         #region contacts
         [Route("owners/{id:Guid}/contacts"), HttpPost]
         public async Task<IActionResult> AddContact(Guid id, [FromBody]ContactRequest info)
@@ -209,83 +238,121 @@ namespace ROWM.Controllers
         #endregion
         #region parcel status
         [HttpPut("parcels/{pid}/status/{statusCode}")]
-        public async Task<ParcelGraph> UpdateStatus(string pid, string statusCode)
-        {
-            var p = await _repo.GetParcel(pid);
-
-            List<Task> tks = new List<Task>();
-
-            try
-            {
-                var dv = _statusHelper.GetDomainValue(statusCode);
-                tks.Add( _featureUpdate.UpdateFeature(pid, dv));
-            }
-            catch( InvalidOperationException)
-            {
-                Trace.TraceWarning($"bad parcel status domain {statusCode}");
-            }
-
-            p.ParcelStatusCode = statusCode;
-            p.LastModified = DateTimeOffset.Now;
-            p.ModifiedBy = _APP_NAME;
-
-            tks.Add(_repo.UpdateParcel(p).ContinueWith( d => p = d.Result));
-
-            // p = await _repo.UpdateParcel(p);
-            await Task.WhenAll(tks);
-
-            return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
-        }
-        #endregion
-        #region roe status
-        [HttpPut("parcels/{pid}/roe/{statusCode}")]
-        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus(string pid, string statusCode) => await UpdateRoeStatusImpl(pid, statusCode, null);
-
-        [HttpPut("parcels/{pid}/roe")]
-        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus2(string pid, [FromBody] RoeRequest r) => await UpdateRoeStatusImpl(pid, r.StatusCode, r.Condition);
-
-        private async Task<ActionResult<ParcelGraph>> UpdateRoeStatusImpl(string pid, string statusCode, string condition)
+        public async Task<ActionResult<ParcelGraph>> UpdateStatus(string pid, string statusCode)
         {
             var p = await _repo.GetParcel(pid);
             if (p == null)
                 return BadRequest();
 
-            List<Task> tks = new List<Task>();
+            var a = await _repo.GetDefaultAgent();
 
-            try
-            {
-                var dv = _statusHelper.GetRoeDomainValue(statusCode);
-                tks.Add( null == condition ?
-                    _featureUpdate.UpdateFeatureRoe(pid, dv) : _featureUpdate.UpdateFeatureRoe_Ex(pid, dv, condition));
-            }
-            catch( InvalidOperationException )
-            {
-                Trace.TraceWarning($"bad roe status domain {statusCode}");
+            var update = new UpdateParcelStatus(new[] { p }, a, this._context, this._repo, this._featureUpdate, this._statusHelper);
+            update.AcquisitionStatus = statusCode;
+            update.ModifiedBy = User?.Identity?.Name ?? _APP_NAME;
+            await update.Apply();
+
+            //int dv = -1;
+
+
+            //List<Task> tks = new List<Task>();
+
+            //try
+            //{
+            //    dv = _statusHelper.GetDomainValue(statusCode);
+            //    tks.Add( _featureUpdate.UpdateFeature(pid, dv));
+            //}
+            //catch( InvalidOperationException)
+            //{
+            //    Trace.TraceWarning($"bad parcel status domain {statusCode}");
+            //}
+
+            //p.ParcelStatusCode = statusCode;
+            //p.LastModified = DateTimeOffset.Now;
+            //p.ModifiedBy = _APP_NAME;
+
+            //tks.Add(_repo.UpdateParcel(p).ContinueWith( d => p = d.Result));
+
+            //// p = await _repo.UpdateParcel(p);
+            //await Task.WhenAll(tks);
+
+            return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
+        }
+
+        [HttpPut("parcels/{pid}/status")]
+        public async Task<ActionResult<ParcelGraph>> UpdateStatus(string pid, [FromBody] AcqRequest request)
+        {
+            var p = await _repo.GetParcel(pid);
+            if (p == null)
                 return BadRequest();
-            }
 
-            p.RoeStatusCode = statusCode;
-            if (!string.IsNullOrWhiteSpace(condition))
-            {
-                if ( null == p.Conditions)
-                    p.Conditions = new List<RoeCondition>();
+            var a = await _repo.GetAgent(request.AgentId);
 
-                p.Conditions.Add(new RoeCondition() { Condition = condition, IsActive = true, EffectiveStartDate = DateTimeOffset.Now, EffectiveEndDate = DateTimeOffset.MaxValue });
-            }
-            p.LastModified = DateTimeOffset.Now;
-            p.ModifiedBy = _APP_NAME;
+            var update = new UpdateParcelStatus(new[] { p }, a, this._context, this._repo, this._featureUpdate, this._statusHelper);
+            update.AcquisitionStatus = request.StatusCode;
+            update.Notes = request.Notes;
+            update.ModifiedBy = User?.Identity?.Name ?? _APP_NAME;
+            await update.Apply();
+            return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
+        }
+        #endregion
+        #region roe status
+        [HttpPut("parcels/{pid}/roe/{statusCode}")]
+        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus(string pid, string statusCode) => await UpdateRoeStatusImpl(pid, Guid.Empty, statusCode, null);
 
-            // propagate to parcel 
-            // TODO: clean up
-            switch( statusCode )
-            {
-                case "ROE_Obtained": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
-                case "ROE_with_Conditions": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
-            }
+        [HttpPut("parcels/{pid}/roe")]
+        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus2(string pid, [FromBody] RoeRequest r) => await UpdateRoeStatusImpl(pid, r.AgentId, r.StatusCode, r.Condition);
 
-            tks.Add( _repo.UpdateParcel(p));
+        private async Task<ActionResult<ParcelGraph>> UpdateRoeStatusImpl(string pid, Guid agentId, string statusCode, string condition)
+        {
+            var p = await _repo.GetParcel(pid);
+            if (p == null)
+                return BadRequest();
 
-            await Task.WhenAll(tks);
+            var a = await _repo.GetAgent(agentId);
+
+            var update = new UpdateParcelStatus(new[] { p }, a, this._context, this._repo, this._featureUpdate, this._statusHelper);
+            update.RoeStatus = statusCode;
+            update.RoeCondition = condition;
+            // update.Notes = request.Notes;
+            update.ModifiedBy = User?.Identity?.Name ?? _APP_NAME;
+            await update.Apply();
+
+            //List<Task> tks = new List<Task>();
+
+            //try
+            //{
+            //    var dv = _statusHelper.GetRoeDomainValue(statusCode);
+            //    tks.Add( null == condition ?
+            //        _featureUpdate.UpdateFeatureRoe(pid, dv) : _featureUpdate.UpdateFeatureRoe_Ex(pid, dv, condition));
+            //}
+            //catch( InvalidOperationException )
+            //{
+            //    Trace.TraceWarning($"bad roe status domain {statusCode}");
+            //    return BadRequest();
+            //}
+
+            //p.RoeStatusCode = statusCode;
+            //if (!string.IsNullOrWhiteSpace(condition))
+            //{
+            //    if ( null == p.Conditions)
+            //        p.Conditions = new List<RoeCondition>();
+
+            //    p.Conditions.Add(new RoeCondition() { Condition = condition, IsActive = true, EffectiveStartDate = DateTimeOffset.Now, EffectiveEndDate = DateTimeOffset.MaxValue });
+            //}
+            //p.LastModified = DateTimeOffset.Now;
+            //p.ModifiedBy = _APP_NAME;
+
+            //// propagate to parcel 
+            //// TODO: clean up
+            //switch( statusCode )
+            //{
+            //    case "ROE_Obtained": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
+            //    case "ROE_with_Conditions": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
+            //}
+
+            //tks.Add( _repo.UpdateParcel(p));
+
+            //await Task.WhenAll(tks);
 
             return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
         }
@@ -504,9 +571,24 @@ namespace ROWM.Controllers
         public string Relations { get; set; } = "";
     }
 
+    public class OwnerRequest
+    {
+        public string PartyName { get; set; }
+        public string OwnerType { get; set; }
+    }
+
+    public class AcqRequest
+    {
+        public Guid AgentId { get; set; }
+        public string StatusCode { get; set; }
+        public DateTimeOffset ChangeDate { get; set; }
+        public string Notes { get; set; }
+    }
     public class RoeRequest
     {
+        public Guid AgentId { get; set; }
         public string StatusCode { get; set; }
+        public DateTimeOffset ChangeDate { get; set; }
         public string Condition { get; set; }
     }
     #endregion
