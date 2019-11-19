@@ -63,6 +63,10 @@ namespace SharePointInterface
                 _appSecret = __appSecret;
                 _siteUrl = _url;
             }
+
+            // override site url
+            if (!string.IsNullOrWhiteSpace(_url))
+                _siteUrl = _url;
         }
 
         ClientContext MyContext()

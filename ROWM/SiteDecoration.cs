@@ -19,4 +19,9 @@ namespace ROWM
     {
         public string SiteTitle() => "ATC Line 6943";
     }
+
+    public class Atc862: SiteDecoration
+    {
+        public string SiteTitle() => "ATC Line 862";
+    }
 }

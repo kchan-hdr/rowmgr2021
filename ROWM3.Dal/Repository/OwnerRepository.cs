@@ -364,6 +364,14 @@ namespace ROWM.Dal
         }
         #endregion
         #region row agents
+        public async Task<Agent> GetAgent(Guid id)
+        {
+            var a = await _ctx.Agent.FindAsync(id);
+            if (a == null)
+                a = await GetDefaultAgent();
+
+            return a;
+        }
         public async Task<Agent> GetAgent(string name) => await _ctx.Agent.FirstOrDefaultAsync(ax => ax.AgentName.Equals(name, StringComparison.CurrentCultureIgnoreCase));
         public async Task<Agent> GetDefaultAgent() => await _ctx.Agent.FirstOrDefaultAsync(ax => ax.AgentName.Equals("DEFAULT"));
 
