@@ -72,7 +72,7 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(fac.GetRequiredService<ROWM.Dal.ROWM_Context>()));
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, ReservoirParcel>(fac =>
-                new ReservoirParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/California/ATC_Line862_Parcel_FS/FeatureServer"));
+                new ReservoirParcel("https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_Line862_Parcel_FS/FeatureServer"));
             services.AddScoped<ISharePointCRUD, SharePointCRUD>( fac =>
                 new SharePointCRUD( d: fac.GetRequiredService<ROWM.Dal.DocTypes>(), _url: "https://atcpmp.sharepoint.com/atcrow/line862" )) ;
 
