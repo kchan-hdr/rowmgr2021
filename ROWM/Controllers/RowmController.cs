@@ -20,14 +20,16 @@ namespace ROWM.Controllers
 
         #region ctor
         readonly OwnerRepository _repo;
+        readonly ContactInfoRepository _contactRepo;
         readonly StatisticsRepository _statistics;
         readonly ParcelStatusHelper _statusHelper;
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
 
-        public RowmController(OwnerRepository r, StatisticsRepository sr, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
+        public RowmController(OwnerRepository r, ContactInfoRepository c, StatisticsRepository sr, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
         {
             _repo = r;
+            _contactRepo = c;
             _statistics = sr;
             _statusHelper = h;
             _featureUpdate = f;
@@ -81,6 +83,8 @@ namespace ROWM.Controllers
             };
             o.ContactInfo.Add(newc);
 
+            await CheckBusiness(newc, info);
+
             var newo = await _repo.UpdateOwner(o);
 
             var sites = _featureUpdate as ReservoirParcel;
@@ -125,6 +129,8 @@ namespace ROWM.Controllers
             c.LastModified = dt;
             c.ModifiedBy = _APP_NAME;
 
+            await CheckBusiness(c, info);
+
             var newc = await _repo.UpdateContact(c);
 
             var sites = _featureUpdate as ReservoirParcel;
@@ -134,6 +140,28 @@ namespace ROWM.Controllers
             return Json(new ContactInfoDto(newc));
         }
 
+        private async Task<ContactInfo> CheckBusiness(ContactInfo c, ContactRequest r)
+        {
+            if (string.IsNullOrWhiteSpace(r.BusinessName))
+                return c;
+
+            var org = await _contactRepo.FindOrganization(r.BusinessName);
+            if ( org == null )
+            {
+                org = new Organization { Name = r.BusinessName };
+            }
+
+            if (c.OrganizationId.HasValue)
+            {
+                if (c.OrganizationId == org.OrganizationId) // no ops. don't do business edits here
+                    return c;
+
+                Trace.TraceWarning($"changing affilitation for {c.FirstName} to {org.Name}");
+            }
+
+            c.Affiliation = org ;
+            return c;
+        }
         static geographia.ags.ReservoirParcel.ContactInfo_dto Convert(ContactInfo c) =>
             new ReservoirParcel.ContactInfo_dto
             {
@@ -457,19 +485,19 @@ namespace ROWM.Controllers
         async Task<bool> RecordParcelFirstContact(IEnumerable<string> parcelIds)
         {
             var good = true;
-            var tasks = new List<Task>();
-            foreach( var pid in parcelIds)
-            {
-                var p = await _repo.GetParcel(pid);
-                if ( ParcelStatusHelper.HasNoContact(p))
-                {
-                    p.ParcelStatusCode = "Owner_Contacted";
-                    //p.ParcelStatus = Parcel.RowStatus.Owner_Contacted;
+            //var tasks = new List<Task>();
+            //foreach( var pid in parcelIds)
+            //{
+            //    var p = await _repo.GetParcel(pid);
+            //    if ( ParcelStatusHelper.HasNoContact(p))
+            //    {
+            //        p.ParcelStatusCode = "Owner_Contacted";
+            //        //p.ParcelStatus = Parcel.RowStatus.Owner_Contacted;
 
-                    tasks.Add(_featureUpdate.UpdateFeature(p.Assessor_Parcel_Number, 1));
-                }
-            }
-            await Task.WhenAll(tasks);
+            //        tasks.Add(_featureUpdate.UpdateFeature(p.Assessor_Parcel_Number, 1));
+            //    }
+            //}
+            //await Task.WhenAll(tasks);
 
             return good;
         }
@@ -570,6 +598,8 @@ namespace ROWM.Controllers
 
         public bool IsPrimaryContact { get; set; } = false;
         public string Relations { get; set; } = "";
+
+        public string BusinessName { get; set; } = "";
     }
 
     public class RoeRequest
@@ -669,6 +699,8 @@ namespace ROWM.Controllers
         public string OwnerCellPhone { get; set; }
         public string OwnerWorkPhone { get; set; }
 
+        public string BusinessName { get; set; }
+
         internal ContactInfoDto(ContactInfo c)
         {
             ContactId = c.ContactId;
@@ -686,6 +718,9 @@ namespace ROWM.Controllers
             OwnerCellPhone = c.CellPhone;
             OwnerWorkPhone = c.WorkPhone;
             OwnerHomePhone = c.HomePhone;
+
+            if (c.Affiliation != null)
+                BusinessName = c.Affiliation.Name;
         }
     }
 
@@ -693,6 +728,7 @@ namespace ROWM.Controllers
     {
         public Guid OwnerId { get; set; }
         public string PartyName { get; set; }
+        public string OwnerAddress { get; set; }
         public IEnumerable<ParcelHeaderDto> OwnedParcel { get; set; }
         public IEnumerable<ContactInfoDto> Contacts { get; set; }
         public IEnumerable<ContactLogDto> ContactLogs { get; set; }
@@ -702,6 +738,8 @@ namespace ROWM.Controllers
         {
             OwnerId = o.OwnerId;
             PartyName = o.PartyName;
+            OwnerAddress = o.OwnerAddress;
+
             OwnedParcel = o.Ownership.Where(ox=>ox.Parcel.IsActive).Select(ox=> new ParcelHeaderDto(ox));
             Contacts = o.ContactInfo.Select(cx => new ContactInfoDto(cx));
             ContactLogs = o.ContactInfo

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace ROWM.Dal
 {
+    [Table("RoeConditions", Schema ="ROWM")]
     public class RoeCondition
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]

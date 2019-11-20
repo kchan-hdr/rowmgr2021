@@ -13,6 +13,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Http.Features;
 using geographia.ags;
 using SharePointInterface;
+using ROWM.Dal;
 
 namespace ROWM
 {
@@ -49,17 +50,16 @@ namespace ROWM
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
+            services.AddScoped<ROWM.Dal.ContactInfoRepository>();
             services.AddScoped<ROWM.Dal.StatisticsRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
-            services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
+            services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(fac.GetRequiredService<ROWM_Context>()));
             services.AddScoped<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, ReservoirParcel>(fac =>
-                new ReservoirParcel("https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_Line6943_Parcel_FS/FeatureServer"));
+            services.AddScoped<IFeatureUpdate, AtcParcel>(fac =>
+                new AtcParcel("https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_Line6943_Parcel_FS/FeatureServer"));
 
-            services.AddScoped<ISharePointCRUD, SharePointCRUD>();
-            //services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac =>
-            //    new SharePointCRUD("14e5814e-95f9-4aee-9890-e82fa00b323f", "Mc2nMSCT0Rq2AcR5vrzDAH38dqdUh6R/wHPS/EmjTgc=", "https://atcpmp.sharepoint.com/line6943", 
-            //    new Dal.DocTypes(new Dal.ROWM_Context(cs))));
+            services.AddScoped<ISharePointCRUD, SharePointCRUD>( fac => new SharePointCRUD(
+                d: fac.GetRequiredService<DocTypes>(), _url: "https://atcpmp.sharepoint.com/line6943"));
 
             services.AddSingleton<SiteDecoration, Atc6943>();
 
