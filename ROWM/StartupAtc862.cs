@@ -45,7 +45,7 @@ namespace ROWM
             services.AddCors();
 
             // Add framework services.
-            services.AddMvc()
+            services.AddMvc( c => c.Conventions.Add(new SwaggerIgnores()))
                 .AddJsonOptions(o =>
                 {
                     o.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;

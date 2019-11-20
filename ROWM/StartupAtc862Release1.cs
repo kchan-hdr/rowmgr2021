@@ -45,17 +45,17 @@ namespace ROWM
             services.AddCors();
 
             // Add framework services.
-            services.AddMvc()
+            services.AddMvc(c => c.Conventions.Add(new SwaggerIgnores()))
                 .AddJsonOptions(o =>
                 {
                     o.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                 });
 
-            services.AddProgressiveWebApp(new PwaOptions
-            {
-                RoutesToPreCache = "/, /js/index.js",
-                Strategy= ServiceWorkerStrategy.CacheFirst
-            });
+            //services.AddProgressiveWebApp(new PwaOptions
+            //{
+            //    RoutesToPreCache = "/, /js/index.js",
+            //    Strategy= ServiceWorkerStrategy.CacheFirstSafe
+            //});
 
             services.Configure<FormOptions>(o =>
             {
