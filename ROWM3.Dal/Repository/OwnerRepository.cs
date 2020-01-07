@@ -38,9 +38,11 @@ namespace ROWM.Dal
                 .Where(ox => ox.PartyName.Contains(name)).ToArrayAsync();
         }
 
+        IQueryable<Parcel> ActiveParcels() => _ctx.Parcel.Where(px => px.IsActive);
+
         public async Task<Parcel> GetParcel(string pid)
         {
-            var p = await _ctx.Parcel
+            var p = await ActiveParcels()
                 .Include(px => px.Ownership.Select( o=>o.Owner.ContactLog))
                 .Include(px => px.ContactLog)
                 .FirstOrDefaultAsync(px => px.Assessor_Parcel_Number == pid);
@@ -50,7 +52,7 @@ namespace ROWM.Dal
         }
         public async Task<List<Document>> GetDocumentsForParcel(string pid)
         {
-            var p = await _ctx.Parcel.FirstOrDefaultAsync(px => px.Assessor_Parcel_Number.Equals(pid));
+            var p = await ActiveParcels().FirstOrDefaultAsync(px => px.Assessor_Parcel_Number.Equals(pid));
             var q = _ctx.Database.SqlQuery<DocumentH>("SELECT d.DocumentId, d.DocumentType, d.title FROM rowm.ParcelDocuments pd INNER JOIN rowm.Document d on pd.document_documentid = d.documentid WHERE pd.parcel_parcelId = @pid", new System.Data.SqlClient.SqlParameter("@pid", p.ParcelId));
             var ds = await q.ToListAsync();
             return ds.Select(dx => new Document { Title = dx.Title, DocumentId = dx.DocumentId, DocumentType = dx.DocumentType }).ToList();
@@ -64,8 +66,8 @@ namespace ROWM.Dal
         }
         #endregion
 
-        public IEnumerable<string> GetParcels() => _ctx.Parcel.AsNoTracking().Select(px => px.Assessor_Parcel_Number);
-        public IEnumerable<Parcel> GetParcels2() => _ctx.Parcel.Include(px => px.Ownership.Select( o => o.Owner )).Include(px => px.Conditions).AsNoTracking();
+        public IEnumerable<string> GetParcels() => ActiveParcels().AsNoTracking().Select(px => px.Assessor_Parcel_Number);
+        public IEnumerable<Parcel> GetParcels2() => ActiveParcels().Include(px => px.Ownership.Select( o => o.Owner )).Include(px => px.Conditions).AsNoTracking();
 
         public async Task<Parcel> UpdateParcel (Parcel p)
         {
@@ -177,7 +179,7 @@ namespace ROWM.Dal
             {
                 foreach (var pid in pids)
                 {
-                    var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.Assessor_Parcel_Number.Equals(pid));
+                    var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.Assessor_Parcel_Number.Equals(pid) && pxid.IsActive );
                     if (px == null)
                         Trace.TraceWarning($"invalid parcel {pid}");
                     log.Parcel.Add(px);
@@ -363,6 +365,14 @@ namespace ROWM.Dal
         }
         #endregion
         #region row agents
+        public async Task<Agent> GetAgent(Guid id)
+        {
+            var a = await _ctx.Agent.FindAsync(id);
+            if (a == null)
+                a = await GetDefaultAgent();
+
+            return a;
+        }
         public async Task<Agent> GetAgent(string name) => await _ctx.Agent.FirstOrDefaultAsync(ax => ax.AgentName.Equals(name, StringComparison.CurrentCultureIgnoreCase));
         public async Task<Agent> GetDefaultAgent() => await _ctx.Agent.FirstOrDefaultAsync(ax => ax.AgentName.Equals("DEFAULT"));
 

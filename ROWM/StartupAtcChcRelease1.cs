@@ -14,12 +14,14 @@ using Microsoft.AspNetCore.Http.Features;
 using geographia.ags;
 using SharePointInterface;
 using ROWM.Dal;
+using Microsoft.Azure.Services.AppAuthentication;
+using Microsoft.Azure.KeyVault;
 
 namespace ROWM
 {
-    public class StartupAtc6943Release1
+    public class StartupAtcChcRelease1
     {
-        public StartupAtc6943Release1(IConfiguration configuration)
+        public StartupAtcChcRelease1(IConfiguration configuration)
         {
             Configuration = configuration;
         }
@@ -53,15 +55,21 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.ContactInfoRepository>();
             services.AddScoped<ROWM.Dal.StatisticsRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
-            services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(fac.GetRequiredService<ROWM_Context>()));
+            services.AddScoped<ROWM.Dal.DocTypes>(fac => new DocTypes(fac.GetRequiredService<ROWM_Context>()));
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, AtcParcel>(fac =>
-                new AtcParcel("https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_Line6943_Parcel_FS/FeatureServer"));
+                new AtcParcel("https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_CHC_Parcel_FS/FeatureServer"));
 
-            services.AddScoped<ISharePointCRUD, SharePointCRUD>( fac => new SharePointCRUD(
-                d: fac.GetRequiredService<DocTypes>(), _url: "https://atcpmp.sharepoint.com/line6943"));
+            //
+            var msi = new AzureServiceTokenProvider();
+            var vaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(msi.KeyVaultTokenCallback));
 
-            services.AddSingleton<SiteDecoration, Atc6943>();
+            var appid = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-client").GetAwaiter().GetResult();
+            var apps = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-secret").GetAwaiter().GetResult();
+            services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac => new SharePointCRUD(
+               d: fac.GetRequiredService<DocTypes>(), __appId: appid.Value, __appSecret: apps.Value, _url: "https://atcpmp.sharepoint.com/ATCROW/CHC"));
+
+            services.AddSingleton<SiteDecoration, AtcChc>();
 
             services.AddSwaggerGen(c =>
             {

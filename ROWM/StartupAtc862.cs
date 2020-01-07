@@ -13,13 +13,26 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Http.Features;
 using geographia.ags;
 using SharePointInterface;
-using ROWM.Dal;
 
 namespace ROWM
 {
-    public class StartupAtc6943Release1
+    public class StartupAtc862
     {
-        public StartupAtc6943Release1(IConfiguration configuration)
+        //public Startup(IHostingEnvironment env)
+        //{
+        //    var builder = new ConfigurationBuilder()
+        //        .SetBasePath(env.ContentRootPath)
+        //        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        //        .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+        //        .AddEnvironmentVariables();
+        //    if (env.IsDevelopment())
+        //    {
+        //        builder.AddUserSecrets<Startup>();
+        //    }
+        //    Configuration = builder.Build();
+        //}
+
+        public StartupAtc862(IConfiguration configuration)
         {
             Configuration = configuration;
         }
@@ -31,11 +44,7 @@ namespace ROWM
             services.AddCors();
 
             // Add framework services.
-            services.AddMvc()
-                .AddJsonOptions(o =>
-                {
-                    o.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-                });
+            services.AddMvc( );
 
             services.Configure<FormOptions>(o =>
             {
@@ -53,15 +62,13 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.ContactInfoRepository>();
             services.AddScoped<ROWM.Dal.StatisticsRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
-            services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(fac.GetRequiredService<ROWM_Context>()));
+            services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, AtcParcel>(fac =>
-                new AtcParcel("https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_Line6943_Parcel_FS/FeatureServer"));
+                new AtcParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/California/ATC_Line862_Parcel_FS/FeatureServer"));
+            services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
-            services.AddScoped<ISharePointCRUD, SharePointCRUD>( fac => new SharePointCRUD(
-                d: fac.GetRequiredService<DocTypes>(), _url: "https://atcpmp.sharepoint.com/line6943"));
-
-            services.AddSingleton<SiteDecoration, Atc6943>();
+            services.AddSingleton<SiteDecoration, Atc862>();
 
             services.AddSwaggerGen(c =>
             {

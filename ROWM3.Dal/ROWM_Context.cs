@@ -34,6 +34,7 @@ namespace ROWM.Dal
         public virtual DbSet<Repesentation_Type> Repesentation_Type { get; set; }
         public virtual DbSet<Roe_Status> Roe_Status { get; set; }
         public virtual DbSet<RoeCondition> RoeCondition { get; set; }
+        public virtual DbSet<StatusActivity> Activities { get; set; }
         public virtual DbSet<Followup> Followup { get; set; }
         public virtual DbSet<Organization> Organization { get; set; }
         public virtual DbSet<MapConfiguration> MapConfiguration { get; set; }
@@ -54,6 +55,11 @@ namespace ROWM.Dal
                 .HasMany(e => e.ContactLog)
                 .WithMany(e => e.ContactInfo)
                 .Map(m => m.ToTable("ContactInfoContactLogs", "ROWM"));
+
+            modelBuilder.Entity<ContactInfo>()
+                .HasMany(e => e.Parcels)
+                .WithMany(e => e.ParcelContacts)
+                .Map(m => m.ToTable("ParcelContactInfo", "ROWM"));
 
             modelBuilder.Entity<ContactLog>()
                 .HasMany(e => e.Parcel)

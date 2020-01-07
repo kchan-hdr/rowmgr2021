@@ -61,6 +61,7 @@ namespace ROWM.Dal
         public string Representation { get; set; }
 
         public virtual Owner Owner { get; set; }
+        public virtual ICollection<Parcel> Parcels { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ContactLog> ContactLog { get; set; }

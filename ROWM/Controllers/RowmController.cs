@@ -51,6 +51,33 @@ namespace ROWM.Controllers
             return (await _repo.FindOwner(name))
                 .Select(ox => new OwnerDto(ox));
         }
+        [HttpPut("owners/{id:Guid}")]
+        public async Task<ActionResult<OwnerDto>> UpdateOwner(Guid id, [FromBody]OwnerRequest o)
+        {
+            var ow = await _repo.GetOwner(id);
+            if (ow == null)
+                return BadRequest();
+
+            ow.PartyName = o.PartyName;
+            ow.OwnerType = o.OwnerType;
+
+            ow = await _repo.UpdateOwner(ow);
+
+            return new OwnerDto(ow);
+        }
+        [HttpPost("parcels/{pid}/owners")]
+        public async Task<ActionResult<ParcelGraph>> SetOwner(string pid, [FromBody]OwnerRequest o)
+        {
+            var p = await _repo.GetParcel(pid);
+
+            var update = new UpdateParcelOwner(this._ctx, p, o.PartyName, o.OwnerType);
+            update.ModifiedBy = User?.Identity?.Name ?? _APP_NAME;
+            p = await update.Apply();
+
+            return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
+        }
+
+
         #region contacts
         [Route("owners/{id:Guid}/contacts"), HttpPost]
         public async Task<IActionResult> AddContact(Guid id, [FromBody]ContactRequest info)
@@ -279,13 +306,17 @@ namespace ROWM.Controllers
         #endregion
         #region parcel status
         [HttpPut("parcels/{pid}/status/{statusCode}")]
-        public async Task<ParcelGraph> UpdateStatus(string pid, string statusCode)
+        public async Task<ActionResult<ParcelGraph>> UpdateStatus(string pid, string statusCode)
         {
             var p = await _repo.GetParcel(pid);
+            if (p == null)
+                return BadRequest();
+
             var a = await _repo.GetDefaultAgent();
             var ud = new UpdateParcelStatus(new Parcel[] { p }, a, context: _ctx, _repo, _featureUpdate, _statusHelper)
             {
-                AcquisitionStatus = statusCode
+                AcquisitionStatus = statusCode,
+                ModifiedBy = User?.Identity?.Name ?? _APP_NAME
             };
             
             await ud.Apply();
@@ -315,25 +346,42 @@ namespace ROWM.Controllers
 
             return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
         }
-        #endregion
-        #region roe status
-        [HttpPut("parcels/{pid}/roe/{statusCode}")]
-        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus(string pid, string statusCode) => await UpdateRoeStatusImpl(pid, statusCode, null);
-
-        [HttpPut("parcels/{pid}/roe")]
-        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus2(string pid, [FromBody] RoeRequest r) => await UpdateRoeStatusImpl(pid, r.StatusCode, r.Condition);
-
-        private async Task<ActionResult<ParcelGraph>> UpdateRoeStatusImpl(string pid, string statusCode, string condition)
+        [HttpPut("parcels/{pid}/status")]
+        public async Task<ActionResult<ParcelGraph>> UpdateStatus(string pid, [FromBody] AcqRequest request)
         {
             var p = await _repo.GetParcel(pid);
             if (p == null)
                 return BadRequest();
 
-            var a = await _repo.GetDefaultAgent();
+            var a = await _repo.GetAgent(request.AgentId);
+
+            var update = new UpdateParcelStatus(new[] { p }, a, this._ctx, this._repo, this._featureUpdate, this._statusHelper);
+            update.AcquisitionStatus = request.StatusCode;
+            update.Notes = request.Notes;
+            update.ModifiedBy = User?.Identity?.Name ?? _APP_NAME;
+            await update.Apply();
+            return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
+        }
+        #endregion
+        #region roe status
+        [HttpPut("parcels/{pid}/roe/{statusCode}")]
+        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus(string pid, string statusCode) => await UpdateRoeStatusImpl(pid, Guid.Empty, statusCode, null);
+
+        [HttpPut("parcels/{pid}/roe")]
+        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus2(string pid, [FromBody] RoeRequest r) => await UpdateRoeStatusImpl(pid, r.AgentId, r.StatusCode, r.Condition);
+
+        private async Task<ActionResult<ParcelGraph>> UpdateRoeStatusImpl(string pid, Guid agentId, string statusCode, string condition)
+        {
+            var p = await _repo.GetParcel(pid);
+            if (p == null)
+                return BadRequest();
+
+            var a = await _repo.GetAgent(agentId);
             var ud = new UpdateParcelStatus(new Parcel[] { p }, a, context: _ctx, _repo, _featureUpdate, _statusHelper)
             {
                 RoeCondition = condition,
-                RoeStatus = statusCode
+                RoeStatus = statusCode,
+                ModifiedBy = User?.Identity?.Name ?? _APP_NAME
             };
 
             await ud.Apply();
@@ -622,9 +670,24 @@ namespace ROWM.Controllers
         public string BusinessName { get; set; } = "";
     }
 
+    public class OwnerRequest
+    {
+        public string PartyName { get; set; }
+        public string OwnerType { get; set; }
+    }
+
+    public class AcqRequest
+    {
+        public Guid AgentId { get; set; }
+        public string StatusCode { get; set; }
+        public DateTimeOffset ChangeDate { get; set; }
+        public string Notes { get; set; }
+    }
     public class RoeRequest
     {
+        public Guid AgentId { get; set; }
         public string StatusCode { get; set; }
+        public DateTimeOffset ChangeDate { get; set; }
         public string Condition { get; set; }
     }
     #endregion
