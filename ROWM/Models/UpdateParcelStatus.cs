@@ -61,6 +61,9 @@ namespace ROWM.Dal
 
                 if (this.AcquisitionStatus != null && p.ParcelStatusCode != this.AcquisitionStatus)
                 {
+                    history.OrigianlParcelStatusCode = p.ParcelStatusCode;
+                    history.ParcelStatusCode = this.AcquisitionStatus;
+
                     p.ParcelStatusCode = this.AcquisitionStatus;
                     dirty = true;
 
@@ -70,6 +73,9 @@ namespace ROWM.Dal
 
                 if (this.RoeStatus != null && p.RoeStatusCode != this.RoeStatus)
                 {
+                    history.OriginalRoeStatusCode = p.RoeStatusCode;
+                    history.RoeStatusCode = this.RoeStatus;
+
                     p.RoeStatusCode = this.RoeStatus;
                     dirty = true;
 
