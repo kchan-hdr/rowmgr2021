@@ -57,17 +57,19 @@ namespace geographia.ags.Test
 
             using (var ctx = new ROWM_Context())
             {
-                var c = new RowmController(
-                    new OwnerRepository(),
+                var c = new RowmController( ctx,
+                    new OwnerRepository(ctx),
+                    new ContactInfoRepository(ctx),
+                    new StatisticsRepository(ctx),
                     new ParcelStatusHelper(ctx),
                     new SunflowerParcel(),
                     new SharePointCRUD());
-                var good = await c.UpdateStatus(_test, _test_status);
+                var good = ( await c.UpdateStatus(_test, _test_status) ).Value;
                 Assert.AreEqual(_test, good.ParcelId);
                 Assert.AreEqual(_test_status, good.ParcelStatusCode);
 
                 var better = await c.UpdateRoeStatus(_test, _test_roe);
-                Assert.AreEqual(_test_roe, better.RoeStatusCode);
+                Assert.AreEqual(_test_roe, better.Value.RoeStatusCode);
             }
 
             // check
@@ -87,8 +89,10 @@ namespace geographia.ags.Test
 
             using (var ctx = new ROWM_Context())
             {
-                var c = new RowmController(
-                    new OwnerRepository(),
+                var c = new RowmController(ctx,
+                    new OwnerRepository(ctx),
+                    new ContactInfoRepository(ctx),
+                    new StatisticsRepository(ctx),
                     new ParcelStatusHelper(ctx),
                     new SunflowerParcel(),
                     new SharePointCRUD());

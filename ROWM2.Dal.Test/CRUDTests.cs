@@ -74,7 +74,7 @@ namespace ROWM.Dal.Test
                 var parcel = repo2.GetParcel(p);
                 Assert.IsNotNull(parcel);
                 Assert.AreEqual(p, parcel.ParcelId);
-                Assert.IsNotNull(parcel.Owners);
+                //Assert.IsNotNull(parcel.Owners);
             }
 
             watch.Stop();
@@ -85,7 +85,7 @@ namespace ROWM.Dal.Test
             {
                 var parcel = await repo.GetParcel(p);
                 Assert.IsNotNull(parcel);
-                Assert.AreEqual(p, parcel.ParcelId);
+                Assert.AreEqual(p, parcel.Assessor_Parcel_Number);
                 Assert.IsNotNull(parcel.Ownership);
             }
 
