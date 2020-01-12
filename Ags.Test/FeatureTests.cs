@@ -17,7 +17,7 @@ namespace Ags.Test
             var parcels = await h.GetAllParcels();
 
             Assert.IsNotNull(parcels);
-            Assert.AreEqual(76, parcels.Count());
+            Assert.AreEqual(79, parcels.Count());
 
             foreach (var p in parcels)
             {

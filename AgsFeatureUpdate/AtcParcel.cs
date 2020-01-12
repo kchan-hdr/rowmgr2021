@@ -6,15 +6,16 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Polly;
 
 namespace geographia.ags
 {
-    public class ReservoirParcel : FeatureService_Base, IFeatureUpdate
+    public class AtcParcel : FeatureService_Base, IFeatureUpdate
     {
-        static readonly string _PARCEL_KEY = "Assessor_Parcel_Number";
+        static readonly string _PARCEL_KEY = "Tracking_Number";
 
         #region service info
-        readonly string _parcel_outlines = "parcel outlines";
+        readonly string _parcel_outlines = "parcels";
         readonly string _parcel_status = "parcel status";
         readonly string _powner = "sites_row.dbo.owner";
         readonly string _clog = "sites_row.dbo.contactlog";
@@ -23,10 +24,10 @@ namespace geographia.ags
 
         AgsSchema _layers;
 
-        public ReservoirParcel(string url = "")
+        public AtcParcel(string url = "")
         {
             _URL = string.IsNullOrWhiteSpace(url) ?
-                "https://maps-stg.hdrgateway.com/arcgis/rest/services/California/Sites_Parcel_FS/FeatureServer"
+                "https://maps-stg.hdrgateway.com/arcgis/rest/services/California/ATC_Line862_Parcel_FS/FeatureServer"
                 : url;
 
             _LAYERID = 0;
@@ -40,24 +41,55 @@ namespace geographia.ags
         {
             var lid = await _layers.GetId(_parcel_outlines);
             var req = $"{_URL}/{lid}/query?f=json&where=OBJECTID is not null&returnGeometry=false&returnIdsOnly=false&outFields=OBJECTID,PARCEL_ID,ParcelStatus,ROE_Status,Documents";
-            var r = await GetAll<Status_dto>(req, (arr) =>
-            {
-                var list = new List<Status_dto>();
 
-                foreach (var f in arr)
+            var r = await Policy.Handle<Exception>()
+                .RetryAsync(3, (ex, ec) =>
                 {
-                    var s = new Status_dto();
-                    s.OBJECTID = f["attributes"].Value<int>("OBJECTID");
-                    s.ParcelId = f["attributes"].Value<string>(_PARCEL_KEY);
-                    s.ParcelStatus = f["attributes"].Value<string>("ParcelStatus");
-                    s.RoeStatus = f["attributes"].Value<string>("ROE_Status");
-                    s.Documents = f["attributes"].Value<string>("Documents");
-                    s.Landowner_Score = f["attributes"].Value<int>("Likelihood");
-                    list.Add(s);
-                }
+                    Trace.TraceError(ex.Message);
+                })
+                .ExecuteAsync(() =>
+                {
+                   return
+                   GetAll<Status_dto>(req, (arr) =>
+                   {
+                       var list = new List<Status_dto>();
 
-                return list;
-            });
+                       foreach (var f in arr)
+                       {
+                           var s = new Status_dto();
+                           s.OBJECTID = f["attributes"].Value<int>("OBJECTID");
+                           s.ParcelId = f["attributes"].Value<string>(_PARCEL_KEY);
+                           s.ParcelStatus = f["attributes"].Value<string>("ParcelStatus");
+                           s.RoeStatus = f["attributes"].Value<string>("ROE_Status");
+                           s.Documents = f["attributes"].Value<string>("Documents");
+                           s.Landowner_Score = f["attributes"].Value<int>("Likelihood");
+                           list.Add(s);
+                       }
+
+                       return list;
+                   });
+
+                });
+
+            
+            //var r = await GetAll<Status_dto>(req, (arr) =>
+            //{
+            //    var list = new List<Status_dto>();
+
+            //    foreach (var f in arr)
+            //    {
+            //        var s = new Status_dto();
+            //        s.OBJECTID = f["attributes"].Value<int>("OBJECTID");
+            //        s.ParcelId = f["attributes"].Value<string>(_PARCEL_KEY);
+            //        s.ParcelStatus = f["attributes"].Value<string>("ParcelStatus");
+            //        s.RoeStatus = f["attributes"].Value<string>("ROE_Status");
+            //        s.Documents = f["attributes"].Value<string>("Documents");
+            //        s.Landowner_Score = f["attributes"].Value<int>("Likelihood");
+            //        list.Add(s);
+            //    }
+
+            //    return list;
+            //});
 
             return r;
         }
