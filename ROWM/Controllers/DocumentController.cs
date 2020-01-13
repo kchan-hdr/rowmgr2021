@@ -76,7 +76,7 @@ namespace ROWM.Controllers
         public IActionResult GetFile(Guid docId)
         {
             var v = _repo.GetDocument(docId);
-            return File(v.Content, v.ContentType ?? "application/pdf");
+            return File(v.Content, v.ContentType ?? "application/pdf", fileDownloadName: v.SourceFilename);
         }
 
         // Get the default form options so that we can use them to set the default limits for
