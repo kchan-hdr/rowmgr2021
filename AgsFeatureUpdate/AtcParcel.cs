@@ -11,7 +11,7 @@ namespace geographia.ags
 {
     public class AtcParcel : FeatureService_Base, IFeatureUpdate
     {
-        static readonly string _PARCEL_KEY = "Assessor_Parcel_Number";
+        static readonly string _PARCEL_KEY = "Tracking_Number";
 
         #region service info
         readonly string _parcel_outlines = "parcels";

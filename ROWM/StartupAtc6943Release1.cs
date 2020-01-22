@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Http.Features;
 using geographia.ags;
 using SharePointInterface;
 using ROWM.Dal;
+using Microsoft.Azure.Services.AppAuthentication;
+using Microsoft.Azure.KeyVault;
 
 namespace ROWM
 {
@@ -58,8 +60,14 @@ namespace ROWM
             services.AddScoped<IFeatureUpdate, AtcParcel>(fac =>
                 new AtcParcel("https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_Line6943_Parcel_FS/FeatureServer"));
 
+            //
+            var msi = new AzureServiceTokenProvider();
+            var vaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(msi.KeyVaultTokenCallback));
+
+            var appid = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-client").GetAwaiter().GetResult();
+            var apps = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-secret").GetAwaiter().GetResult();
             services.AddScoped<ISharePointCRUD, SharePointCRUD>( fac => new SharePointCRUD(
-                d: fac.GetRequiredService<DocTypes>(), _url: "https://atcpmp.sharepoint.com/line6943"));
+                d: fac.GetRequiredService<DocTypes>(), __appId: appid.Value, __appSecret: apps.Value, _url: "https://atcpmp.sharepoint.com/atcrow/line6943"));
 
             services.AddSingleton<SiteDecoration, Atc6943>();
 
