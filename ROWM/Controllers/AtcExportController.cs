@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ROWM.Dal;
+using System.Data.Entity;
 
 namespace ROWM.Controllers
 {
@@ -23,7 +24,7 @@ namespace ROWM.Controllers
         [HttpGet("export/atcroetable")]
         public async Task<IActionResult> ExportAtcRoeTable()
         {
-            const string HDR = "Tract,Owner Name,Contact Name,Contact Phone,No Actvity,ROE In Progress,ROE Obtained - Survey,ROE Obtained - Boring,ROE Obtained Survey and Boring,No Access";
+            const string HDR = "Segment,Tract,Owner Name,Contact Name,Contact Phone,No Actvity,ROE In Progress,ROE Obtained - Survey,ROE Obtained - Boring,ROE Obtained Survey and Boring,No Access";
 
             // summary
             var a = from p in _ctx.Parcel
@@ -35,7 +36,7 @@ namespace ROWM.Controllers
                     select new { status.Description, status.DisplayOrder, g };
 
             // details
-            var q = _ctx.Database.SqlQuery<StatusTable>("select * from dbo.tract_roe_status_view");          
+            var q = _ctx.Database.SqlQuery<StatusTable>("select * from dbo.tract_roe_status_view order by 1");          
 
             using (var s = new MemoryStream())
             {
@@ -64,16 +65,16 @@ namespace ROWM.Controllers
         [HttpGet("export/atcroepaymenttable")]
         public async Task<IActionResult> ExportAtcRoePaymentTable()
         {
-            const string HDR = "Tract,Property Owner,Initial ROE Offer,Final ROE Offer";
+            const string HDR = "Tract,Property Owner,Initial ROE Offer,Final ROE Offer,Primary Contact Name,Primary Contact Phone";
 
             var pay = _ctx.Parcel.Where(px => px.IsActive);
 
             var totalInitial = pay.Sum(px => px.InitialROEOffer_OfferAmount);
             var totalFinal = pay.Sum(px => px.FinalROEOffer_OfferAmount);
 
-            var pays = pay
+            var pays = await pay
                 .Where(p => p.InitialROEOffer_OfferAmount.HasValue || p.FinalROEOffer_OfferAmount.HasValue)
-                .Select(p => new { p, p.Ownership.FirstOrDefault().Owner.PartyName }).ToList();
+                .Select(p => new { p, p.Ownership.FirstOrDefault().Owner.PartyName, c = p.Ownership.FirstOrDefault().Owner.ContactInfo.FirstOrDefault(ct => ct.Representation == "comc") }).ToListAsync();
 
             using (var s = new MemoryStream())
             {
@@ -88,7 +89,7 @@ namespace ROWM.Controllers
                     writer.WriteLine(HDR);
 
                     foreach (var tract in pays.OrderBy(px => px.p.Tracking_Number))
-                        writer.WriteLine($"{tract.p.Tracking_Number},\"{tract.PartyName}\",{PrettyMoney(tract.p.InitialROEOffer_OfferAmount)},{PrettyMoney(tract.p.FinalROEOffer_OfferAmount)}");
+                        writer.WriteLine($"{tract.p.Tracking_Number},\"{tract.PartyName}\",{PrettyMoney(tract.p.InitialROEOffer_OfferAmount)},{PrettyMoney(tract.p.FinalROEOffer_OfferAmount)},{tract.c?.FirstName ?? string.Empty},{tract.c?.WorkPhone ?? string.Empty}");
 
                     writer.Close();
                 }
@@ -111,6 +112,8 @@ namespace ROWM.Controllers
     /// </summary>
     public class StatusTable
     {
+        public string Segment { get; set; }
+        public string Notes { get; set; }
         public string Tract { get; set; }
         public string Owner_Name { get; set; }
         public string Contact_Name { get; set; }
@@ -122,9 +125,10 @@ namespace ROWM.Controllers
         public int ROE_Obtained_Survey_Boring { get; set; }
         public int No_Access { get; set; }
 
-        public override string ToString() => $"{Tract},\"{Owner_Name}\",\"{Contact_Name}\",{Contact_Phone},{PrettyPrint(No_Activity)},{PrettyPrint(ROE_In_Progress)},{PrettyPrint(ROE_Obtained_Survey)},{PrettyPrint(ROE_Obtained_Boring)},{PrettyPrint(ROE_Obtained_Survey_Boring)},{(PrettyPrint(No_Access))}";
+        public override string ToString() => $"{Segment},{Tract},{PrettyPrint(Owner_Name)},{PrettyPrint(Contact_Name)},{PrettyPrint(Contact_Phone)},{PrettyPrint(No_Activity)},{PrettyPrint(ROE_In_Progress)},{PrettyPrint(ROE_Obtained_Survey)},{PrettyPrint(ROE_Obtained_Boring)},{PrettyPrint(ROE_Obtained_Survey_Boring)},{(PrettyPrint(No_Access))},{PrettyPrint(Notes)}";
 
         static string PrettyPrint(int i) => i > 0 ? "\"X\"" : string.Empty;
+        static string PrettyPrint(string s) => string.IsNullOrWhiteSpace(s) ? string.Empty : $"\"{s.Trim()}\"";
     }
     #endregion
 }

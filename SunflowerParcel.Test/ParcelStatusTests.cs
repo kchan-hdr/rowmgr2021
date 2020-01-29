@@ -15,6 +15,7 @@ namespace geographia.ags.Test
         SunflowerParcel fs_raw = new ags.SunflowerParcel();
         IFeatureUpdate fs = new SunflowerParcel();
 
+        [Ignore]
         [TestMethod, TestCategory("AGS")]
         public async Task Simple_Get_Status()
         {
@@ -58,7 +59,9 @@ namespace geographia.ags.Test
             using (var ctx = new ROWM_Context())
             {
                 var c = new RowmController(
-                    new OwnerRepository(),
+                    new OwnerRepository(ctx),
+                    new ContactInfoRepository (ctx),
+                    new StatisticsRepository(ctx),
                     new ParcelStatusHelper(ctx),
                     new SunflowerParcel(),
                     new SharePointCRUD());
@@ -67,7 +70,7 @@ namespace geographia.ags.Test
                 Assert.AreEqual(_test_status, good.ParcelStatusCode);
 
                 var better = await c.UpdateRoeStatus(_test, _test_roe);
-                Assert.AreEqual(_test_roe, better.RoeStatusCode);
+                Assert.AreEqual(_test_roe, better.Value.RoeStatusCode);
             }
 
             // check
@@ -88,7 +91,9 @@ namespace geographia.ags.Test
             using (var ctx = new ROWM_Context())
             {
                 var c = new RowmController(
-                    new OwnerRepository(),
+                    new OwnerRepository(ctx),
+                    new ContactInfoRepository(ctx),
+                    new StatisticsRepository(ctx),
                     new ParcelStatusHelper(ctx),
                     new SunflowerParcel(),
                     new SharePointCRUD());

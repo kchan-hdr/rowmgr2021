@@ -16,7 +16,7 @@ namespace geographia.ags
 
         #region service info
         readonly string _parcel_outlines = "parcels";
-        readonly string _parcel_status = "parcel status";
+        readonly string _parcel_status = "parcels";
         readonly string _powner = "sites_row.dbo.owner";
         readonly string _clog = "sites_row.dbo.contactlog";
         readonly string _cinfo = "sites_row.dbo.contactinfo";
@@ -211,17 +211,17 @@ namespace geographia.ags
             t.Add(this.Update(u, po));
 
 
-            var ps = await _layers.GetId(_parcel_status);
-            var soid = await Find(ps, $"{_PARCEL_KEY}='{parcelId}'");
-            var su = oid.Select(i => new UpdateFeature
-            {
-                attributes = new Status_Req
-                {
-                    OBJECTID = i,
-                    Access_Likelihood = Enum.GetName(typeof( Status_dto.Likelihood_Domain), rating)
-                }
-            });
-            t.Add(this.Update(su, ps));
+            //var ps = await _layers.GetId(_parcel_status);
+            //var soid = await Find(ps, $"{_PARCEL_KEY}='{parcelId}'");
+            //var su = oid.Select(i => new UpdateFeature
+            //{
+            //    attributes = new Status_Req
+            //    {
+            //        OBJECTID = i,
+            //        Access_Likelihood = Enum.GetName(typeof( Status_dto.Likelihood_Domain), rating)
+            //    }
+            //});
+            //t.Add(this.Update(su, ps));
 
             var good = await Task.WhenAll(t);
             return good.All(g => g);

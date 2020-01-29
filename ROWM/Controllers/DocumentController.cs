@@ -236,6 +236,7 @@ namespace ROWM.Controllers
         //    in the request header and then falls back to reading the body.
         [Route("api/addDocument"), HttpPost]
         [DisableFormValueModelBinding]
+        [RequestSizeLimit(long.MaxValue)]
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> addDocument()
         {

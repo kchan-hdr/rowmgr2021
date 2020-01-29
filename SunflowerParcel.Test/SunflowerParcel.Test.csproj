@@ -414,9 +414,9 @@
       <Project>{9eba766e-dda1-49bd-845e-ada468fbc00b}</Project>
       <Name>AgsFeatureUpdate</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ROWM2.Dal\ROWM2.Dal.csproj">
-      <Project>{23D465B8-D88E-4979-AD4E-891B744D6D1E}</Project>
-      <Name>ROWM2.Dal</Name>
+    <ProjectReference Include="..\ROWM3.Dal\ROWM3.Dal.csproj">
+      <Project>{D9838F13-BB90-4B23-9192-95FEDBA58696}</Project>
+      <Name>ROWM3.Dal</Name>
     </ProjectReference>
     <ProjectReference Include="..\ROWM\ROWM.csproj">
       <Project>{31360b6a-20fe-4159-a5f6-081e6126d04a}</Project>

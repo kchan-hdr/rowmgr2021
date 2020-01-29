@@ -172,10 +172,18 @@ namespace ROWM.Controllers
         private async Task<ContactInfo> CheckBusiness(ContactInfo c, ContactRequest r)
         {
             if (string.IsNullOrWhiteSpace(r.BusinessName))
+            {
+                if (c.OrganizationId.HasValue)
+                {
+                    c.OrganizationId = null;
+                    c.Affiliation = null;
+                }
+
                 return c;
+            }
 
             var org = await _contactRepo.FindOrganization(r.BusinessName);
-            if ( org == null )
+            if (org == null)
             {
                 org = new Organization { Name = r.BusinessName };
             }
@@ -188,9 +196,10 @@ namespace ROWM.Controllers
                 Trace.TraceWarning($"changing affilitation for {c.FirstName} to {org.Name}");
             }
 
-            c.Affiliation = org ;
+            c.Affiliation = org;
             return c;
         }
+
         static geographia.ags.ReservoirParcel.ContactInfo_dto Convert(ContactInfo c) =>
             new ReservoirParcel.ContactInfo_dto
             {
@@ -501,15 +510,15 @@ namespace ROWM.Controllers
             var p = await _repo.GetParcel(pid);
             var a = await _repo.GetAgent(logRequest.AgentName);
             var l = p.ContactLog.Single(cx => cx.ContactLogId == lid);
-            
+
             //l.ContactAgent = a;
-            //l.ContactChannel = logRequest.Channel;
-            //l.ProjectPhase = logRequest.Phase;
-            //l.DateAdded = logRequest.DateAdded;
+            l.ContactChannel = logRequest.Channel;
+            l.ProjectPhase = logRequest.Phase;
+            l.DateAdded = logRequest.DateAdded;
             l.Title = logRequest.Title;
             l.Notes = logRequest.Notes;
             l.Landowner_Score = logRequest.Score;
-            //l.Created = dt;
+            l.Created = dt;
             l.LastModified = dt;
             l.ModifiedBy = _APP_NAME;
             //l.Parcels = new List<Parcel> { p };
