@@ -210,60 +210,74 @@ namespace ROWM.Dal
                 _ctx.Entry<ContactLog>(log).State = EntityState.Modified;
             }
 
-            //var existingPids = log.Parcels.Select(p => p.ParcelId).ToList();
-            //var existingCids = log.Contacts.Select(c => c.ContactId).ToList();
+            var existingPids = log.Parcel.Select(p => p.Tracking_Number).ToList();
+            var existingCids = log.ContactInfo.Select(c => c.ContactId).ToList();
 
             // Find Deleted & added parcels & contacts
-            //var deletedPids = existingPids.Except(pids);
-            //var newPids = pids.Except(existingPids);
-            //var deletedCids = existingCids.Except(cids);
-            //var newCids = cids.Except(existingCids);
+            var deletedPids = existingPids.Except(pids);
+            var newPids = pids.Except(existingPids);
+            var deletedCids = existingCids.Except(cids);
+            var newCids = cids.Except(existingCids);
 
             // Remove deleted parcels & contacts
-            //if (deletedPids != null && deletedPids.Count() > 0)
-            //{
-            //    foreach (var pid in deletedPids)
-            //    {
-            //        var px = await _ctx.Parcels.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
-            //        if (px == null)
-            //            Trace.TraceWarning($"invalid parcel {pid}");
-            //        log.Parcels.Remove(px);
-            //    }
-            //}
+            if (deletedPids != null && deletedPids.Count() > 0)
+            {
+                foreach (var pid in deletedPids)
+                {
+                    var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
+                    if (px == null)
+                    {
+                        Trace.TraceWarning($"invalid parcel {pid}");
+                        continue;
+                    }
 
-            //if (deletedCids != null && deletedCids.Count() > 0)
-            //{
-            //    foreach (var cid in deletedCids)
-            //    {
-            //        var cx = await _ctx.Contacts.SingleOrDefaultAsync(oxid => oxid.ContactId.Equals(cid));
-            //        if (cx == null)
-            //            Trace.TraceWarning($"invalid contact {cid}");
-            //        log.Contacts.Remove(cx);
-            //    }
-            //}
+                    log.Parcel.Remove(px);
+                }
+            }
+
+            if (deletedCids != null && deletedCids.Count() > 0)
+            {
+                foreach (var cid in deletedCids)
+                {
+                    var cx = await _ctx.ContactInfo.SingleOrDefaultAsync(oxid => oxid.ContactId.Equals(cid));
+                    if (cx == null)
+                    {
+                        Trace.TraceWarning($"invalid contact {cid}");
+                        continue;
+                    }
+
+                    log.ContactInfo.Remove(cx);
+                }
+            }
 
             // Add new parcels & contacts
-            //if (newPids != null && newPids.Count() > 0)
-            //{
-            //    foreach (var pid in newPids)
-            //    {
-            //        var px = await _ctx.Parcels.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
-            //        if (px == null)
-            //            Trace.TraceWarning($"invalid parcel {pid}");
-            //        log.Parcels.Add(px);
-            //    }
-            //}
+            if (newPids != null && newPids.Count() > 0)
+            {
+                foreach (var pid in newPids)
+                {
+                    var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
+                    if (px == null)
+                    {
+                        Trace.TraceWarning($"invalid parcel {pid}");
+                        continue;
+                    }
+                    log.Parcel.Add(px);
+                }
+            }
 
-            //if (newCids != null && newCids.Count() > 0)
-            //{
-            //    foreach (var cid in newCids)
-            //    {
-            //        var cx = await _ctx.Contacts.SingleOrDefaultAsync(oxid => oxid.ContactId.Equals(cid));
-            //        if (cx == null)
-            //            Trace.TraceWarning($"invalid contact {cid}");
-            //        log.Contacts.Add(cx);
-            //    }
-            //}
+            if (newCids != null && newCids.Count() > 0)
+            {
+                foreach (var cid in newCids)
+                {
+                    var cx = await _ctx.ContactInfo.SingleOrDefaultAsync(oxid => oxid.ContactId.Equals(cid));
+                    if (cx == null)
+                    {
+                        Trace.TraceWarning($"invalid contact {cid}");
+                        continue;
+                    }
+                    log.ContactInfo.Add(cx);
+                }
+            }
 
 
             if (await WriteDb() <= 0)

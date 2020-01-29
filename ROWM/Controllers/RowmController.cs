@@ -511,7 +511,7 @@ namespace ROWM.Controllers
             var a = await _repo.GetAgent(logRequest.AgentName);
             var l = p.ContactLog.Single(cx => cx.ContactLogId == lid);
 
-            //l.ContactAgent = a;
+            l.Agent = a;
             l.ContactChannel = logRequest.Channel;
             l.ProjectPhase = logRequest.Phase;
             l.DateAdded = logRequest.DateAdded;
@@ -528,7 +528,7 @@ namespace ROWM.Controllers
             var myParcels = logRequest.ParcelIds.Distinct();
             await UpdateLandownerScore(logRequest.Score, dt, myParcels);
 
-            var log = await _repo.UpdateContactLog(logRequest.ParcelIds, logRequest.ContactIds, l);
+            var log = await _repo.UpdateContactLog(myParcels, logRequest.ContactIds, l);
 
             var sites = _featureUpdate as ReservoirParcel;
             if (sites != null)
