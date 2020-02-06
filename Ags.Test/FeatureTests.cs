@@ -33,7 +33,16 @@ namespace Ags.Test
             var parcels = await h.GetAllParcels();
 
             Assert.IsNotNull(parcels);
-            Assert.AreEqual(244, parcels.Count());
+            Assert.AreEqual(207, parcels.Count());
+
+            // duplicated parcels
+            var q = from p in parcels
+                    group p by p.ParcelId into par
+                    select par;
+
+            foreach (var p in q)
+                if (p.Count() > 1)
+                    Trace.TraceError($"duplicated {p.Key} {p.Count()}");
 
             foreach (var p in parcels)
             {
