@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics;
+﻿using Microsoft.AspNetCore.Mvc;
+using ROWM.Dal;
+using System;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
-using System.Data;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using ROWM.Dal;
-using System.Data.Entity;
 
 namespace ROWM.Controllers
 {
@@ -32,11 +26,11 @@ namespace ROWM.Controllers
                     select p;
 
             var roes = from status in _ctx.Roe_Status
-                    join t in a on status.Code equals t.RoeStatusCode into g
-                    select new { status.Description, status.DisplayOrder, g };
+                       join t in a on status.Code equals t.RoeStatusCode into g
+                       select new { status.Description, status.DisplayOrder, g };
 
             // details
-            var q = _ctx.Database.SqlQuery<StatusTable>("select * from dbo.tract_roe_status_view order by 1");          
+            var q = _ctx.Database.SqlQuery<StatusTable>("select * from dbo.tract_roe_status_view order by 1");
 
             using (var s = new MemoryStream())
             {

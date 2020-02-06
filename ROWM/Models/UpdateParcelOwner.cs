@@ -1,7 +1,4 @@
-﻿using ROWM.Dal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Threading.Tasks;
 
 namespace ROWM.Dal
@@ -45,7 +42,7 @@ namespace ROWM.Dal
 
                 PartyName = this.partyName,
                 OwnerType = this.ownerType,
-                          
+
                 Created = dt,
                 LastModified = dt,
                 ModifiedBy = this.ModifiedBy
@@ -55,7 +52,7 @@ namespace ROWM.Dal
             {
                 Parcel = this.myParcel,
                 Owner = o,
-                Ownership_t = (int) Ownership.OwnershipType.Primary,
+                Ownership_t = (int)Ownership.OwnershipType.Primary,
                 Created = dt,
                 LastModified = dt,
                 ModifiedBy = this.ModifiedBy

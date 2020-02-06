@@ -59,6 +59,7 @@ namespace geographia.ags.Test
             using (var ctx = new ROWM_Context())
             {
                 var c = new RowmController(
+                    ctx,
                     new OwnerRepository(ctx),
                     new ContactInfoRepository (ctx),
                     new StatisticsRepository(ctx),
@@ -66,8 +67,8 @@ namespace geographia.ags.Test
                     new SunflowerParcel(),
                     new SharePointCRUD());
                 var good = await c.UpdateStatus(_test, _test_status);
-                Assert.AreEqual(_test, good.ParcelId);
-                Assert.AreEqual(_test_status, good.ParcelStatusCode);
+                Assert.AreEqual(_test, good.Value.ParcelId);
+                Assert.AreEqual(_test_status, good.Value.ParcelStatusCode);
 
                 var better = await c.UpdateRoeStatus(_test, _test_roe);
                 Assert.AreEqual(_test_roe, better.Value.RoeStatusCode);
@@ -91,6 +92,7 @@ namespace geographia.ags.Test
             using (var ctx = new ROWM_Context())
             {
                 var c = new RowmController(
+                    ctx,
                     new OwnerRepository(ctx),
                     new ContactInfoRepository(ctx),
                     new StatisticsRepository(ctx),

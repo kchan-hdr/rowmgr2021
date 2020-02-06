@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using geographia.ags;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Azure.KeyVault;
+using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Serialization;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using Microsoft.AspNetCore.Http.Features;
-using geographia.ags;
+using ROWM.Dal;
 using SharePointInterface;
 
 namespace ROWM
@@ -44,6 +40,7 @@ namespace ROWM
             services.AddCors();
 
             // Add framework services.
+            services.AddApplicationInsightsTelemetry();
             services.AddMvc();
 
             services.Configure<FormOptions>(o =>
@@ -63,8 +60,15 @@ namespace ROWM
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, AtcParcel>(fac =>
                 new AtcParcel("https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_Line862_Parcel_FS/FeatureServer"));
-            services.AddScoped<ISharePointCRUD, SharePointCRUD>( fac =>
-                new SharePointCRUD( d: fac.GetRequiredService<ROWM.Dal.DocTypes>(), _url: "https://atcpmp.sharepoint.com/atcrow/line862" )) ;
+
+            //
+            var msi = new AzureServiceTokenProvider();
+            var vaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(msi.KeyVaultTokenCallback));
+
+            var appid = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-client").GetAwaiter().GetResult();
+            var apps = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-secret").GetAwaiter().GetResult();
+            services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac => new SharePointCRUD(
+               d: fac.GetRequiredService<DocTypes>(), __appId: appid.Value, __appSecret: apps.Value, _url: "https://atcpmp.sharepoint.com/atcrow/line862"));
 
             services.AddSingleton<SiteDecoration, Atc862>();
 
@@ -74,7 +78,7 @@ namespace ROWM
             });
             services.ConfigureSwaggerGen(o =>
             {
-               o.OperationFilter<FileOperation>();
+                o.OperationFilter<FileOperation>();
             });
         }
 
@@ -83,7 +87,7 @@ namespace ROWM
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-            
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

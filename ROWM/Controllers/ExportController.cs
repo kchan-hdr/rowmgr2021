@@ -1,11 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ROWM.Dal;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ROWM.Controllers
 {
@@ -45,7 +44,7 @@ namespace ROWM.Controllers
 
                     writer.Close();
                 }
-                
+
                 return File(s.GetBuffer(), "text/csv", "logs.csv");
             }
         }
@@ -103,7 +102,7 @@ namespace ROWM.Controllers
                 {
                     writer.WriteLine("Parcel ID,Owner,ROE Status,Conditions,Date");
 
-                    foreach( var p in parcels.OrderBy(px=> px.Assessor_Parcel_Number))
+                    foreach (var p in parcels.OrderBy(px => px.Assessor_Parcel_Number))
                     {
                         var os = p.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
                         var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
@@ -261,7 +260,7 @@ namespace ROWM.Controllers
                 var relatedParcels = og.Select(p => p.Parcel.Assessor_Parcel_Number).OrderBy(p => p).ToArray<string>();
 
                 var ox = og.First();
-                return ox.Owner.ContactInfo.Select(cx =>  new ContactExport2
+                return ox.Owner.ContactInfo.Select(cx => new ContactExport2
                 {
                     PartyName = ox.Owner.PartyName?.TrimEnd(',') ?? "",
                     IsPrimary = cx.IsPrimaryContact,
@@ -280,7 +279,7 @@ namespace ROWM.Controllers
             }
 
             string RelatedParcels =>
-                string.Join(",", this.ParcelId.Select(p=> $"=\"{p}\""));
+                string.Join(",", this.ParcelId.Select(p => $"=\"{p}\""));
 
             public static string Header() =>
                 "Owner,Is Primary Contact,First Name,Last Name,Email,Cell Phone,Phone,Street Address,City,State,ZIP,Representation";

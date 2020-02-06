@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using geographia.ags;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Azure.KeyVault;
+using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Serialization;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using Microsoft.AspNetCore.Http.Features;
-using geographia.ags;
-using SharePointInterface;
 using ROWM.Dal;
-using Microsoft.Azure.Services.AppAuthentication;
-using Microsoft.Azure.KeyVault;
+using SharePointInterface;
 
 namespace ROWM
 {
@@ -33,6 +26,7 @@ namespace ROWM
             services.AddCors();
 
             // Add framework services.
+            services.AddApplicationInsightsTelemetry();
             services.AddMvc()
                 .AddJsonOptions(o =>
                 {
@@ -48,7 +42,7 @@ namespace ROWM
             var cs = Configuration.GetConnectionString("ROWM_Context");
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {
-               return new ROWM.Dal.ROWM_Context(cs);
+                return new ROWM.Dal.ROWM_Context(cs);
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
@@ -77,7 +71,7 @@ namespace ROWM
             });
             services.ConfigureSwaggerGen(o =>
             {
-               o.OperationFilter<FileOperation>();
+                o.OperationFilter<FileOperation>();
             });
         }
 
@@ -86,7 +80,7 @@ namespace ROWM
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-            
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

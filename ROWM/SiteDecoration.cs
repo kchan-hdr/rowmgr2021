@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace ROWM
+﻿namespace ROWM
 {
     public interface SiteDecoration
     {
@@ -15,17 +10,17 @@ namespace ROWM
         public string SiteTitle() => "Sites Reservior";
     }
 
-    public class Atc6943: SiteDecoration
+    public class Atc6943 : SiteDecoration
     {
         public string SiteTitle() => "ATC Line 6943";
     }
 
-    public class Atc862: SiteDecoration
+    public class Atc862 : SiteDecoration
     {
         public string SiteTitle() => "ATC Line 862";
     }
 
-    public class AtcChc: SiteDecoration
+    public class AtcChc : SiteDecoration
     {
         public string SiteTitle() => "ATC Cardinal-Hickory Creek";
     }
