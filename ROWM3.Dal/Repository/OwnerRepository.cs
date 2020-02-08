@@ -88,23 +88,27 @@ namespace ROWM.Dal
             var o = _ctx.Owner.Create();
             o.Created = dt;
             o.PartyName = name;
+            o.OwnerAddress = MakeAddress(address, city, state, z);
 
-            var c = _ctx.ContactInfo.Create();
-            c.Created = dt;
-            c.IsPrimaryContact = primary;
-            c.FirstName = first;
-            c.LastName = last;
-            c.StreetAddress = address;
-            c.City = city;
-            c.State = state;
-            c.ZIP = z;
-            c.Email = email;
-            c.HomePhone = hfone;
-            c.CellPhone = cfone;
-            c.WorkPhone = wfone;
+            ///
+            /// no longer automatically add a default contact
+            /// 
+            //var c = _ctx.ContactInfo.Create();
+            //c.Created = dt;
+            //c.IsPrimaryContact = primary;
+            //c.FirstName = first;
+            //c.LastName = last;
+            //c.StreetAddress = address;
+            //c.City = city;
+            //c.State = state;
+            //c.ZIP = z;
+            //c.Email = email;
+            //c.HomePhone = hfone;
+            //c.CellPhone = cfone;
+            //c.WorkPhone = wfone;
             
-            o.ContactInfo = new List<ContactInfo>();
-            o.ContactInfo.Add(c);
+            //o.ContactInfo = new List<ContactInfo>();
+            //o.ContactInfo.Add(c);
 
             _ctx.Owner.Add(o);
 
@@ -112,6 +116,16 @@ namespace ROWM.Dal
                 throw new ApplicationException("Add owner failed");
 
             return o;
+        }
+
+        static string MakeAddress( string address, string city, string state, string zip)
+        {
+            char[] trimmer = { ',', ' ' };
+
+            if (string.IsNullOrWhiteSpace(address) && string.IsNullOrWhiteSpace(city) && string.IsNullOrWhiteSpace(state) && string.IsNullOrWhiteSpace(zip))
+                return string.Empty;
+
+            return $"{address}, {city} {state} {zip}".Trim(trimmer);
         }
 
         public async Task<Owner> UpdateOwner(Owner o)
