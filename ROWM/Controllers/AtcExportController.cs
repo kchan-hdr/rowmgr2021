@@ -16,7 +16,7 @@ namespace ROWM.Controllers
         public AtcExportController(ROWM_Context c) => _ctx = c;
 
         [HttpGet("export/atcroetable")]
-        public async Task<IActionResult> ExportAtcRoeTable()
+        public IActionResult ExportAtcRoeTable()
         {
             const string HDR = "Segment,Tract,Owner Name,Contact Name,Contact Phone,No Actvity,ROE In Progress,ROE Obtained - Survey,ROE Obtained - Boring,ROE Obtained Survey and Boring,No Access";
 

@@ -90,6 +90,10 @@
     <Compile Include="Migrations\201911040621428_fix join table.Designer.cs">
       <DependentUpon>201911040621428_fix join table.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202002090002188_support soft delete.cs" />
+    <Compile Include="Migrations\202002090002188_support soft delete.Designer.cs">
+      <DependentUpon>202002090002188_support soft delete.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Organization.cs" />
     <Compile Include="Owner.cs" />
@@ -101,6 +105,7 @@
     <Compile Include="Repesentation_Type.cs" />
     <Compile Include="Repository\AppRepository.cs" />
     <Compile Include="Repository\ContactInfoRepository.cs" />
+    <Compile Include="Repository\DeleteHelper.cs" />
     <Compile Include="Repository\OwnerRepository.cs" />
     <Compile Include="Repository\StatisticsRepository.cs" />
     <Compile Include="RoeCondition.cs" />
@@ -131,6 +136,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201911040621428_fix join table.resx">
       <DependentUpon>201911040621428_fix join table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202002090002188_support soft delete.resx">
+      <DependentUpon>202002090002188_support soft delete.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

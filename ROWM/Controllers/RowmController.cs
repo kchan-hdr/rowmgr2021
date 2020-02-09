@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace ROWM.Controllers
@@ -21,15 +22,17 @@ namespace ROWM.Controllers
         readonly OwnerRepository _repo;
         readonly ContactInfoRepository _contactRepo;
         readonly StatisticsRepository _statistics;
+        readonly DeleteHelper _delete;
         readonly ParcelStatusHelper _statusHelper;
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
 
-        public RowmController(ROWM_Context ctx, OwnerRepository r, ContactInfoRepository c, StatisticsRepository sr, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
+        public RowmController(ROWM_Context ctx, OwnerRepository r, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
         {
             _ctx = ctx;
             _repo = r;
             _contactRepo = c;
+            _delete = del;
             _statistics = sr;
             _statusHelper = h;
             _featureUpdate = f;
@@ -38,10 +41,7 @@ namespace ROWM.Controllers
         #endregion
         #region owner
         [Route("owners/{id:Guid}"), HttpGet]
-        public async Task<OwnerDto> GetOwner(Guid id)
-        {
-            return new OwnerDto(await _repo.GetOwner(id));
-        }
+        public async Task<OwnerDto> GetOwner(Guid id) => new OwnerDto(await _repo.GetOwner(id));
 
         [Route("owners"), HttpGet]
         public async Task<IEnumerable<OwnerDto>> FindOwner(string name)
@@ -165,6 +165,15 @@ namespace ROWM.Controllers
                 await sites.Update(Convert(newc));
 
             return Json(new ContactInfoDto(newc));
+        }
+
+        [HttpDelete("contacts/{cid:Guid}")]
+        public async Task<IActionResult> DeleteContact(Guid cid)
+        {
+            if (await _delete.DeleteContact(cid, User.Identity.Name))
+                return Ok();
+            else
+                return BadRequest();
         }
 
         private async Task<ContactInfo> CheckBusiness(ContactInfo c, ContactRequest r)
@@ -831,11 +840,11 @@ namespace ROWM.Controllers
             OwnerAddress = o.OwnerAddress;
 
             OwnedParcel = o.Ownership.Where(ox => ox.Parcel.IsActive).Select(ox => new ParcelHeaderDto(ox));
-            Contacts = o.ContactInfo.Select(cx => new ContactInfoDto(cx));
+            Contacts = o.ContactInfo.Where(cx => !cx.IsDeleted).Select(cx => new ContactInfoDto(cx));
             ContactLogs = o.ContactInfo
                 .Where(cx => cx.ContactLog != null)
                 .SelectMany(cx => cx.ContactLog.Select(cxl => new ContactLogDto(cxl))); //  o.ContactLogs.Select(cx => new ContactLogDto(cx));
-            Documents = o.Document.Select(dx => new DocumentHeader(dx));
+            Documents = o.Document.Where(dx => !dx.IsDeleted).Select(dx => new DocumentHeader(dx));
         }
     }
 
@@ -914,8 +923,8 @@ namespace ROWM.Controllers
             FinalROEOffer = OfferHelper.MakeCompensation(p, "FinalROE");
 
             Owners = p.Ownership.Select(ox => new OwnerDto(ox.Owner));
-            ContactsLog = p.ContactLog.Select(cx => new ContactLogDto(cx));
-            Documents = d.Select(dx => new DocumentHeader(dx));
+            ContactsLog = p.ContactLog.Where(cx => !cx.IsDeleted).Select(cx => new ContactLogDto(cx));
+            Documents = d.Where(dx => !dx.IsDeleted).Select(dx => new DocumentHeader(dx));
         }
     }
     #endregion

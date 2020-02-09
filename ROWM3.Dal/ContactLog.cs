@@ -34,6 +34,8 @@ namespace ROWM.Dal
 
         public string Notes { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         public DateTimeOffset Created { get; set; }
 
         public DateTimeOffset LastModified { get; set; }

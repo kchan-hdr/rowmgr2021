@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,12 +29,14 @@ namespace ROWM.Controllers
         private readonly DocTypes _docTypes;
 
         #region ctor
-        OwnerRepository _repo;
+        readonly OwnerRepository _repo;
         readonly IFeatureUpdate _featureUpdate;
+        readonly DeleteHelper _deleteHelper;
 
-        public DocumentController(OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, IFeatureUpdate f, DocTypes d)
+        public DocumentController(OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, IFeatureUpdate f, DeleteHelper del, DocTypes d)
         {
             _repo = r;
+            _deleteHelper = del;
             _sharePointCRUD = sp;
             _featureUpdate = f;
             _statusHelper = h;
@@ -43,6 +46,15 @@ namespace ROWM.Controllers
 
         [HttpGet("api/documents/{docId:Guid}/info")]
         public DocumentInfo GetDocument(Guid docId) => new DocumentInfo(_repo.GetDocument(docId));
+
+        [HttpDelete("api/documents/{docId:Guid}")]
+        public async Task<IActionResult> DeleteDocument(Guid docId)
+        {
+            if (await _deleteHelper.DeleteDocument(docId, User.Identity.Name))
+                return Ok();
+            else 
+                return BadRequest();
+        }
 
         [HttpPut("api/documents/{docId:Guid}/info", Name = "UpdateDocuMeta")]
         [ProducesResponseType(typeof(DocumentInfo), 202)]
@@ -65,6 +77,9 @@ namespace ROWM.Controllers
             d.SignedDate = info.SignedDate;
             d.DateRecorded = info.DateRecorded;
             d.CheckNo = info.CheckNo;
+
+            if (!string.IsNullOrWhiteSpace(info.Title)) // allow title change now, kklc 2020.2.8
+                d.Title = info.Title;
 
             d.LastModified = DateTimeOffset.Now;
 

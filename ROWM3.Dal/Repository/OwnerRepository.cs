@@ -17,28 +17,33 @@ namespace ROWM.Dal
         public OwnerRepository(ROWM_Context c) => _ctx = c;
         #endregion
 
+        IQueryable<Parcel> ActiveParcels() => _ctx.Parcel.Where(px => px.IsActive);
+        IQueryable<Owner> ActiveOwners() => _ctx.Owner.Where(ox => !ox.IsDeleted);
+        IQueryable<ContactInfo> ActiveContacts() => _ctx.ContactInfo.Where(cx => !cx.IsDeleted);
+        IQueryable<ContactLog> ActiveLogs() => _ctx.ContactLog.Where(lx => !lx.IsDeleted);
+        IQueryable<Document> ActiveDocuments() => _ctx.Document.Where(dx => !dx.IsDeleted);
+
+
         public async Task<Owner> GetOwner(Guid uid)
         {
-            return await _ctx.Owner
-                .Include(ox => ox.Ownership.Select( o=>o.Parcel))
+            return await ActiveOwners()
+                .Include(ox => ox.Ownership.Select(o => o.Parcel))
                 //.Include(ox => ox.ContactLogs)
                 //.Include(ox => ox.ContactLogs.Select(ocx => ocx.ContactAgent))
                 .Include(ox => ox.ContactInfo)
-                .Include(ox => ox.ContactInfo.Select( ocx => ocx.ContactLog))
+                .Include(ox => ox.ContactInfo.Select(ocx => ocx.ContactLog))
                 .Include(ox => ox.Document)
                 .FirstOrDefaultAsync(ox => ox.OwnerId == uid);
         }
 
         public async Task<IEnumerable<Owner>> FindOwner(string name)
         {
-            return await _ctx.Owner
+            return await ActiveOwners()
                 .Include(ox => ox.ContactInfo)
                 .Include(ox => ox.ContactInfo.Select(ocx => ocx.ContactLog))
                 .Include(ox => ox.Document)
                 .Where(ox => ox.PartyName.Contains(name)).ToArrayAsync();
         }
-
-        IQueryable<Parcel> ActiveParcels() => _ctx.Parcel.Where(px => px.IsActive);
 
         public async Task<Parcel> GetParcel(string pid)
         {
@@ -47,13 +52,26 @@ namespace ROWM.Dal
                 .Include(px => px.ContactLog)
                 .FirstOrDefaultAsync(px => px.Assessor_Parcel_Number == pid);
 
-
             return p;
         }
         public async Task<List<Document>> GetDocumentsForParcel(string pid)
         {
             var p = await ActiveParcels().FirstOrDefaultAsync(px => px.Assessor_Parcel_Number.Equals(pid));
-            var q = _ctx.Database.SqlQuery<DocumentH>("SELECT d.DocumentId, d.DocumentType, d.title FROM rowm.ParcelDocuments pd INNER JOIN rowm.Document d on pd.document_documentid = d.documentid WHERE pd.parcel_parcelId = @pid", new System.Data.SqlClient.SqlParameter("@pid", p.ParcelId));
+            if ( p == null)
+            {
+                throw new IndexOutOfRangeException($"cannot find parcel <{pid}>");
+            }
+
+            //var query = p.Document.Select(dx => new { dx.DocumentId, dx.DocumentType, dx.Title });
+
+            //return query.Select(dx => new Document
+            //{
+            //    DocumentId = dx.DocumentId,
+            //    Title = dx.Title,
+            //    DocumentType = dx.DocumentType
+            //}).ToList();
+
+            var q = _ctx.Database.SqlQuery<DocumentH>("SELECT d.DocumentId, d.DocumentType, d.title FROM rowm.ParcelDocuments pd INNER JOIN rowm.Document d on pd.document_documentid = d.documentid WHERE pd.parcel_parcelId = @pid and d.IsDeleted = 0", new System.Data.SqlClient.SqlParameter("@pid", p.ParcelId));
             var ds = await q.ToListAsync();
             return ds.Select(dx => new Document { Title = dx.Title, DocumentId = dx.DocumentId, DocumentType = dx.DocumentType }).ToList();
         }
@@ -152,13 +170,13 @@ namespace ROWM.Dal
 
         public IEnumerable<Ownership> GetContacts() => _ctx.Parcel.Where(p => p.IsActive).SelectMany(p => p.Ownership);
 
-        public IEnumerable<ContactLog> GetLogs() =>_ctx.ContactLog.Where(c => c.Parcel.Any(p => p.IsActive));
+        public IEnumerable<ContactLog> GetLogs() => ActiveLogs().Where(c => c.Parcel.Any(p => p.IsActive));
         public async Task<IEnumerable<DocHead>> GetDocs()
         {
             try
             {
                 // for performance
-                var qstr = "SELECT d.DocumentId, d.Title, d.ContentType, d.ReceivedDate, d.SentDate, d.DeliveredDate, d.SignedDate, d.DateRecorded, d.ClientTrackingNumber, d.CheckNo, p.Assessor_Parcel_Number as 'Parcel_ParcelId' FROM rowm.ParcelDocuments pd INNER JOIN Rowm.Document d on pd.Document_DocumentId = d.DocumentId INNER JOIN Rowm.Parcel p ON pd.Parcel_ParcelId = p.ParcelId where p.IsActive = 1";
+                var qstr = "SELECT d.DocumentId, d.Title, d.ContentType, d.ReceivedDate, d.SentDate, d.DeliveredDate, d.SignedDate, d.DateRecorded, d.ClientTrackingNumber, d.CheckNo, p.Assessor_Parcel_Number as 'Parcel_ParcelId' FROM rowm.ParcelDocuments pd INNER JOIN Rowm.Document d on pd.Document_DocumentId = d.DocumentId INNER JOIN Rowm.Parcel p ON pd.Parcel_ParcelId = p.ParcelId where p.IsActive = 1 and d.IsDeleted = 0";
                 var q = _ctx.Database.SqlQuery<DocHead>(qstr);
 
                 return await q.ToListAsync();
