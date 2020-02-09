@@ -464,14 +464,16 @@ namespace SharePointInterface
             return isFolderPasted;
         }
 
-        static string CleanInput(string strIn)
+        public static string CleanInput(string strIn)
         {
             // Replace invalid characters with empty strings.
             // ~, \, /, :, *, ?, ", <, >, | , # , %
             try
             {
-                return Regex.Replace(strIn, @"[^,\w\s\.@-]", "",
+                var s = Regex.Replace(strIn, @"[^,\w\s\.@-]", "",
                                      RegexOptions.None, TimeSpan.FromSeconds(1.5));
+
+                return s.Trim('.', ' ');     // folder/file names cannot start or end with '.'  -- not in documentation, so need to check
             }
             // If we timeout when replacing invalid characters, 
             // we should return Empty.
