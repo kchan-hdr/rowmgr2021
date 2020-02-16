@@ -5,6 +5,11 @@
         string SiteTitle();
     }
 
+    public class Dw : SiteDecoration
+    {
+        public string SiteTitle() => "Denver Water";
+    }
+
     public class ReserviorSite : SiteDecoration
     {
         public string SiteTitle() => "Sites Reservior";

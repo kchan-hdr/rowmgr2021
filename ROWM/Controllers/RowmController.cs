@@ -851,6 +851,7 @@ namespace ROWM.Controllers
     public class ParcelHeaderDto
     {
         public string ParcelId { get; set; }
+        public string TractNo { get; set; }
         public string SitusAddress { get; set; }
         public bool IsPrimaryOwner { get; set; }
 
@@ -864,6 +865,7 @@ namespace ROWM.Controllers
         internal ParcelHeaderDto(Ownership o)
         {
             ParcelId = o.Parcel.Assessor_Parcel_Number;
+            TractNo = o.Parcel.Tracking_Number;
             SitusAddress = o.Parcel.SitusAddress;
             IsPrimaryOwner = o.IsPrimary(); // .Ownership_t == Ownership.OwnershipType.Primary;
 
