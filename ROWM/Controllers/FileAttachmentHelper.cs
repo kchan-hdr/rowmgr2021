@@ -38,6 +38,8 @@ namespace ROWM.Controllers
             d.Agent.Add(log.Agent); // this relationship is not used anymore
 
             // add document to log
+            if (log.Attachments == null || !log.Attachments.Any())
+                log.Attachments = new List<Document>();
             log.Attachments.Add(d);
 
             // Add document to parcels

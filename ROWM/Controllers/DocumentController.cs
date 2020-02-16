@@ -1,22 +1,22 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using geographia.ags;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 using ROWM.Dal;
+using SharePointInterface;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+// using Sunflower = com.hdr.Rowm.Sunflower;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using SharePointInterface;
-using geographia.ags;
-// using Sunflower = com.hdr.Rowm.Sunflower;
-using System.Diagnostics;
 
 namespace ROWM.Controllers
 {
@@ -29,12 +29,14 @@ namespace ROWM.Controllers
         private readonly DocTypes _docTypes;
 
         #region ctor
-        OwnerRepository _repo;
+        readonly OwnerRepository _repo;
         readonly IFeatureUpdate _featureUpdate;
+        readonly DeleteHelper _deleteHelper;
 
-        public DocumentController(OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, IFeatureUpdate f, DocTypes d)
+        public DocumentController(OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, IFeatureUpdate f, DeleteHelper del, DocTypes d)
         {
             _repo = r;
+            _deleteHelper = del;
             _sharePointCRUD = sp;
             _featureUpdate = f;
             _statusHelper = h;
@@ -43,9 +45,18 @@ namespace ROWM.Controllers
         #endregion
 
         [HttpGet("api/documents/{docId:Guid}/info")]
-        public DocumentInfo GetDocument(Guid docId) => new DocumentInfo( _repo.GetDocument(docId));
+        public DocumentInfo GetDocument(Guid docId) => new DocumentInfo(_repo.GetDocument(docId));
 
-        [HttpPut("api/documents/{docId:Guid}/info", Name="UpdateDocuMeta")]
+        [HttpDelete("api/documents/{docId:Guid}")]
+        public async Task<IActionResult> DeleteDocument(Guid docId)
+        {
+            if (await _deleteHelper.DeleteDocument(docId, User.Identity.Name))
+                return Ok();
+            else 
+                return BadRequest();
+        }
+
+        [HttpPut("api/documents/{docId:Guid}/info", Name = "UpdateDocuMeta")]
         [ProducesResponseType(typeof(DocumentInfo), 202)]
         public async Task<IActionResult> UpdateDocument(Guid docId, [FromBody] DocumentInfo info)
         {
@@ -67,6 +78,9 @@ namespace ROWM.Controllers
             d.DateRecorded = info.DateRecorded;
             d.CheckNo = info.CheckNo;
 
+            if (!string.IsNullOrWhiteSpace(info.Title)) // allow title change now, kklc 2020.2.8
+                d.Title = info.Title;
+
             d.LastModified = DateTimeOffset.Now;
 
             return CreatedAtRoute("UpdateDocuMeta", new DocumentInfo(await _repo.UpdateDocument(d)));
@@ -76,7 +90,8 @@ namespace ROWM.Controllers
         public IActionResult GetFile(Guid docId)
         {
             var v = _repo.GetDocument(docId);
-            return File(v.Content, v.ContentType ?? "application/pdf");
+            var filename = $"{v.Title}{System.IO.Path.GetExtension(v.SourceFilename)}";
+            return File(v.Content, v.ContentType ?? "application/pdf", fileDownloadName: filename);
         }
 
         // Get the default form options so that we can use them to set the default limits for
@@ -224,7 +239,7 @@ namespace ROWM.Controllers
             {
                 // TODO: Return error to user?
                 Console.WriteLine("Error uploading document {0} type {1} to Sharepoint for {2}", sourceFilename, header.DocumentType, parcelName);
-            }           
+            }
             return Json(header);
         }
         #endregion
@@ -236,6 +251,7 @@ namespace ROWM.Controllers
         //    in the request header and then falls back to reading the body.
         [Route("api/addDocument"), HttpPost]
         [DisableFormValueModelBinding]
+        [RequestSizeLimit(long.MaxValue)]
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> addDocument()
         {
@@ -424,19 +440,19 @@ namespace ROWM.Controllers
                     p.RoeStatusCode = "ROE_In_Progress";
                     break;
 
-                //case "Acquisition Offer Package Original": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
-                //case "Acquisition Offer Package Updated": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
-                //case "Acquisition Notice of Intent Package": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
-                //case "Acquisition Offer Package Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
-                //case "Acquisition Final Offer Package": tasks.Add(_featureUpdate.UpdateFeature(pid, 8)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(8);  break;
-                //case "Acquisition Offer Package Signed": tasks.Add(_featureUpdate.UpdateFeature(pid, 4)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(4);  break;
-                //case "Acquisition Offer Packet Sent to Client": tasks.Add(_featureUpdate.UpdateFeature(pid, 9)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(9);  break;
-                //case "Acquisition Compensation Check": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
-                //case "Acquisition Documents Recorded": tasks.Add(_featureUpdate.UpdateFeature(pid, 6)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(6);  break;
-                //case "Acquisition Compensation Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
-                //case "Acquisition Fully Signed Compenation Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
-                //case "Acquisition Fully Signed Easement Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 4)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(4);  break;
-                //case "Acquisition Recorded Easement Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 6)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(6);  break;
+                    //case "Acquisition Offer Package Original": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
+                    //case "Acquisition Offer Package Updated": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
+                    //case "Acquisition Notice of Intent Package": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
+                    //case "Acquisition Offer Package Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
+                    //case "Acquisition Final Offer Package": tasks.Add(_featureUpdate.UpdateFeature(pid, 8)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(8);  break;
+                    //case "Acquisition Offer Package Signed": tasks.Add(_featureUpdate.UpdateFeature(pid, 4)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(4);  break;
+                    //case "Acquisition Offer Packet Sent to Client": tasks.Add(_featureUpdate.UpdateFeature(pid, 9)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(9);  break;
+                    //case "Acquisition Compensation Check": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
+                    //case "Acquisition Documents Recorded": tasks.Add(_featureUpdate.UpdateFeature(pid, 6)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(6);  break;
+                    //case "Acquisition Compensation Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
+                    //case "Acquisition Fully Signed Compenation Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
+                    //case "Acquisition Fully Signed Easement Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 4)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(4);  break;
+                    //case "Acquisition Recorded Easement Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 6)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(6);  break;
             }
 
             return (await Task.WhenAll(tasks)).All(rt => rt);
@@ -482,7 +498,7 @@ namespace ROWM.Controllers
 
         public string DocumentType { get; set; }
         public string Title { get; set; }
-        public string ContentType { get; set; } 
+        public string ContentType { get; set; }
 
         // denormalized tracking
         public bool TitleInFile { get; set; }
@@ -508,13 +524,13 @@ namespace ROWM.Controllers
         /// </summary>
         public DocumentInfo() { }
 
-        internal DocumentInfo( Document d)
+        internal DocumentInfo(Document d)
         {
             DocumentId = d.DocumentId;
             DocumentType = d.DocumentType;
             Title = d.Title;
             ContentType = d.ContentType;
-  
+
             ReceivedDate = d.ReceivedDate;
             QCDate = d.QCDate;
             ApprovedDate = d.ApprovedDate;

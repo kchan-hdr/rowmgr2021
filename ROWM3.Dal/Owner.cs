@@ -27,9 +27,13 @@ namespace ROWM.Dal
         [StringLength(50)]
         public string OwnerType { get; set; }
 
+        public string OwnerAddress { get; set; }
+
         public DateTimeOffset Created { get; set; }
 
         public DateTimeOffset LastModified { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         [StringLength(50)]
         public string ModifiedBy { get; set; }

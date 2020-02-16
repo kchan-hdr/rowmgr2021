@@ -43,6 +43,8 @@ namespace ROWM.Dal
 
         public DateTimeOffset LastModified { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         [StringLength(50)]
         public string ModifiedBy { get; set; }
 
@@ -95,6 +97,8 @@ namespace ROWM.Dal
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Ownership> Ownership { get; set; }
 
+        public virtual ICollection<ContactInfo> ParcelContacts { get; set; }
+
         public virtual Parcel_Status Parcel_Status { get; set; }
 
         public virtual Roe_Status Roe_Status { get; set; }
@@ -106,6 +110,7 @@ namespace ROWM.Dal
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Document> Document { get; set; }
 
+        public virtual ICollection<StatusActivity> Activities { get; set; }
 
         public virtual ICollection<Parcel> RelatedParcels { get; set; }
     }

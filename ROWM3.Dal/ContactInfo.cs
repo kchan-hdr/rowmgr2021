@@ -53,6 +53,8 @@ namespace ROWM.Dal
 
         public DateTimeOffset? LastModified { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         [StringLength(50)]
         public string ModifiedBy { get; set; }
 
@@ -61,6 +63,7 @@ namespace ROWM.Dal
         public string Representation { get; set; }
 
         public virtual Owner Owner { get; set; }
+        public virtual ICollection<Parcel> Parcels { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ContactLog> ContactLog { get; set; }

@@ -78,6 +78,22 @@
     <Compile Include="Migrations\201809130621343_roe condition.Designer.cs">
       <DependentUpon>201809130621343_roe condition.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201910262343369_parcel status history.cs" />
+    <Compile Include="Migrations\201910262343369_parcel status history.Designer.cs">
+      <DependentUpon>201910262343369_parcel status history.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201911040605351_keep owner address from title.cs" />
+    <Compile Include="Migrations\201911040605351_keep owner address from title.Designer.cs">
+      <DependentUpon>201911040605351_keep owner address from title.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201911040621428_fix join table.cs" />
+    <Compile Include="Migrations\201911040621428_fix join table.Designer.cs">
+      <DependentUpon>201911040621428_fix join table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202002090002188_support soft delete.cs" />
+    <Compile Include="Migrations\202002090002188_support soft delete.Designer.cs">
+      <DependentUpon>202002090002188_support soft delete.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Organization.cs" />
     <Compile Include="Owner.cs" />
@@ -88,11 +104,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repesentation_Type.cs" />
     <Compile Include="Repository\AppRepository.cs" />
+    <Compile Include="Repository\ContactInfoRepository.cs" />
+    <Compile Include="Repository\DeleteHelper.cs" />
     <Compile Include="Repository\OwnerRepository.cs" />
     <Compile Include="Repository\StatisticsRepository.cs" />
     <Compile Include="RoeCondition.cs" />
     <Compile Include="Roe_Status.cs" />
+    <Compile Include="ROWM_SdeContext.cs" />
     <Compile Include="ROWM_Context.cs" />
+    <Compile Include="StatusActivity.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -107,6 +127,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201809130621343_roe condition.resx">
       <DependentUpon>201809130621343_roe condition.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201910262343369_parcel status history.resx">
+      <DependentUpon>201910262343369_parcel status history.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201911040605351_keep owner address from title.resx">
+      <DependentUpon>201911040605351_keep owner address from title.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201911040621428_fix join table.resx">
+      <DependentUpon>201911040621428_fix join table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202002090002188_support soft delete.resx">
+      <DependentUpon>202002090002188_support soft delete.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

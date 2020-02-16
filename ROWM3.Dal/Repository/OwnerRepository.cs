@@ -17,21 +17,28 @@ namespace ROWM.Dal
         public OwnerRepository(ROWM_Context c) => _ctx = c;
         #endregion
 
+        IQueryable<Parcel> ActiveParcels() => _ctx.Parcel.Where(px => px.IsActive);
+        IQueryable<Owner> ActiveOwners() => _ctx.Owner.Where(ox => !ox.IsDeleted);
+        IQueryable<ContactInfo> ActiveContacts() => _ctx.ContactInfo.Where(cx => !cx.IsDeleted);
+        IQueryable<ContactLog> ActiveLogs() => _ctx.ContactLog.Where(lx => !lx.IsDeleted);
+        IQueryable<Document> ActiveDocuments() => _ctx.Document.Where(dx => !dx.IsDeleted);
+
+
         public async Task<Owner> GetOwner(Guid uid)
         {
-            return await _ctx.Owner
-                .Include(ox => ox.Ownership.Select( o=>o.Parcel))
+            return await ActiveOwners()
+                .Include(ox => ox.Ownership.Select(o => o.Parcel))
                 //.Include(ox => ox.ContactLogs)
                 //.Include(ox => ox.ContactLogs.Select(ocx => ocx.ContactAgent))
                 .Include(ox => ox.ContactInfo)
-                .Include(ox => ox.ContactInfo.Select( ocx => ocx.ContactLog))
+                .Include(ox => ox.ContactInfo.Select(ocx => ocx.ContactLog))
                 .Include(ox => ox.Document)
                 .FirstOrDefaultAsync(ox => ox.OwnerId == uid);
         }
 
         public async Task<IEnumerable<Owner>> FindOwner(string name)
         {
-            return await _ctx.Owner
+            return await ActiveOwners()
                 .Include(ox => ox.ContactInfo)
                 .Include(ox => ox.ContactInfo.Select(ocx => ocx.ContactLog))
                 .Include(ox => ox.Document)
@@ -40,18 +47,31 @@ namespace ROWM.Dal
 
         public async Task<Parcel> GetParcel(string pid)
         {
-            var p = await _ctx.Parcel
+            var p = await ActiveParcels()
                 .Include(px => px.Ownership.Select( o=>o.Owner.ContactLog))
                 .Include(px => px.ContactLog)
                 .FirstOrDefaultAsync(px => px.Assessor_Parcel_Number == pid);
-
 
             return p;
         }
         public async Task<List<Document>> GetDocumentsForParcel(string pid)
         {
-            var p = await _ctx.Parcel.FirstOrDefaultAsync(px => px.Assessor_Parcel_Number.Equals(pid));
-            var q = _ctx.Database.SqlQuery<DocumentH>("SELECT d.DocumentId, d.DocumentType, d.title FROM rowm.ParcelDocuments pd INNER JOIN rowm.Document d on pd.document_documentid = d.documentid WHERE pd.parcel_parcelId = @pid", new System.Data.SqlClient.SqlParameter("@pid", p.ParcelId));
+            var p = await ActiveParcels().FirstOrDefaultAsync(px => px.Assessor_Parcel_Number.Equals(pid));
+            if ( p == null)
+            {
+                throw new IndexOutOfRangeException($"cannot find parcel <{pid}>");
+            }
+
+            //var query = p.Document.Select(dx => new { dx.DocumentId, dx.DocumentType, dx.Title });
+
+            //return query.Select(dx => new Document
+            //{
+            //    DocumentId = dx.DocumentId,
+            //    Title = dx.Title,
+            //    DocumentType = dx.DocumentType
+            //}).ToList();
+
+            var q = _ctx.Database.SqlQuery<DocumentH>("SELECT d.DocumentId, d.DocumentType, d.title FROM rowm.ParcelDocuments pd INNER JOIN rowm.Document d on pd.document_documentid = d.documentid WHERE pd.parcel_parcelId = @pid and d.IsDeleted = 0", new System.Data.SqlClient.SqlParameter("@pid", p.ParcelId));
             var ds = await q.ToListAsync();
             return ds.Select(dx => new Document { Title = dx.Title, DocumentId = dx.DocumentId, DocumentType = dx.DocumentType }).ToList();
         }
@@ -64,8 +84,8 @@ namespace ROWM.Dal
         }
         #endregion
 
-        public IEnumerable<string> GetParcels() => _ctx.Parcel.AsNoTracking().Select(px => px.Assessor_Parcel_Number);
-        public IEnumerable<Parcel> GetParcels2() => _ctx.Parcel.Include(px => px.Ownership.Select( o => o.Owner )).Include(px => px.Conditions).AsNoTracking();
+        public IEnumerable<string> GetParcels() => ActiveParcels().AsNoTracking().Select(px => px.Assessor_Parcel_Number);
+        public IEnumerable<Parcel> GetParcels2() => ActiveParcels().Include(px => px.Ownership.Select( o => o.Owner )).Include(px => px.Conditions).AsNoTracking();
 
         public async Task<Parcel> UpdateParcel (Parcel p)
         {
@@ -86,23 +106,27 @@ namespace ROWM.Dal
             var o = _ctx.Owner.Create();
             o.Created = dt;
             o.PartyName = name;
+            o.OwnerAddress = MakeAddress(address, city, state, z);
 
-            var c = _ctx.ContactInfo.Create();
-            c.Created = dt;
-            c.IsPrimaryContact = primary;
-            c.FirstName = first;
-            c.LastName = last;
-            c.StreetAddress = address;
-            c.City = city;
-            c.State = state;
-            c.ZIP = z;
-            c.Email = email;
-            c.HomePhone = hfone;
-            c.CellPhone = cfone;
-            c.WorkPhone = wfone;
+            ///
+            /// no longer automatically add a default contact
+            /// 
+            //var c = _ctx.ContactInfo.Create();
+            //c.Created = dt;
+            //c.IsPrimaryContact = primary;
+            //c.FirstName = first;
+            //c.LastName = last;
+            //c.StreetAddress = address;
+            //c.City = city;
+            //c.State = state;
+            //c.ZIP = z;
+            //c.Email = email;
+            //c.HomePhone = hfone;
+            //c.CellPhone = cfone;
+            //c.WorkPhone = wfone;
             
-            o.ContactInfo = new List<ContactInfo>();
-            o.ContactInfo.Add(c);
+            //o.ContactInfo = new List<ContactInfo>();
+            //o.ContactInfo.Add(c);
 
             _ctx.Owner.Add(o);
 
@@ -110,6 +134,16 @@ namespace ROWM.Dal
                 throw new ApplicationException("Add owner failed");
 
             return o;
+        }
+
+        static string MakeAddress( string address, string city, string state, string zip)
+        {
+            char[] trimmer = { ',', ' ' };
+
+            if (string.IsNullOrWhiteSpace(address) && string.IsNullOrWhiteSpace(city) && string.IsNullOrWhiteSpace(state) && string.IsNullOrWhiteSpace(zip))
+                return string.Empty;
+
+            return $"{address}, {city} {state} {zip}".Trim(trimmer);
         }
 
         public async Task<Owner> UpdateOwner(Owner o)
@@ -136,13 +170,13 @@ namespace ROWM.Dal
 
         public IEnumerable<Ownership> GetContacts() => _ctx.Parcel.Where(p => p.IsActive).SelectMany(p => p.Ownership);
 
-        public IEnumerable<ContactLog> GetLogs() =>_ctx.ContactLog.Where(c => c.Parcel.Any(p => p.IsActive));
+        public IEnumerable<ContactLog> GetLogs() => ActiveLogs().Where(c => c.Parcel.Any(p => p.IsActive));
         public async Task<IEnumerable<DocHead>> GetDocs()
         {
             try
             {
                 // for performance
-                var qstr = "SELECT d.DocumentId, d.Title, d.ContentType, d.ReceivedDate, d.SentDate, d.DeliveredDate, d.SignedDate, d.DateRecorded, d.ClientTrackingNumber, d.CheckNo, p.Assessor_Parcel_Number as 'Parcel_ParcelId' FROM rowm.ParcelDocuments pd INNER JOIN Rowm.Document d on pd.Document_DocumentId = d.DocumentId INNER JOIN Rowm.Parcel p ON pd.Parcel_ParcelId = p.ParcelId where p.IsActive = 1";
+                var qstr = "SELECT d.DocumentId, d.Title, d.ContentType, d.ReceivedDate, d.SentDate, d.DeliveredDate, d.SignedDate, d.DateRecorded, d.ClientTrackingNumber, d.CheckNo, p.Assessor_Parcel_Number as 'Parcel_ParcelId' FROM rowm.ParcelDocuments pd INNER JOIN Rowm.Document d on pd.Document_DocumentId = d.DocumentId INNER JOIN Rowm.Parcel p ON pd.Parcel_ParcelId = p.ParcelId where p.IsActive = 1 and d.IsDeleted = 0";
                 var q = _ctx.Database.SqlQuery<DocHead>(qstr);
 
                 return await q.ToListAsync();
@@ -177,7 +211,7 @@ namespace ROWM.Dal
             {
                 foreach (var pid in pids)
                 {
-                    var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.Assessor_Parcel_Number.Equals(pid));
+                    var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.Assessor_Parcel_Number.Equals(pid) && pxid.IsActive );
                     if (px == null)
                         Trace.TraceWarning($"invalid parcel {pid}");
                     log.Parcel.Add(px);
@@ -208,60 +242,74 @@ namespace ROWM.Dal
                 _ctx.Entry<ContactLog>(log).State = EntityState.Modified;
             }
 
-            //var existingPids = log.Parcels.Select(p => p.ParcelId).ToList();
-            //var existingCids = log.Contacts.Select(c => c.ContactId).ToList();
+            var existingPids = log.Parcel.Select(p => p.Tracking_Number).ToList();
+            var existingCids = log.ContactInfo.Select(c => c.ContactId).ToList();
 
             // Find Deleted & added parcels & contacts
-            //var deletedPids = existingPids.Except(pids);
-            //var newPids = pids.Except(existingPids);
-            //var deletedCids = existingCids.Except(cids);
-            //var newCids = cids.Except(existingCids);
+            var deletedPids = existingPids.Except(pids);
+            var newPids = pids.Except(existingPids);
+            var deletedCids = existingCids.Except(cids);
+            var newCids = cids.Except(existingCids);
 
             // Remove deleted parcels & contacts
-            //if (deletedPids != null && deletedPids.Count() > 0)
-            //{
-            //    foreach (var pid in deletedPids)
-            //    {
-            //        var px = await _ctx.Parcels.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
-            //        if (px == null)
-            //            Trace.TraceWarning($"invalid parcel {pid}");
-            //        log.Parcels.Remove(px);
-            //    }
-            //}
+            if (deletedPids != null && deletedPids.Count() > 0)
+            {
+                foreach (var pid in deletedPids)
+                {
+                    var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
+                    if (px == null)
+                    {
+                        Trace.TraceWarning($"invalid parcel {pid}");
+                        continue;
+                    }
 
-            //if (deletedCids != null && deletedCids.Count() > 0)
-            //{
-            //    foreach (var cid in deletedCids)
-            //    {
-            //        var cx = await _ctx.Contacts.SingleOrDefaultAsync(oxid => oxid.ContactId.Equals(cid));
-            //        if (cx == null)
-            //            Trace.TraceWarning($"invalid contact {cid}");
-            //        log.Contacts.Remove(cx);
-            //    }
-            //}
+                    log.Parcel.Remove(px);
+                }
+            }
+
+            if (deletedCids != null && deletedCids.Count() > 0)
+            {
+                foreach (var cid in deletedCids)
+                {
+                    var cx = await _ctx.ContactInfo.SingleOrDefaultAsync(oxid => oxid.ContactId.Equals(cid));
+                    if (cx == null)
+                    {
+                        Trace.TraceWarning($"invalid contact {cid}");
+                        continue;
+                    }
+
+                    log.ContactInfo.Remove(cx);
+                }
+            }
 
             // Add new parcels & contacts
-            //if (newPids != null && newPids.Count() > 0)
-            //{
-            //    foreach (var pid in newPids)
-            //    {
-            //        var px = await _ctx.Parcels.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
-            //        if (px == null)
-            //            Trace.TraceWarning($"invalid parcel {pid}");
-            //        log.Parcels.Add(px);
-            //    }
-            //}
+            if (newPids != null && newPids.Count() > 0)
+            {
+                foreach (var pid in newPids)
+                {
+                    var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
+                    if (px == null)
+                    {
+                        Trace.TraceWarning($"invalid parcel {pid}");
+                        continue;
+                    }
+                    log.Parcel.Add(px);
+                }
+            }
 
-            //if (newCids != null && newCids.Count() > 0)
-            //{
-            //    foreach (var cid in newCids)
-            //    {
-            //        var cx = await _ctx.Contacts.SingleOrDefaultAsync(oxid => oxid.ContactId.Equals(cid));
-            //        if (cx == null)
-            //            Trace.TraceWarning($"invalid contact {cid}");
-            //        log.Contacts.Add(cx);
-            //    }
-            //}
+            if (newCids != null && newCids.Count() > 0)
+            {
+                foreach (var cid in newCids)
+                {
+                    var cx = await _ctx.ContactInfo.SingleOrDefaultAsync(oxid => oxid.ContactId.Equals(cid));
+                    if (cx == null)
+                    {
+                        Trace.TraceWarning($"invalid contact {cid}");
+                        continue;
+                    }
+                    log.ContactInfo.Add(cx);
+                }
+            }
 
 
             if (await WriteDb() <= 0)
@@ -363,6 +411,14 @@ namespace ROWM.Dal
         }
         #endregion
         #region row agents
+        public async Task<Agent> GetAgent(Guid id)
+        {
+            var a = await _ctx.Agent.FindAsync(id);
+            if (a == null)
+                a = await GetDefaultAgent();
+
+            return a;
+        }
         public async Task<Agent> GetAgent(string name) => await _ctx.Agent.FirstOrDefaultAsync(ax => ax.AgentName.Equals(name, StringComparison.CurrentCultureIgnoreCase));
         public async Task<Agent> GetDefaultAgent() => await _ctx.Agent.FirstOrDefaultAsync(ax => ax.AgentName.Equals("DEFAULT"));
 
