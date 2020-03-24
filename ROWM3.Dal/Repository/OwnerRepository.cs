@@ -242,7 +242,7 @@ namespace ROWM.Dal
                 _ctx.Entry<ContactLog>(log).State = EntityState.Modified;
             }
 
-            var existingPids = log.Parcel.Select(p => p.Tracking_Number).ToList();
+            var existingPids = log.Parcel.Select(p => p.Assessor_Parcel_Number).ToList();
             var existingCids = log.ContactInfo.Select(c => c.ContactId).ToList();
 
             // Find Deleted & added parcels & contacts
@@ -361,6 +361,12 @@ namespace ROWM.Dal
 
             return o;
         }
+
+        #region statics lookup
+        public async Task<IEnumerable<Parcel_Status>> GetParcelStatus() => await _ctx.Parcel_Status.Where(s => s.IsActive).AsNoTracking().ToListAsync();
+        public async Task<IEnumerable<Contact_Purpose>> GetPurpose() => await _ctx.Contact_Purpose.Include(p => p.Milestone).Where(p => p.IsActive).AsNoTracking().ToListAsync();
+        #endregion
+
         #region documents
         public Document GetDocument(Guid id) => _ctx.Document.Find(id);
 

@@ -76,14 +76,14 @@ App Domain:  	www.denver-rowmgr.com
 Redirect URI:  	https://denver-rowmgr.azurewebsites.net
              */
 
-            if (_appId == null || _appSecret == null )
+            if (__appId == null || __appSecret == null )
             {
                 _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc";
                 _appSecret = "d4M24Cq7r4ZcHraDHBmB6LVNfMzs/e6Ya5/TzP4/svk=";
 
                 _appId = "1bca8e9c-15ac-41b0-9869-1e93d4a5d779";
                 _appSecret = "13+Rj3uGBRFR7FN5FgfGImEn6eEWqK06qUOfJ+XmY9o=";
-            _siteUrl = string.IsNullOrWhiteSpace(_url) ? _STAGING_SITE_URL : _url;
+                _siteUrl = string.IsNullOrWhiteSpace(_url) ? _STAGING_SITE_URL : _url;
 
             // if (__appId == null || __appSecret == null )
             // {
@@ -103,7 +103,7 @@ Redirect URI:  	https://denver-rowmgr.azurewebsites.net
                 _siteUrl = _url;
         }
 
-        ClientContext MyContext()
+        ClientContext MyContext_()
         {
             if (_ctx != null)
                 return _ctx;
@@ -111,6 +111,18 @@ Redirect URI:  	https://denver-rowmgr.azurewebsites.net
             AuthenticationManager authManager = new AuthenticationManager();
             _ctx = authManager.GetAppOnlyAuthenticatedContext(_siteUrl, _appId, _appSecret);
 
+            return _ctx;
+        }
+
+        // switch to certificate
+        ClientContext MyContext()
+        {
+            if (_ctx != null)
+                return _ctx;
+
+            var c = new System.Security.Cryptography.X509Certificates.X509Certificate2(Convert.FromBase64String(_appSecret));
+            AuthenticationManager authManager = new AuthenticationManager();
+            _ctx = authManager.GetAzureADAppOnlyAuthenticatedContext(_siteUrl, _appId, "hdroneview.onmicrosoft.com", c);
             return _ctx;
         }
 

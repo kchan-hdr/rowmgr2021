@@ -63,6 +63,7 @@ namespace geographia.ags.Test
                     new OwnerRepository(ctx),
                     new ContactInfoRepository (ctx),
                     new StatisticsRepository(ctx),
+                    new DeleteHelper(ctx),
                     new ParcelStatusHelper(ctx),
                     new SunflowerParcel(),
                     new SharePointCRUD());
@@ -96,6 +97,7 @@ namespace geographia.ags.Test
                     new OwnerRepository(ctx),
                     new ContactInfoRepository(ctx),
                     new StatisticsRepository(ctx),
+                    new DeleteHelper(ctx),
                     new ParcelStatusHelper(ctx),
                     new SunflowerParcel(),
                     new SharePointCRUD());

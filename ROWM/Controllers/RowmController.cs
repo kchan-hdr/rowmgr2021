@@ -1,6 +1,7 @@
 using geographia.ags;
 using Microsoft.AspNetCore.Mvc;
 using ROWM.Dal;
+using ROWM.Models;
 using SharePointInterface;
 using System;
 using System.Collections.Generic;
@@ -24,10 +25,11 @@ namespace ROWM.Controllers
         readonly StatisticsRepository _statistics;
         readonly DeleteHelper _delete;
         readonly ParcelStatusHelper _statusHelper;
+        readonly UpdateParcelStatus2 _updater;
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
 
-        public RowmController(ROWM_Context ctx, OwnerRepository r, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
+        public RowmController(ROWM_Context ctx, OwnerRepository r, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, UpdateParcelStatus2 u, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
         {
             _ctx = ctx;
             _repo = r;
@@ -37,6 +39,7 @@ namespace ROWM.Controllers
             _statusHelper = h;
             _featureUpdate = f;
             _spDocument = s;
+            _updater = u;
         }
         #endregion
         #region owner
@@ -490,6 +493,7 @@ namespace ROWM.Controllers
             };
 
             var log = await _repo.AddContactLog(myParcels, logRequest.ContactIds, l);
+            var touched = await PromptStatus(myParcels);
 
             var sites = _featureUpdate as ReservoirParcel;
             if (sites != null)
@@ -536,6 +540,7 @@ namespace ROWM.Controllers
             await UpdateLandownerScore(logRequest.Score, dt, myParcels);
 
             var log = await _repo.UpdateContactLog(myParcels, logRequest.ContactIds, l);
+            var touched = await PromptStatus(myParcels);
 
             var sites = _featureUpdate as ReservoirParcel;
             if (sites != null)
@@ -545,6 +550,26 @@ namespace ROWM.Controllers
                 await sites.Update(logx);
             }
             return Json(new ContactLogDto(log));
+        }
+
+        async Task<int> PromptStatus(IEnumerable<string> pids)
+        {
+            // way too convoluted. TODO: 2020.3.24
+            //
+
+            var touched = 0;
+            foreach (var p in pids)
+            {
+                var parcel = await _repo.GetParcel(p);
+                var (t, s) = await _updater.DoUpdate(parcel);
+                if (t)
+                {
+                    touched++;
+                    await UpdateStatus(p, s.Code);
+                }
+            }
+
+            return touched;
         }
 
         static ReservoirParcel.ContactLog_dto Convert(ContactLog log)
@@ -746,7 +771,7 @@ namespace ROWM.Controllers
     public class ContactLogDto
     {
         public Guid ContactLogId { get; set; }
-        public IEnumerable<string> ParcelIds { get; set; }
+        public IEnumerable<RelatedParcelHeader> ParcelIds { get; set; }
         public IEnumerable<ContactInfoDto> ContactIds { get; set; }
         public DateTimeOffset DateAdded { get; set; }
         public string ContactType { get; set; }
@@ -763,13 +788,26 @@ namespace ROWM.Controllers
             DateAdded = log.DateAdded;
             ContactType = log.ContactChannel;
 
-            ParcelIds = log.Parcel.Select(px => px.Assessor_Parcel_Number);
+            ParcelIds = log.Parcel.Select(px => new RelatedParcelHeader(px));
             ContactIds = log.ContactInfo.Select(cx => new ContactInfoDto(cx));
 
             Phase = log.ProjectPhase;
             Title = log.Title;
             Notes = log.Notes;
             Score = log.Landowner_Score ?? 0;
+        }
+    }
+
+    public class RelatedParcelHeader
+    {
+        public Guid ParcelId { get; set; }
+        public string APN { get; set; }
+        public string Tracking { get; set; }
+        public RelatedParcelHeader(Parcel p)
+        {
+            this.ParcelId = p.ParcelId;
+            this.APN = p.Assessor_Parcel_Number;
+            this.Tracking = p.Tracking_Number;
         }
     }
 

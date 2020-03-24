@@ -14,7 +14,7 @@ namespace ROWM.Dal
     {
         readonly OwnerRepository repo;
         readonly IFeatureUpdate _featureUpdate;
-        readonly Controllers.ParcelStatusHelper _statusHelper;
+        readonly ParcelStatusHelper _statusHelper;
         readonly ROWM_Context _context;
 
 

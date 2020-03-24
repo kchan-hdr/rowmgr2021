@@ -39,7 +39,7 @@ namespace ROWM.Controllers
                 {
                     writer.WriteLine(LogExport.Header());
 
-                    foreach (var l in logs.SelectMany(l => LogExport.Export(l)))
+                    foreach (var l in logs.SelectMany(l => LogExport.Export(l)).OrderBy(l => l.Tracking))
                         writer.WriteLine(l);
 
                     writer.Close();
@@ -57,7 +57,7 @@ namespace ROWM.Controllers
         [HttpGet("export/documents")]
         public async Task<IActionResult> ExportDocumentg(string f)
         {
-            const string DOCUMENT_HEADER = "Parcel Id,Title,Content Type,Date Sent,Date Delivered,Client Tracking Number,Date Received,Date Signed,Check No,Date Recorded,Document ID";
+            const string DOCUMENT_HEADER = "NSR Number,Parcel Id,Title,Content Type,Date Sent,Date Delivered,Client Tracking Number,Date Received,Date Signed,Check No,Date Recorded,Document ID";
 
             if ("excel" != f)
                 return BadRequest($"not supported export '{f}'");
@@ -66,8 +66,11 @@ namespace ROWM.Controllers
             if (d.Count() <= 0)
                 return NoContent();
 
-            var lines = d.OrderBy(dh => dh.Parcel_ParcelId)
-                .Select(dh => $"=\"{dh.Parcel_ParcelId}\",\"{dh.Title}\",{dh.ContentType},{dh.SentDate?.Date.ToShortDateString() ?? ""},{dh.DeliveredDate?.Date.ToShortDateString() ?? ""},{dh.ClientTrackingNumber},{dh.ReceivedDate?.Date.ToShortDateString() ?? ""},{dh.SignedDate?.Date.ToShortDateString() ?? ""},=\"{dh.CheckNo}\",{dh.DateRecorded?.Date.ToShortDateString() ?? ""},=\"{dh.DocumentId}\"");
+            var ps = this._repo.GetParcels2();
+
+            var dd = from parcel in this._repo.GetParcels2()
+                     join doc in d on parcel.Assessor_Parcel_Number equals doc.Parcel_ParcelId into dh  // bad alias
+                     select new { parcel.Tracking_Number, dh };
 
             using (var s = new MemoryStream())
             {
@@ -75,8 +78,15 @@ namespace ROWM.Controllers
                 {
                     writer.WriteLine(DOCUMENT_HEADER);
 
-                    foreach (var l in lines)
-                        writer.WriteLine(l);
+                    foreach( var ddx in dd.OrderBy(dx => dx.Tracking_Number))
+                    {
+                        writer.WriteLine($"{ddx.Tracking_Number}");
+
+                        foreach ( var dh in ddx.dh)
+                        {
+                            writer.WriteLine($"{ddx.Tracking_Number},\"{dh.Parcel_ParcelId}\",\"{dh.Title}\",{dh.ContentType},{dh.SentDate?.Date.ToShortDateString() ?? ""},{dh.DeliveredDate?.Date.ToShortDateString() ?? ""},{dh.ClientTrackingNumber},{dh.ReceivedDate?.Date.ToShortDateString() ?? ""},{dh.SignedDate?.Date.ToShortDateString() ?? ""},=\"{dh.CheckNo}\",{dh.DateRecorded?.Date.ToShortDateString() ?? ""},=\"{dh.DocumentId}\"");
+                        }
+                    }
 
                     writer.Close();
                 }
@@ -100,14 +110,14 @@ namespace ROWM.Controllers
             {
                 using (var writer = new StreamWriter(s))
                 {
-                    writer.WriteLine("Parcel ID,Owner,ROE Status,Conditions,Date");
+                    writer.WriteLine("NSR Number,Parcel ID,Owner,ROE Status,Conditions,Date");
 
-                    foreach (var p in parcels.OrderBy(px => px.Assessor_Parcel_Number))
+                    foreach (var p in parcels.OrderBy(px => px.Tracking_Number))
                     {
                         var os = p.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
                         var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
                         var conditions = p.Conditions?.FirstOrDefault()?.Condition ?? "";
-                        var row = $"{p.Assessor_Parcel_Number},\"{oname}\",{p.Roe_Status.Description},{conditions},{p.LastModified.Date.ToShortDateString()}";
+                        var row = $"{p.Tracking_Number},\"{p.Assessor_Parcel_Number}\",\"{oname}\",{p.Roe_Status.Description},{conditions},{p.LastModified.Date.ToShortDateString()}";
                         writer.WriteLine(row);
                     }
 
@@ -197,6 +207,7 @@ namespace ROWM.Controllers
         #region helpers
         public class LogExport
         {
+            public string Tracking { get; set; }
             public string ParcelId { get; set; }
             public string ParcelStatusCode { get; set; }
             public string RoeStatusCode { get; set; }
@@ -214,6 +225,7 @@ namespace ROWM.Controllers
             {
                 return log.Parcel.Where(p => p.IsActive).Select(p => new LogExport
                 {
+                    Tracking = p.Tracking_Number,
                     ParcelId = p.Assessor_Parcel_Number,
                     ParcelStatusCode = p.ParcelStatusCode,
                     RoeStatusCode = log.Landowner_Score?.ToString() ?? "", // p.RoeStatusCode,
@@ -228,12 +240,12 @@ namespace ROWM.Controllers
             }
 
             public static string Header() =>
-                "Parcel ID,Parcel Status,Landowner Score,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
+                "NSR Number,Parcel ID,Parcel Status,Landowner Score,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
 
             public override string ToString()
             {
                 var n = Notes.Replace('"', '\'');
-                return $"=\"{ParcelId}\",{ParcelStatusCode},{RoeStatusCode},\"{ContactName}\",{DateAdded.Date.ToShortDateString()},{ContactChannel},{ProjectPhase},\"{Title}\",\"{n}\",\"{AgentName}\"";
+                return $"{Tracking},\"{ParcelId}\",{ParcelStatusCode},{RoeStatusCode},\"{ContactName}\",{DateAdded.Date.ToShortDateString()},{ContactChannel},{ProjectPhase},\"{Title}\",\"{n}\",\"{AgentName}\"";
             }
         }
 
@@ -257,7 +269,7 @@ namespace ROWM.Controllers
 
             public static IEnumerable<ContactExport2> Export(IGrouping<Guid, Ownership> og)
             {
-                var relatedParcels = og.Select(p => p.Parcel.Assessor_Parcel_Number).OrderBy(p => p).ToArray<string>();
+                var relatedParcels = og.Select(p => $"{p.Parcel.Tracking_Number} ({p.Parcel.Assessor_Parcel_Number})").OrderBy(p => p).ToArray<string>();
 
                 var ox = og.First();
                 return ox.Owner.ContactInfo.Select(cx => new ContactExport2
