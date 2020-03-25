@@ -866,16 +866,20 @@ namespace ROWM.Controllers
         public Guid OwnerId { get; set; }
         public string PartyName { get; set; }
         public string OwnerAddress { get; set; }
+        public string OwnerType { get; set; }
+        public int OwnershipType { get; set; }
         public IEnumerable<ParcelHeaderDto> OwnedParcel { get; set; }
         public IEnumerable<ContactInfoDto> Contacts { get; set; }
         public IEnumerable<ContactLogDto> ContactLogs { get; set; }
         public IEnumerable<DocumentHeader> Documents { get; set; }
 
-        public OwnerDto(Owner o)
+        public OwnerDto(Owner o, int oType = 1)
         {
             OwnerId = o.OwnerId;
             PartyName = o.PartyName;
             OwnerAddress = o.OwnerAddress;
+            OwnerType = o.OwnerType;
+            OwnershipType = oType;
 
             OwnedParcel = o.Ownership.Where(ox => ox.Parcel.IsActive).Select(ox => new ParcelHeaderDto(ox));
             Contacts = o.ContactInfo.Where(cx => !cx.IsDeleted).Select(cx => new ContactInfoDto(cx));
@@ -962,7 +966,7 @@ namespace ROWM.Controllers
             FinalOptionOffer = OfferHelper.MakeCompensation(p, "FinalOption");
             FinalROEOffer = OfferHelper.MakeCompensation(p, "FinalROE");
 
-            Owners = p.Ownership.Select(ox => new OwnerDto(ox.Owner));
+            Owners = p.Ownership.Select(ox => new OwnerDto(ox.Owner, ox.Ownership_t));
             ContactsLog = p.ContactLog.Where(cx => !cx.IsDeleted).Select(cx => new ContactLogDto(cx));
             Documents = d.Where(dx => !dx.IsDeleted).Select(dx => new DocumentHeader(dx));
         }
