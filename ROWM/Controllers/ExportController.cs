@@ -128,6 +128,38 @@ namespace ROWM.Controllers
             }
         }
 
+        [HttpGet("export/acq")]
+        public IActionResult ExportAcq(string f)
+        {
+            if ("excel" != f)
+                return BadRequest($"not supported export '{f}'");
+
+            var parcels = this._repo.GetParcels2();
+
+            if (parcels.Count() <= 0)
+                return NoContent();
+
+            using (var s = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(s))
+                {
+                    writer.WriteLine("NSR Number,Parcel ID,Owner,Parcel Status,Conditions,Date");
+
+                    foreach (var p in parcels.OrderBy(px => px.Tracking_Number))
+                    {
+                        var os = p.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
+                        var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
+                        var conditions = p.Conditions?.FirstOrDefault()?.Condition ?? "";
+                        var row = $"{p.Tracking_Number},\"{p.Assessor_Parcel_Number}\",\"{oname}\",{p.Parcel_Status.Description},{conditions},{p.LastModified.Date.ToShortDateString()}";
+                        writer.WriteLine(row);
+                    }
+
+                    writer.Close();
+                }
+
+                return File(s.GetBuffer(), "text/csv", "acq.csv");
+            }
+        }
         /// <summary>
         /// support excel only
         /// </summary>
