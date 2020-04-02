@@ -20,6 +20,6 @@ namespace SharePointInterface
         public string GetSiteTitle() => string.Empty;
         public bool InsertDoc(Folder folder, string docName, byte[] docBytes) => false;
         public ListCollection ListAllLists() => default;
-        public bool UploadParcelDoc(string pid, string docType, string docName, byte[] docBytes, string baseFolderName) => false;
+        public bool UploadParcelDoc(string pid, string docType, string docName, byte[] docBytes, string baseFolderName) => true;
     }
 }
