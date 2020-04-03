@@ -68,7 +68,7 @@ namespace ROWM
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<UpdateParcelStatus2>();
             services.AddScoped<IFeatureUpdate, DenverParcel>( fac => 
-                new DenverParcel("https://gis05.hdrgateway.com/arcgis/rest/services/California/DW_Parcel_FS_PROD/FeatureServer") 
+                new DenverParcel("https://gis05.hdrgateway.com/arcgis/rest/services/California/DW_Parcel_FS_prod/FeatureServer") 
             );
             services.AddScoped<ISharePointCRUD, DenverNoOp>();
 
