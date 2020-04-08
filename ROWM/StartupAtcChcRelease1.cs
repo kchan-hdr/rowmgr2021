@@ -42,12 +42,15 @@ namespace ROWM
             var cs = Configuration.GetConnectionString("ROWM_Context");
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {
-                return new ROWM.Dal.ROWM_Context(cs);
+                var c = new ROWM.Dal.ROWM_Context(cs);
+                c.Database.CommandTimeout = 300;
+                return c;
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddScoped<ROWM.Dal.ContactInfoRepository>();
             services.AddScoped<ROWM.Dal.StatisticsRepository>();
+            services.AddScoped<DeleteHelper>();
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new DocTypes(fac.GetRequiredService<ROWM_Context>()));
             services.AddScoped<Controllers.ParcelStatusHelper>();
