@@ -35,7 +35,7 @@ namespace ROWM.Controllers
 
             using (var s = new MemoryStream())
             {
-                using (var writer = new StreamWriter(s))
+                using (var writer = new StreamWriter(s, System.Text.Encoding.UTF8))
                 {
                     writer.WriteLine(LogExport.Header());
 
@@ -71,7 +71,7 @@ namespace ROWM.Controllers
 
             using (var s = new MemoryStream())
             {
-                using (var writer = new StreamWriter(s))
+                using (var writer = new StreamWriter(s, System.Text.Encoding.UTF8))
                 {
                     writer.WriteLine(DOCUMENT_HEADER);
 
@@ -98,7 +98,7 @@ namespace ROWM.Controllers
 
             using (var s = new MemoryStream())
             {
-                using (var writer = new StreamWriter(s))
+                using (var writer = new StreamWriter(s, System.Text.Encoding.UTF8))
                 {
                     writer.WriteLine("Parcel ID,Owner,ROE Status,Conditions,Date");
 
@@ -142,7 +142,7 @@ namespace ROWM.Controllers
 
             using (var s = new MemoryStream())
             {
-                using (var writer = new StreamWriter(s))
+                using (var writer = new StreamWriter(s, System.Text.Encoding.UTF8))
                 {
                     writer.WriteLine(ContactExport2.Header());
 
@@ -178,7 +178,7 @@ namespace ROWM.Controllers
 
             using (var s = new MemoryStream())
             {
-                using (var writer = new StreamWriter(s))
+                using (var writer = new StreamWriter(s, System.Text.Encoding.UTF8))
                 {
                     writer.WriteLine(ContactExport.Header());
 
