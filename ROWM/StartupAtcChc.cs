@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using geographia.ags;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Serialization;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using Microsoft.AspNetCore.Http.Features;
-using geographia.ags;
-using SharePointInterface;
 using ROWM.Dal;
+using SharePointInterface;
 
 namespace ROWM
 {
@@ -31,6 +24,7 @@ namespace ROWM
             services.AddCors();
 
             // Add framework services.
+            services.AddApplicationInsightsTelemetry();
             services.AddMvc()
                 .AddJsonOptions(o =>
                 {
@@ -46,18 +40,21 @@ namespace ROWM
             var cs = Configuration.GetConnectionString("ROWM_Context");
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {
-               return new ROWM.Dal.ROWM_Context(cs);
+                return new ROWM.Dal.ROWM_Context(cs);
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddScoped<ROWM.Dal.ContactInfoRepository>();
             services.AddScoped<ROWM.Dal.StatisticsRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
+            services.AddScoped<DeleteHelper>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new DocTypes(fac.GetRequiredService<ROWM_Context>()));
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, AtcParcel>(fac =>
                 new AtcParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/California/ATC_CHC_Parcel_FS/FeatureServer"));
-            services.AddScoped<ISharePointCRUD, SharePointCRUD>();
+            services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac =>
+                new SharePointCRUD("14e5814e-95f9-4aee-9890-e82fa00b323f", "Mc2nMSCT0Rq2AcR5vrzDAH38dqdUh6R/wHPS/EmjTgc=", "https://atcpmp.sharepoint.com/line6943",
+                d: fac.GetRequiredService<DocTypes>()));
 
             services.AddSingleton<SiteDecoration, AtcChc>();
 
@@ -67,7 +64,7 @@ namespace ROWM
             });
             services.ConfigureSwaggerGen(o =>
             {
-               o.OperationFilter<FileOperation>();
+                o.OperationFilter<FileOperation>();
             });
         }
 
@@ -76,7 +73,7 @@ namespace ROWM
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-            
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

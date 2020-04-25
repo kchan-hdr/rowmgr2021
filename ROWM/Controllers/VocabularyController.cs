@@ -35,7 +35,7 @@ namespace ROWM.Controllers
             r.Parcel_Fc = _repo.GetLayers().Where(lx => lx.LayerType == LayerType.Parcel).FirstOrDefault();
             r.Reference_MapLayer = _repo.GetLayers().Where(lx => lx.LayerType == LayerType.Reference).FirstOrDefault();
 
-            var ( t,d) = await _ags.Token();
+            var (t, d) = await _ags.Token();
             r.Token = t;
             r.Expiration = d;
 
@@ -54,7 +54,7 @@ namespace ROWM.Controllers
             var rStatus = _Context.Roe_Status.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
             var llScore = _Context.Landowner_Score.Where(s => s.IsActive ?? false).OrderBy(s => s.DisplayOrder);
 
-            return new Vocabulary(agents,channels,purposes,rels, pStatus, rStatus, llScore);
+            return new Vocabulary(agents, channels, purposes, rels, pStatus, rStatus, llScore);
         }
 
         [HttpGet("api/DocTypes")]
@@ -67,7 +67,7 @@ namespace ROWM.Controllers
         /// <returns></returns>
         [HttpGet("SharePoint/{folder}")]
         public string GetSharePoint(string folder) => _sp.GetParcelFolderURL(folder, string.Empty);
-        
+
         #region lookups
         public class Lookup
         {
@@ -87,9 +87,9 @@ namespace ROWM.Controllers
             public IEnumerable<Lookup> Score { get; set; }
 
             internal Vocabulary(
-                IEnumerable<Agent> agents, 
-                IEnumerable<Contact_Channel> channels, 
-                IEnumerable<Contact_Purpose> purposes, 
+                IEnumerable<Agent> agents,
+                IEnumerable<Contact_Channel> channels,
+                IEnumerable<Contact_Purpose> purposes,
                 IEnumerable<Repesentation_Type> rels,
                 IEnumerable<Parcel_Status> p,
                 IEnumerable<Roe_Status> r,

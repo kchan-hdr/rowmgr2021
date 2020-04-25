@@ -120,6 +120,7 @@
     <Compile Include="Repesentation_Type.cs" />
     <Compile Include="Repository\AppRepository.cs" />
     <Compile Include="Repository\ContactInfoRepository.cs" />
+    <Compile Include="Repository\DeleteHelper.cs" />
     <Compile Include="Repository\OwnerRepository.cs" />
     <Compile Include="Repository\StatisticsRepository.cs" />
     <Compile Include="RoeCondition.cs" />

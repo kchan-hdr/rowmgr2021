@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using geographia.ags;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Serialization;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using Microsoft.AspNetCore.Http.Features;
-using geographia.ags;
+using ROWM.Dal;
 using SharePointInterface;
-using WebEssentials.AspNetCore.Pwa;
 
 namespace ROWM
 {
@@ -45,17 +38,8 @@ namespace ROWM
             services.AddCors();
 
             // Add framework services.
-            services.AddMvc( c => c.Conventions.Add(new SwaggerIgnores()))
-                .AddJsonOptions(o =>
-                {
-                    o.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-                });
-
-            services.AddProgressiveWebApp(new PwaOptions
-            {
-                RoutesToPreCache = "/, /js/index.js",
-                Strategy= ServiceWorkerStrategy.CacheFirst
-            });
+            services.AddApplicationInsightsTelemetry();
+            services.AddMvc();
 
             services.Configure<FormOptions>(o =>
             {
@@ -66,18 +50,22 @@ namespace ROWM
             var cs = Configuration.GetConnectionString("ROWM_Context");
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {
-               return new ROWM.Dal.ROWM_Context(cs);
+                return new ROWM.Dal.ROWM_Context(cs);
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddScoped<ROWM.Dal.ContactInfoRepository>();
             services.AddScoped<ROWM.Dal.StatisticsRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
+            services.AddScoped<DeleteHelper>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, AtcParcel>(fac =>
                 new AtcParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/California/ATC_Line862_Parcel_FS/FeatureServer"));
-            services.AddScoped<ISharePointCRUD, SharePointCRUD>();
+
+            services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac => new SharePointCRUD("e8d38b84-11bb-43df-b07d-a549b05eab19", "/kzpHsp4A8NXWYyhGOGI8LmA8jdBwZCtKjqLrfN3W3A=", "https://atcpmp.sharepoint.com/line6943",
+                d: fac.GetRequiredService<Dal.DocTypes>()));
+
 
             services.AddSingleton<SiteDecoration, Atc862>();
 
@@ -87,7 +75,7 @@ namespace ROWM
             });
             services.ConfigureSwaggerGen(o =>
             {
-               o.OperationFilter<FileOperation>();
+                o.OperationFilter<FileOperation>();
             });
         }
 
@@ -96,7 +84,7 @@ namespace ROWM
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-            
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

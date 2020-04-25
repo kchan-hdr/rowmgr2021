@@ -53,6 +53,8 @@ namespace ROWM.Dal
 
         public DateTimeOffset? LastModified { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         [StringLength(50)]
         public string ModifiedBy { get; set; }
 

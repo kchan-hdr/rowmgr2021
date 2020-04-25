@@ -1,8 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Security;
 using Microsoft.SharePoint.Client;
 using OfficeDevPnP.Core;
+using System.Text.RegularExpressions;
 using ROWM.Dal;
 using System.Diagnostics;
 
@@ -40,71 +44,29 @@ namespace SharePointInterface
         private string _appId = "";
         private string _appSecret = "";
 
-        public SharePointCRUD(string __appId = null, string __appSecret = null, string _url = null, DocTypes d = null) // Dictionary<string,string> docTypes = null)
+        public SharePointCRUD (string __appId = null, string __appSecret = null, string _url = null, DocTypes d = null) // Dictionary<string,string> docTypes = null)
         {
             _docTypes = d;
 
             //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
-            _siteUrl = _STAGING_SITE_URL; // "https://b2hpm.sharepoint.com";
+            _siteUrl = string.IsNullOrWhiteSpace(_url) ? _STAGING_SITE_URL : _url;
 
-
-            /*
-             * STAGING---
-             * 
-             * The app identifier has been successfully created.
-            Client Id:  	26589ee5-16ef-4444-9143-cfea08cba1cc
-            Client Secret:  	B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=
-            Title:  	rowm_staging
-            App Domain:  	rowm_staging.hdrinc.com
-            Redirect URI:  	https://rowm_staging.hdrinc.com
-             
-                The app identifier has been successfully created.
-                Client Id:  	3dff29b2-ae04-4ad4-8149-eb703d62b16f
-                Client Secret:  	bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=
-            Title:  	rowm_staging
-                App Domain:  	b2hrowmgr.hdrinc.com
-                Redirect URI:  	https://b2hrowmgr.hdrinc.com
-
-
-            The app identifier has been successfully created.
-Client Id:  	cffcadac-22ec-433f-a045-4a1d79527554
-Client Secret:  	PACWIOp2J6+T9m2mZ3y1mCZ2J77rO8Qa9rFSSFBhoGg=
-Title:  	rowmgr
-App Domain:  	www.denver-rowmgr.com
-Redirect URI:  	https://denver-rowmgr.azurewebsites.net
-             */
-
-            if (_appId == null || _appSecret == null)
+            if (__appId == null || __appSecret == null )
             {
-                _appId = "26589ee5-16ef-4444-9143-cfea08cba1cc";
-                _appSecret = "d4M24Cq7r4ZcHraDHBmB6LVNfMzs/e6Ya5/TzP4/svk=";
-
-                _appId = "cffcadac-22ec-433f-a045-4a1d79527554";
-                _appSecret = "PACWIOp2J6+T9m2mZ3y1mCZ2J77rO8Qa9rFSSFBhoGg=";
-                _appId = "3dff29b2-ae04-4ad4-8149-eb703d62b16f";
-                _appSecret = "oif0sPwxh6sYljG3IPGAIZJiG6ed40FcFci7AOaJDUQ=";// "bpzSZDM/Q9GjwOr3QN9HCODgqTWVVX9kEmNya0Fo1g4=";
-
-                //_appId = "baa9400f-d050-4564-9394-71e71b8feacd";
-                //_appSecret = "OZErYD66RxGIVU8nss+w5v8izHMSOkHf8wB+bBwO9Vw="; // "ysRb00LnnPrY1yB+bPfeFTN1bAnuuQEp43mrr6Tqp3k=";
-                _siteUrl = string.IsNullOrWhiteSpace(_url) ? _STAGING_SITE_URL : _url;
-
-                if (__appId == null || __appSecret == null)
-                {
-                    _appId = "e8d38b84-11bb-43df-b07d-a549b05eab19";
-                    _appSecret = "/kzpHsp4A8NXWYyhGOGI8LmA8jdBwZCtKjqLrfN3W3A=";
-                    _siteUrl = "https://atcpmp.sharepoint.com/line6943";
-                }
-                else
-                {
-                    _appId = __appId;
-                    _appSecret = __appSecret;
-                    _siteUrl = _url;
-                }
-
-                // override site url
-                if (!string.IsNullOrWhiteSpace(_url))
-                    _siteUrl = _url;
+                _appId = "e8d38b84-11bb-43df-b07d-a549b05eab19";
+                _appSecret = "/kzpHsp4A8NXWYyhGOGI8LmA8jdBwZCtKjqLrfN3W3A=";
+                _siteUrl = "https://atcpmp.sharepoint.com/line6943";
             }
+            else
+            {
+                _appId = __appId;
+                _appSecret = __appSecret;
+                _siteUrl = _url;
+            }
+
+            // override site url
+            if (!string.IsNullOrWhiteSpace(_url))
+                _siteUrl = _url;
         }
 
         ClientContext MyContext()
@@ -143,10 +105,7 @@ Redirect URI:  	https://denver-rowmgr.azurewebsites.net
         {
             if (String.IsNullOrWhiteSpace(baseFolderName))
             {
-                // this doesn't make sense
-                // baseFolderName = string.IsNullOrWhiteSpace(baseFolderName) ? $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}" : $"{_DOCUMENT_LIST_BASE}/{baseFolderName}";
-
-                baseFolderName = string.IsNullOrWhiteSpace(_parcelsFolderName) ? _DOCUMENT_LIST_BASE : $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}";
+                baseFolderName = string.IsNullOrWhiteSpace(baseFolderName) ? $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}" : $"{_DOCUMENT_LIST_BASE}/{baseFolderName}";
             }
             if (String.IsNullOrWhiteSpace(folderTemplate))
             {
@@ -165,7 +124,6 @@ Redirect URI:  	https://denver-rowmgr.azurewebsites.net
             ctx.Load(list);
             ctx.Load(baseFolder);
             ctx.ExecuteQuery();
-
 
 
             if (baseFolder.FolderExists(folderName))
@@ -506,14 +464,16 @@ Redirect URI:  	https://denver-rowmgr.azurewebsites.net
             return isFolderPasted;
         }
 
-        static string CleanInput(string strIn)
+        public static string CleanInput(string strIn)
         {
             // Replace invalid characters with empty strings.
             // ~, \, /, :, *, ?, ", <, >, | , # , %
             try
             {
-                return Regex.Replace(strIn, @"[^,\w\s\.@-]", "",
+                var s = Regex.Replace(strIn, @"[^,\w\s\.@-]", "",
                                      RegexOptions.None, TimeSpan.FromSeconds(1.5));
+
+                return s.Trim('.', ' ');     // folder/file names cannot start or end with '.'  -- not in documentation, so need to check
             }
             // If we timeout when replacing invalid characters, 
             // we should return Empty.
