@@ -22,7 +22,7 @@ namespace ExcelExport.Test
         public void Agent_Log_Export()
         {
             // arrange
-            var repo = new ROWM.Dal.OwnerRepository( new ROWM.Dal.ROWM_Context(ROWM.Dal.DbConnection.GetConnectionString()));
+            var repo = new ROWM.Dal.OwnerRepository( new ROWM.Dal.ROWM_Context());
             var logs = repo.GetLogs();
 
             var d = logs.SelectMany(lx => lx.Parcel.Select( p => new AgentLogExport.AgentLog

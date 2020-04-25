@@ -17,7 +17,7 @@ namespace ROWM.Dal.Test
         [TestInitialize]
         public void Init()
         {
-            myCtx = new ROWM_Context(DbConnection.GetConnectionString());
+            myCtx = new ROWM_Context();
         }
 
         [TestMethod, TestCategory("DAL")]
@@ -61,7 +61,7 @@ namespace ROWM.Dal.Test
         public async Task Simple_Parcel_Speed()
         {
             var repo = new OwnerRepository(myCtx);
-            var repo2 = new ParcelRepository(myCtx);
+            //var repo2 = new ParcelRepository(myCtx);
             var ps = repo.GetParcels();
             Assert.IsNotNull(ps);
             Assert.AreNotEqual(0, ps.Count());
@@ -69,13 +69,13 @@ namespace ROWM.Dal.Test
             var watch = new Stopwatch();
             watch.Start();
 
-            foreach( var p in ps)
-            {
-                var parcel = repo2.GetParcel(p);
-                Assert.IsNotNull(parcel);
-                Assert.AreEqual(p, parcel.ParcelId);
-                //Assert.IsNotNull(parcel.Owners);
-            }
+            //foreach( var p in ps)
+            //{
+            //    var parcel = repo2.GetParcel(p);
+            //    Assert.IsNotNull(parcel);
+            //    Assert.AreEqual(p, parcel.ParcelId);
+            //    //Assert.IsNotNull(parcel.Owners);
+            //}
 
             watch.Stop();
             Trace.TraceInformation($"elapse {watch.ElapsedMilliseconds}");

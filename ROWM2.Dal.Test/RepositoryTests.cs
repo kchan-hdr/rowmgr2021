@@ -15,7 +15,7 @@ namespace ROWM2.Dal.Test
         public void Init()
         {
             _repo = new StatisticsRepository(
-                new ROWM_Context(DbConnection.GetConnectionString()));
+                new ROWM_Context());
         }
 
         [TestMethod, TestCategory("DAL Repo")]

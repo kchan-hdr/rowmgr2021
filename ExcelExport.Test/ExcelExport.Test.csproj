@@ -88,9 +88,9 @@
       <Project>{04c417c5-b978-42aa-a648-fe51ea68670c}</Project>
       <Name>ExcelExport</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ROWM2.Dal\ROWM2.Dal.csproj">
-      <Project>{23d465b8-d88e-4979-ad4e-891b744d6d1e}</Project>
-      <Name>ROWM2.Dal</Name>
+    <ProjectReference Include="..\ROWM3.Dal\ROWM3.Dal.csproj">
+      <Project>{d9838f13-bb90-4b23-9192-95fedba58696}</Project>
+      <Name>ROWM3.Dal</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
