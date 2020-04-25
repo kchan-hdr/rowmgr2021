@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -76,7 +76,8 @@ namespace ROWM.Controllers
         public IActionResult GetFile(Guid docId)
         {
             var v = _repo.GetDocument(docId);
-            return File(v.Content, v.ContentType ?? "application/pdf", v.SourceFilename);
+            var filename = $"{v.Title}{System.IO.Path.GetExtension(v.SourceFilename)}";
+            return File(v.Content, v.ContentType ?? "application/pdf", fileDownloadName: filename);
         }
 
         // Get the default form options so that we can use them to set the default limits for

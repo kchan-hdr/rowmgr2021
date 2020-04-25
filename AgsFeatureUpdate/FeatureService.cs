@@ -146,7 +146,6 @@ namespace geographia.ags
             return good;
         }
 
-
         public virtual async Task<IEnumerable<T>> GetAll<T>(string query, Func<JArray, IEnumerable<T>> parser)
         {
             if (parser == null)
