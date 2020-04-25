@@ -1,14 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using geographia.ags;
 using Microsoft.AspNetCore.Mvc;
 using ROWM.Dal;
-using System.Diagnostics;
-using System.IO;
-using geographia.ags;
+using ROWM.Models;
 using SharePointInterface;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace ROWM.Controllers
 {
@@ -23,27 +23,28 @@ namespace ROWM.Controllers
         readonly OwnerRepository _repo;
         readonly ContactInfoRepository _contactRepo;
         readonly StatisticsRepository _statistics;
+        readonly DeleteHelper _delete;
         readonly ParcelStatusHelper _statusHelper;
+        readonly UpdateParcelStatus2 _updater;
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
 
-        public RowmController(ROWM_Context ctx, OwnerRepository r, ContactInfoRepository c, StatisticsRepository sr, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
+        public RowmController(ROWM_Context ctx, OwnerRepository r, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, UpdateParcelStatus2 u, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
         {
             _ctx = ctx;
             _repo = r;
             _contactRepo = c;
+            _delete = del;
             _statistics = sr;
             _statusHelper = h;
             _featureUpdate = f;
             _spDocument = s;
+            _updater = u;
         }
         #endregion
         #region owner
         [Route("owners/{id:Guid}"), HttpGet]
-        public async Task<OwnerDto> GetOwner(Guid id)
-        {
-            return new OwnerDto(await _repo.GetOwner(id));
-        }
+        public async Task<OwnerDto> GetOwner(Guid id) => new OwnerDto(await _repo.GetOwner(id));
 
         [Route("owners"), HttpGet]
         public async Task<IEnumerable<OwnerDto>> FindOwner(string name)
@@ -169,13 +170,30 @@ namespace ROWM.Controllers
             return Json(new ContactInfoDto(newc));
         }
 
+        [HttpDelete("contacts/{cid:Guid}")]
+        public async Task<IActionResult> DeleteContact(Guid cid)
+        {
+            if (await _delete.DeleteContact(cid, User.Identity.Name))
+                return Ok();
+            else
+                return BadRequest();
+        }
+
         private async Task<ContactInfo> CheckBusiness(ContactInfo c, ContactRequest r)
         {
             if (string.IsNullOrWhiteSpace(r.BusinessName))
+            {
+                if (c.OrganizationId.HasValue)
+                {
+                    c.OrganizationId = null;
+                    c.Affiliation = null;
+                }
+
                 return c;
+            }
 
             var org = await _contactRepo.FindOrganization(r.BusinessName);
-            if ( org == null )
+            if (org == null)
             {
                 org = new Organization { Name = r.BusinessName };
             }
@@ -188,9 +206,10 @@ namespace ROWM.Controllers
                 Trace.TraceWarning($"changing affilitation for {c.FirstName} to {org.Name}");
             }
 
-            c.Affiliation = org ;
+            c.Affiliation = org;
             return c;
         }
+
         static geographia.ags.ReservoirParcel.ContactInfo_dto Convert(ContactInfo c) =>
             new ReservoirParcel.ContactInfo_dto
             {
@@ -217,7 +236,7 @@ namespace ROWM.Controllers
         #region parcel
         [Route("parcels"), HttpGet]
         public IEnumerable<string> GetAllParcels() => _repo.GetParcels();
-        
+
 
         [Route("parcels/{pid}"), HttpGet]
         public async Task<ActionResult<ParcelGraph>> GetParcel(string pid)
@@ -226,7 +245,7 @@ namespace ROWM.Controllers
             if (p == null)
                 return BadRequest();
 
-            return Json( new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid)));
+            return Json(new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid)));
         }
         #region offer
         [Route("parcels/{pid}/initialOffer"), HttpPut]
@@ -239,7 +258,7 @@ namespace ROWM.Controllers
             var offer_t = offer.OfferType?.Trim().ToLower() ?? "";
 
             var p = await _repo.GetParcel(pid);
-            switch( offer_t)
+            switch (offer_t)
             {
                 case "roe":
                     p.InitialROEOffer_OfferDate = offer.OfferDate;
@@ -318,7 +337,7 @@ namespace ROWM.Controllers
                 AcquisitionStatus = statusCode,
                 ModifiedBy = User?.Identity?.Name ?? _APP_NAME
             };
-            
+
             await ud.Apply();
 
             //List<Task> tks = new List<Task>();
@@ -450,12 +469,12 @@ namespace ROWM.Controllers
 
             logRequest.ParcelIds.Add(pid);
             var myParcels = logRequest.ParcelIds.Distinct();
-            if ( ! await RecordParcelFirstContact(myParcels))
+            if (!await RecordParcelFirstContact(myParcels))
             {
                 Trace.TraceWarning($"AddContactLog:: update feature status for '{pid}' failed");
             }
 
-            //await UpdateLandownerScore(logRequest.Score, dt, myParcels); b2h
+            // await UpdateLandownerScore(logRequest.Score, dt, myParcels);
 
             var l = new ContactLog
             {
@@ -474,6 +493,7 @@ namespace ROWM.Controllers
             };
 
             var log = await _repo.AddContactLog(myParcels, logRequest.ContactIds, l);
+            var touched = await PromptStatus(myParcels);
 
             var sites = _featureUpdate as ReservoirParcel;
             if (sites != null)
@@ -483,7 +503,7 @@ namespace ROWM.Controllers
                 await sites.Update(logx);
             }
 
-            if ( !string.IsNullOrWhiteSpace(logRequest.MapExportUrl))
+            if (!string.IsNullOrWhiteSpace(logRequest.MapExportUrl))
             {
                 var _helper = new FileAttachmentHelper(_repo, _spDocument);
                 await _helper.Attach(log, logRequest.ParcelIds, logRequest.MapExportUrl);
@@ -501,15 +521,15 @@ namespace ROWM.Controllers
             var p = await _repo.GetParcel(pid);
             var a = await _repo.GetAgent(logRequest.AgentName);
             var l = p.ContactLog.Single(cx => cx.ContactLogId == lid);
-            
-            //l.ContactAgent = a;
-            //l.ContactChannel = logRequest.Channel;
-            //l.ProjectPhase = logRequest.Phase;
-            //l.DateAdded = logRequest.DateAdded;
+
+            l.Agent = a;
+            l.ContactChannel = logRequest.Channel;
+            l.ProjectPhase = logRequest.Phase;
+            l.DateAdded = logRequest.DateAdded;
             l.Title = logRequest.Title;
             l.Notes = logRequest.Notes;
             l.Landowner_Score = logRequest.Score;
-            //l.Created = dt;
+            l.Created = dt;
             l.LastModified = dt;
             l.ModifiedBy = _APP_NAME;
             //l.Parcels = new List<Parcel> { p };
@@ -519,16 +539,37 @@ namespace ROWM.Controllers
             var myParcels = logRequest.ParcelIds.Distinct();
             await UpdateLandownerScore(logRequest.Score, dt, myParcels);
 
-            var log = await _repo.UpdateContactLog(logRequest.ParcelIds, logRequest.ContactIds, l);
+            var log = await _repo.UpdateContactLog(myParcels, logRequest.ContactIds, l);
+            var touched = await PromptStatus(myParcels);
 
             var sites = _featureUpdate as ReservoirParcel;
             if (sites != null)
             {
                 var logx = Convert(log);
-                logx.APN = logRequest.ParcelIds.ToArray(); 
+                logx.APN = logRequest.ParcelIds.ToArray();
                 await sites.Update(logx);
             }
             return Json(new ContactLogDto(log));
+        }
+
+        async Task<int> PromptStatus(IEnumerable<string> pids)
+        {
+            // way too convoluted. TODO: 2020.3.24
+            //
+
+            var touched = 0;
+            foreach (var p in pids)
+            {
+                var parcel = await _repo.GetParcel(p);
+                var (t, s) = await _updater.DoUpdate(parcel);
+                if (t)
+                {
+                    touched++;
+                    await UpdateStatus(p, s.Code);
+                }
+            }
+
+            return touched;
         }
 
         static ReservoirParcel.ContactLog_dto Convert(ContactLog log)
@@ -582,7 +623,7 @@ namespace ROWM.Controllers
         async Task<int> UpdateLandownerScore(int score, DateTimeOffset ts, IEnumerable<string> parcelIds)
         {
             var touched = 0;
-            if (score >= 0 && score <= 3)
+            if (score >= 0 && score <= 2)
             {
                 var tasks = new List<Task>();
 
@@ -590,7 +631,7 @@ namespace ROWM.Controllers
                 {
                     var p = await _repo.GetParcel(pid);
                     var oldValue = p.Landowner_Score;
-                    if ( oldValue != score)
+                    if (oldValue != score)
                     {
                         p.Landowner_Score = score;
                         p.LastModified = ts;
@@ -730,7 +771,7 @@ namespace ROWM.Controllers
     public class ContactLogDto
     {
         public Guid ContactLogId { get; set; }
-        public IEnumerable<string> ParcelIds { get; set; }
+        public IEnumerable<RelatedParcelHeader> ParcelIds { get; set; }
         public IEnumerable<ContactInfoDto> ContactIds { get; set; }
         public DateTimeOffset DateAdded { get; set; }
         public string ContactType { get; set; }
@@ -747,13 +788,26 @@ namespace ROWM.Controllers
             DateAdded = log.DateAdded;
             ContactType = log.ContactChannel;
 
-            ParcelIds = log.Parcel.Select(px => px.Assessor_Parcel_Number);
+            ParcelIds = log.Parcel.Select(px => new RelatedParcelHeader(px));
             ContactIds = log.ContactInfo.Select(cx => new ContactInfoDto(cx));
 
             Phase = log.ProjectPhase;
             Title = log.Title;
             Notes = log.Notes;
             Score = log.Landowner_Score ?? 0;
+        }
+    }
+
+    public class RelatedParcelHeader
+    {
+        public Guid ParcelId { get; set; }
+        public string APN { get; set; }
+        public string Tracking { get; set; }
+        public RelatedParcelHeader(Parcel p)
+        {
+            this.ParcelId = p.ParcelId;
+            this.APN = p.Assessor_Parcel_Number;
+            this.Tracking = p.Tracking_Number;
         }
     }
 
@@ -812,29 +866,34 @@ namespace ROWM.Controllers
         public Guid OwnerId { get; set; }
         public string PartyName { get; set; }
         public string OwnerAddress { get; set; }
+        public string OwnerType { get; set; }
+        public int OwnershipType { get; set; }
         public IEnumerable<ParcelHeaderDto> OwnedParcel { get; set; }
         public IEnumerable<ContactInfoDto> Contacts { get; set; }
         public IEnumerable<ContactLogDto> ContactLogs { get; set; }
         public IEnumerable<DocumentHeader> Documents { get; set; }
 
-        public OwnerDto( Owner o)
+        public OwnerDto(Owner o, int oType = 1)
         {
             OwnerId = o.OwnerId;
             PartyName = o.PartyName;
             OwnerAddress = o.OwnerAddress;
+            OwnerType = o.OwnerType;
+            OwnershipType = oType;
 
-            OwnedParcel = o.Ownership.Where(ox=>ox.Parcel.IsActive).Select(ox=> new ParcelHeaderDto(ox));
-            Contacts = o.ContactInfo.Select(cx => new ContactInfoDto(cx));
+            OwnedParcel = o.Ownership.Where(ox => ox.Parcel.IsActive).Select(ox => new ParcelHeaderDto(ox));
+            Contacts = o.ContactInfo.Where(cx => !cx.IsDeleted).Select(cx => new ContactInfoDto(cx));
             ContactLogs = o.ContactInfo
-                .Where( cx => cx.ContactLog != null )
-                .SelectMany( cx => cx.ContactLog.Select( cxl => new ContactLogDto(cxl ))); //  o.ContactLogs.Select(cx => new ContactLogDto(cx));
-            Documents = o.Document.Select(dx => new DocumentHeader(dx));
+                .Where(cx => cx.ContactLog != null)
+                .SelectMany(cx => cx.ContactLog.Select(cxl => new ContactLogDto(cxl))); //  o.ContactLogs.Select(cx => new ContactLogDto(cx));
+            Documents = o.Document.Where(dx => !dx.IsDeleted).Select(dx => new DocumentHeader(dx));
         }
     }
 
     public class ParcelHeaderDto
     {
         public string ParcelId { get; set; }
+        public string TractNo { get; set; }
         public string SitusAddress { get; set; }
         public bool IsPrimaryOwner { get; set; }
 
@@ -848,6 +907,7 @@ namespace ROWM.Controllers
         internal ParcelHeaderDto(Ownership o)
         {
             ParcelId = o.Parcel.Assessor_Parcel_Number;
+            TractNo = o.Parcel.Tracking_Number;
             SitusAddress = o.Parcel.SitusAddress;
             IsPrimaryOwner = o.IsPrimary(); // .Ownership_t == Ownership.OwnershipType.Primary;
 
@@ -886,7 +946,7 @@ namespace ROWM.Controllers
         public IEnumerable<ContactLogDto> ContactsLog { get; set; }
         public IEnumerable<DocumentHeader> Documents { get; set; }
 
-        internal ParcelGraph( Parcel p, IEnumerable<Document> d)
+        internal ParcelGraph(Parcel p, IEnumerable<Document> d)
         {
             ParcelId = p.Assessor_Parcel_Number;
             TractNo = p.Tracking_Number;
@@ -906,9 +966,9 @@ namespace ROWM.Controllers
             FinalOptionOffer = OfferHelper.MakeCompensation(p, "FinalOption");
             FinalROEOffer = OfferHelper.MakeCompensation(p, "FinalROE");
 
-            Owners = p.Ownership.Select( ox => new OwnerDto(ox.Owner));
-            ContactsLog =  p.ContactLog.Select( cx => new ContactLogDto(cx));
-            Documents = d.Select(dx => new DocumentHeader(dx));
+            Owners = p.Ownership.Select(ox => new OwnerDto(ox.Owner, ox.Ownership_t));
+            ContactsLog = p.ContactLog.Where(cx => !cx.IsDeleted).Select(cx => new ContactLogDto(cx));
+            Documents = d.Where(dx => !dx.IsDeleted).Select(dx => new DocumentHeader(dx));
         }
     }
     #endregion

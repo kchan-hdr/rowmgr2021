@@ -13,6 +13,9 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Http.Features;
 using geographia.ags;
 using SharePointInterface;
+using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
+using ROWM.Models;
+using ROWM.Dal;
 
 namespace ROWM
 {
@@ -36,6 +39,7 @@ namespace ROWM
             services.AddCors();
 
             // Add framework services.
+            services.AddApplicationInsightsTelemetry();
             services.AddMvc()
                 .AddJsonOptions(o =>
                 {
@@ -56,14 +60,19 @@ namespace ROWM
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
+            services.AddScoped<ROWM.Dal.ContactInfoRepository>();
             services.AddScoped<ROWM.Dal.StatisticsRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
-            services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
+            services.AddScoped<DeleteHelper>();
+            services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(fac.GetRequiredService<ROWM_Context>()));
             services.AddScoped<Controllers.ParcelStatusHelper>();
+            services.AddScoped<UpdateParcelStatus2>();
             services.AddScoped<IFeatureUpdate, DenverParcel>( fac => 
-                new DenverParcel("https://gis05.hdrgateway.com/arcgis/rest/services/California/DW_Parcel_FS/FeatureServer") 
+                new DenverParcel("https://gis05.hdrgateway.com/arcgis/rest/services/California/DW_Parcel_FS_prod/FeatureServer") 
             );
-            services.AddScoped<ISharePointCRUD, SharePointCRUD>();
+            services.AddScoped<ISharePointCRUD, DenverNoOp>();
+
+            services.AddSingleton<SiteDecoration, Dw>();
 
             services.AddSwaggerGen(c =>
             {

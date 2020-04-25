@@ -13,6 +13,11 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Http.Features;
 using geographia.ags;
 using SharePointInterface;
+using ROWM.Dal;
+using Microsoft.Azure.Services.AppAuthentication;
+using Microsoft.Azure.KeyVault;
+using Microsoft.AspNetCore.Mvc;
+using ROWM.Models;
 
 namespace ROWM
 {
@@ -36,6 +41,7 @@ namespace ROWM
             services.AddCors();
 
             // Add framework services.
+            services.AddApplicationInsightsTelemetry();
             services.AddMvc()
                 .AddJsonOptions(o =>
                 {
@@ -56,14 +62,24 @@ namespace ROWM
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
+            services.AddScoped<ROWM.Dal.ContactInfoRepository>();
             services.AddScoped<ROWM.Dal.StatisticsRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
-            services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
+            services.AddScoped<DeleteHelper>();
+            services.AddScoped<ROWM.Dal.DocTypes>(fac => new DocTypes(fac.GetRequiredService<ROWM_Context>()));
             services.AddScoped<Controllers.ParcelStatusHelper>();
+            services.AddScoped<UpdateParcelStatus2>();
             services.AddScoped<IFeatureUpdate, DenverParcel>( fac => 
                 new DenverParcel("https://gis05s.hdrgateway.com/arcgis/rest/services/California/DW_Parcel_FS/FeatureServer") 
             );
-            services.AddScoped<ISharePointCRUD, SharePointCRUD>();
+
+            var msi = new AzureServiceTokenProvider();
+            var vaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(msi.KeyVaultTokenCallback));
+            var appid = vaultClient.GetSecretAsync("https://denver-dev-keys.vault.azure.net/", "sharepoint-client-id").GetAwaiter().GetResult();
+            var apps = vaultClient.GetSecretAsync("https://denver-dev-keys.vault.azure.net/", "sharepoint-api").GetAwaiter().GetResult();
+            services.AddScoped<ISharePointCRUD, DenverNoOp>();
+
+            services.AddSingleton<SiteDecoration, Dw>();
 
             services.AddSwaggerGen(c =>
             {

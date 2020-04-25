@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 using ROWM.Dal;
+using ROWM.Models;
 using SharePointInterface;
 using System;
 using System.Collections.Generic;
@@ -24,20 +25,24 @@ namespace ROWM.Controllers
     public class DocumentController : Controller
     {
         static readonly string _APP_NAME = "ROWM";
+        #region ctor            
         private readonly ISharePointCRUD _sharePointCRUD;
+        private readonly UpdateParcelStatus2 _updater;
         private readonly ParcelStatusHelper _statusHelper;
         private readonly DocTypes _docTypes;
 
-        #region ctor
+        readonly ROWM_Context _ctx;
         readonly OwnerRepository _repo;
         readonly IFeatureUpdate _featureUpdate;
         readonly DeleteHelper _deleteHelper;
 
-        public DocumentController(OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, IFeatureUpdate f, DeleteHelper del, DocTypes d)
+        public DocumentController(ROWM_Context c, OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, UpdateParcelStatus2 u, IFeatureUpdate f, DeleteHelper del, DocTypes d)
         {
+            _ctx = c;
             _repo = r;
             _deleteHelper = del;
             _sharePointCRUD = sp;
+            _updater = u;
             _featureUpdate = f;
             _statusHelper = h;
             _docTypes = d;
@@ -52,7 +57,7 @@ namespace ROWM.Controllers
         {
             if (await _deleteHelper.DeleteDocument(docId, User.Identity.Name))
                 return Ok();
-            else 
+            else
                 return BadRequest();
         }
 
@@ -372,7 +377,18 @@ namespace ROWM.Controllers
             {
                 var myParcel = await _repo.GetParcel(pid);
                 myParcel.Document.Add(d);
-                await _repo.UpdateParcel(myParcel);
+
+                var (t, s) = await _updater.DoUpdate(myParcel);
+                if (t)
+                {
+                    var ud = new UpdateParcelStatus(new Parcel[] { myParcel }, agent, context: _ctx, _repo, _featureUpdate, _statusHelper)
+                    {
+                        AcquisitionStatus = s.Code,
+                        ModifiedBy = User?.Identity?.Name ?? _APP_NAME
+                    };
+
+                    await ud.Apply();
+                }
 
                 header.DocumentId = d.DocumentId;
 
@@ -382,12 +398,12 @@ namespace ROWM.Controllers
                 try
                 {
                     //_sharePointCRUD.UploadParcelDoc(parcelName, "Other", sourceFilename, bb, null);
-                    _sharePointCRUD.UploadParcelDoc(parcelName, header.DocumentType, sourceFilename, bb, null);
-                    string parcelDocUrl = _sharePointCRUD.GetParcelFolderURL(parcelName, null);
-
-                    // bool success = await _featureUpdate.UpdateFeatureDocuments(pid, parcelDocUrl);
-                    bool success = await ParcelStatusEvent(myParcel, parcelDocUrl, header.DocumentType);
-                    await _repo.UpdateParcel(myParcel);
+                    if (_sharePointCRUD.UploadParcelDoc(parcelName, header.DocumentType, sourceFilename, bb, null))
+                    {
+                        string parcelDocUrl = _sharePointCRUD.GetParcelFolderURL(parcelName, null);
+                        bool success = await ParcelStatusEvent(myParcel, parcelDocUrl, header.DocumentType);
+                        await _repo.UpdateParcel(myParcel);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -398,6 +414,7 @@ namespace ROWM.Controllers
 #endif
                 }
             }
+
 
             return Json(header);
         }
