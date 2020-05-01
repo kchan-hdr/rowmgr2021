@@ -68,6 +68,7 @@ namespace ROWM.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            var touched = false;
             var d = _repo.GetDocument(docId);
             d.ApprovedDate = info.ApprovedDate;
             d.ClientSignatureDate = info.ClientSignatureDate;
@@ -86,10 +87,42 @@ namespace ROWM.Controllers
             if (!string.IsNullOrWhiteSpace(info.Title)) // allow title change now, kklc 2020.2.8
                 d.Title = info.Title;
 
+            if (!string.IsNullOrWhiteSpace(info.DocumentType))
+            {
+                d.DocumentType = info.DocumentType;
+                touched = true;
+            }
+
+            // DocumentInfoCopy(d, info);
+
             d.LastModified = DateTimeOffset.Now;
+
+            if (touched)
+                await _updater.DoUpdate(d.Parcel);
 
             return CreatedAtRoute("UpdateDocuMeta", new DocumentInfo(await _repo.UpdateDocument(d)));
         }
+
+        #region DocumentInfo helper (automapper-ish)
+        static Document DocumentInfoCopy(Document origin, DocumentInfo param)
+        {
+            var propsd = origin.GetType().GetProperties().ToDictionary(p => p.Name);
+            var props = param.GetType().GetProperties();
+
+            foreach( var prop in props.Where(px => px.Name != "DocumentId"))
+            {
+                var v = prop.GetValue(param);
+                if (v != null)
+                {
+                    if (propsd.TryGetValue(prop.Name, out var tp))
+                    {
+                        tp.SetValue(origin, v);
+                    }
+                }
+            }
+            return origin;
+        }
+        #endregion
 
         [HttpGet("api/documents/{docId:Guid}")]
         public IActionResult GetFile(Guid docId)
