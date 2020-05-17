@@ -15,6 +15,14 @@ variables:
   buildPlatform: 'AnyCPU'
   buildConfiguration: 'Release'
 
+resources:
+  pipelines:
+    - pipeline: hdrgis.row-services-base
+      source: hdrgis.wharton-row-manager
+      trigger:
+        branches: 
+        - master
+
 steps:
 - task: NuGetToolInstaller@1
 
