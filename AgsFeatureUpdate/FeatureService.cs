@@ -1,13 +1,12 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Polly;
 
 namespace geographia.ags
 {
@@ -18,9 +17,48 @@ namespace geographia.ags
         protected string _URL;
         protected int _LAYERID;
 
+        TokenHelper _tokenHelper;
+
+        #region polly
+
+        #endregion
+
         static FeatureService_Base()
         {
             _Client = new HttpClient();
+        }
+
+        public virtual async Task<T> Layers<T>()
+        {
+            var r = await Policy.Handle<Exception>()
+                .RetryAsync( 3, onRetry: (ex,ec) =>
+                {
+                    Trace.WriteLine(ex.Message);
+                })
+                .ExecuteAsync(() => LayerImpl<T>());
+
+            return r;
+        }
+
+        internal async Task<T> LayerImpl<T> ()
+        { 
+            var q = await AppendToken($"{_URL}?f=json");
+
+            var response = await _Client.GetStringAsync(q);
+            var r = JObject.Parse(response);
+            CheckError(r);
+            return r.ToObject<T>();
+        }
+
+        public virtual async Task<string> Describe(int layerId)
+        {
+            if (layerId < 0)
+                throw new ArgumentOutOfRangeException(nameof(layerId));
+
+            var q = await AppendToken($"{_URL}/{layerId}?f=json");
+            var response = await _Client.GetStringAsync(q);
+            var r = JObject.Parse(response);
+            return response;
         }
 
         public virtual async Task<IEnumerable<int>> Find(int layerId, string query)
@@ -31,7 +69,7 @@ namespace geographia.ags
             if (string.IsNullOrWhiteSpace(query))
                 throw new ArgumentNullException(nameof(query));
 
-            var q = $"{_URL}/{layerId}/query?returnGeometry=fale&returnIdsOnly=true&f=json&where={query}";
+            var q = await AppendToken($"{_URL}/{layerId}/query?returnGeometry=fale&returnIdsOnly=true&f=json&where={query}");
             var response = await _Client.GetStringAsync(q);
             var r = JObject.Parse(response);
 
@@ -40,70 +78,17 @@ namespace geographia.ags
                 Trace.TraceWarning("missing OID field name");
             }
 
-            var idx = r["objectIds"];
+            //var idx = r["objectIds"];
+            var idx = CheckError(r, "objectIds");
             if (idx.Type == JTokenType.Array)
             {
                 var ids = (JArray)idx;
-                return ids.Select<JToken,int>(id => id.Value<int>());
+                return ids.Select<JToken, int>(id => id.Value<int>());
             }
 
-            throw new KeyNotFoundException(query);
+            return default;
+            //throw new KeyNotFoundException(query);
         }
-
-        /// <summary>
-        /// gis05s seems broken
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="query"></param>
-        /// <param name="parser"></param>
-        /// <returns></returns>
-        public virtual async Task<IEnumerable<T>> _GetAll<T>(string query, Func<JArray, IEnumerable<T>> parser)
-        {
-            if (parser == null)
-                throw new ArgumentNullException(nameof(parser));
-
-            if (string.IsNullOrWhiteSpace(query))
-                throw new ArgumentNullException(nameof(query));
-
-            var results = new List<T>();
-            var hasMore = true;
-            var offset = 0;
-            var step = 100;
-
-            while (hasMore)
-            {
-                var myQuery = $"{query}&supportsPagination=true&resultOffset={offset}&resultRecordCount={step}";
-                var response = await _Client.GetAsync(query);
-                response.EnsureSuccessStatusCode();
-
-                var responseText = await response.Content.ReadAsStringAsync();
-                var obj = JObject.Parse(responseText);
-
-                var ff = obj["features"];
-                if ( ff.Type == JTokenType.Array)
-                {
-                    results.AddRange(parser((JArray)ff));
-                }
-
-                hasMore = HasMore(obj);
-                if (hasMore)
-                    offset += step;
-            }
-
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// ArcGIS REST Query response
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        private static bool HasMore(JObject obj)
-        {
-            var good = obj["exceededTransferLimit"]?.Value<bool>() ?? false;
-            return good;
-        }
-
 
         public virtual async Task<IEnumerable<T>> GetAll<T>(string query, Func<JArray, IEnumerable<T>> parser)
         {
@@ -113,16 +98,19 @@ namespace geographia.ags
             if (string.IsNullOrWhiteSpace(query))
                 throw new ArgumentNullException(nameof(query));
 
+            query = await AppendToken(query);
+
             var responseText = await _Client.GetStringAsync(query);
             var obj = JObject.Parse(responseText);
-            var ff = obj["features"];
+            //var ff = obj["features"];
+            var ff = CheckError(obj, "features");
             if (ff.Type == JTokenType.Array)
             {
                 return parser((JArray)ff);
             }
             else
             {
-                return new List<T>();
+                throw new InvalidOperationException(responseText);
             }
         }
 
@@ -134,14 +122,15 @@ namespace geographia.ags
             if (reqContent == null)
                 throw new ArgumentNullException(nameof(reqContent));
 
-            var q = $"{_URL}/{layerId}/updateFeatures";
+            var q = await AppendToken($"{_URL}/{layerId}/updateFeatures");
             var response = await _Client.PostAsync(q, reqContent);
             response.EnsureSuccessStatusCode();
             var responseText = await response.Content.ReadAsStringAsync();
 
             var obj = JObject.Parse(responseText);
 
-            var rst = obj["updateResults"];
+            //var rst = obj["updateResults"];
+            var rst = CheckError(obj, "updateResults");
             if (rst.Type == JTokenType.Array)
             {
                 var results = (JArray)rst;
@@ -152,5 +141,72 @@ namespace geographia.ags
                 return false;
             }
         }
+
+        public virtual async Task<bool> Edit(int layerId, HttpContent reqContent)
+        {
+            if (layerId < 0)
+                throw new ArgumentNullException(nameof(layerId));
+
+            if (reqContent == null)
+                throw new ArgumentNullException(nameof(reqContent));
+
+            var q = await AppendToken($"{_URL}/{layerId}/applyEdits");
+            var response = await _Client.PostAsync(q, reqContent);
+            response.EnsureSuccessStatusCode();
+            var responseText = await response.Content.ReadAsStringAsync();
+
+            var obj = JObject.Parse(responseText);
+
+            //var rst = obj["updateResults"];
+            var rst = CheckError(obj, "updateResults");
+            if (rst.Type == JTokenType.Array)
+            {
+                var results = (JArray)rst;
+                return results.All(rx => rx["success"].Value<bool>());
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        #region error helper
+        static JToken CheckError(JObject j)
+        {
+            var err = j["error"];
+            if (err != null)
+                throw new ApplicationException(err.ToString());
+
+            return j;
+        }
+        static JToken CheckError(JObject j, string key)
+        {
+            var tk = j[key];
+            if (tk != null) return tk;
+            Trace.WriteLine($"bad ags response: <{j}>");
+
+            return JToken.FromObject(false);
+        }
+        #endregion
+        #region token
+        public async Task<(string Token, DateTimeOffset Expiration)> Token()
+        {
+            if (_tokenHelper == null) return (string.Empty, DateTimeOffset.MinValue);
+            return await _tokenHelper.Echo();
+        }
+
+        protected void SetSecured()
+        {
+            _tokenHelper = new TokenHelper(_URL, _Client);
+        }
+
+        async Task<string> AppendToken(string query)
+        {
+            if (_tokenHelper == null)
+                return query;
+
+            return query + $"{( query.Contains('?') ? "&" : "?" )}token={await _tokenHelper.GetToken()}";
+        }
+        #endregion
     }
 }

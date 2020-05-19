@@ -65,6 +65,10 @@
       <Project>{9EBA766E-DDA1-49BD-845E-ADA468FBC00B}</Project>
       <Name>AgsFeatureUpdate</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj">
+      <Project>{1f998edb-3a5d-4f61-a1e8-62b6afbea99b}</Project>
+      <Name>SharePointInterface</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
