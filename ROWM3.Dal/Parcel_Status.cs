@@ -28,6 +28,11 @@ namespace ROWM.Dal
 
         public bool IsActive { get; set; }
 
+        public bool? IsComplete { get; set; }
+        public bool? IsAbort { get; set; }
+        [StringLength(40)]
+        public string ParentStatusCode { get; set; }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Parcel> Parcel { get; set; }
     }

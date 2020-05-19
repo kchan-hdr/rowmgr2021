@@ -1,5 +1,6 @@
 using geographia.ags;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ROWM.Dal;
 using ROWM.Models;
 using SharePointInterface;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
 
 namespace ROWM.Controllers
@@ -17,6 +19,7 @@ namespace ROWM.Controllers
     public class RowmController : Controller
     {
         static readonly string _APP_NAME = "ROWM";
+        static IEnumerable<Parcel_Status> MasterParcelStatus;
 
         #region ctor
         readonly ROWM_Context _ctx;
@@ -239,16 +242,79 @@ namespace ROWM.Controllers
 
 
         [Route("parcels/{pid}"), HttpGet]
+        [ActionName("GetParcel")]
         public async Task<ActionResult<ParcelGraph>> GetParcel(string pid)
         {
             var p = await _repo.GetParcel(pid);
             if (p == null)
                 return BadRequest();
 
-            var g = new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
-            g.AddRelated(await _repo.GetRelatedParcel(pid));
+            return Json(new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid)));
+        }
 
-            return Json(g);
+        [Route("parcels/{pid}/status"), HttpGet]
+        public async Task<ActionResult<ParcelStatusHistoryDto>> GetParcelStatus(string pid)
+        {
+            var st = await _repo.GetStatusForParcel(pid);
+            if (st == null)
+                return BadRequest();
+
+            if ( MasterParcelStatus == null )
+            {
+                MasterParcelStatus = _ctx.Parcel_Status.AsNoTracking().ToArray();
+            }
+
+            var q = from s in MasterParcelStatus
+                          join sx in st on s.Code equals sx.ParcelStatusCode into h
+                          from evt in h.DefaultIfEmpty()
+                          orderby s.DisplayOrder
+                          select new StatusDto { 
+                              Code = s.Code, 
+                              Label = s.Description,
+                              ParentCode = s.ParentStatusCode,
+                              DisplayOrder = s.DisplayOrder, 
+                              IsSet = evt != null,
+                              Stage = ( evt?.ActivityDate == null ) ? StatusDto.StageCode.Pending.ToString() : s.IsAbort == true ? StatusDto.StageCode.Aborted.ToString() : StatusDto.StageCode.Completed.ToString() 
+                          };
+
+            var history = q.Where(x => x.Code != "No_Activity" ).ToArray();
+            foreach( var stage in history.Where(s => !string.IsNullOrEmpty(s.ParentCode) && s.IsSet) )
+            {
+                var mum = history.FirstOrDefault(sx => sx.Code == stage.ParentCode);
+                if (mum == null)
+                    throw new IndexOutOfRangeException();
+
+                if (mum.IsSet) continue;    // 
+                mum.Stage = StatusDto.StageCode.InProgress.ToString();
+            }
+
+            foreach ( var milestone in MasterParcelStatus.Where(s => (s.IsAbort == true) || (s.IsComplete == true) ))
+            {
+                var child = history.FirstOrDefault(sx => sx.Code == milestone.Code);
+                if (child != null && child.Stage != StatusDto.StageCode.Pending.ToString())
+                {
+                    var mum = history.FirstOrDefault(sx => sx.Code == child.ParentCode);
+                    if (mum == null)
+                        throw new IndexOutOfRangeException();
+
+                    if (mum.IsSet) continue;    // 
+
+                    mum.Stage = (milestone.IsComplete == true) ? StatusDto.StageCode.Completed.ToString()
+                        : (milestone.IsAbort == true) ? StatusDto.StageCode.Aborted.ToString()
+                        : StatusDto.StageCode.InProgress.ToString();
+                }
+            }
+
+            var current = st.LastOrDefault().ParcelStatusCode ?? "";
+            var status = MasterParcelStatus.Single(sx => sx.Code == current);
+            var statusCode = string.IsNullOrEmpty(status.ParentStatusCode) ? status.Code : status.ParentStatusCode;
+
+            return new ParcelStatusHistoryDto
+            {
+                ParcelUrl = Url.Link("GetParcel", pid ),
+                Status = statusCode,
+                History = history
+            };
         }
         #region offer
         [Route("parcels/{pid}/initialOffer"), HttpPut]
@@ -366,6 +432,11 @@ namespace ROWM.Controllers
             //// p = await _repo.UpdateParcel(p);
             //await Task.WhenAll(tks);
 
+            var update = new UpdateParcelStatus(new[] { p }, a, this._ctx, this._repo, this._featureUpdate, this._statusHelper);
+            update.AcquisitionStatus = request.StatusCode;
+            update.Notes = request.Notes;
+            update.ModifiedBy = User?.Identity?.Name ?? _APP_NAME;
+            await update.Apply();
             return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
         }
         [HttpPut("parcels/{pid}/status")]
@@ -922,6 +993,24 @@ namespace ROWM.Controllers
             FinalROEOffer = OfferHelper.MakeCompensation(o.Parcel, "FinalROE");
         }
 
+    }
+
+    public class ParcelStatusHistoryDto
+    {
+        public IEnumerable<StatusDto> History { get; set; }
+        public string Status { get; set; }
+        public string ParcelUrl { get; set; }
+    }
+
+    public class StatusDto
+    {
+        public enum StageCode { Pending, InProgress, Completed, Aborted };
+        public string Label { get; set; }
+        public string Code { get; set; }
+        public string ParentCode { get; set; }
+        public int DisplayOrder { get; set; }
+        public string Stage { get; set; }
+        public bool IsSet { get; set; } = false;
     }
     #endregion
     #region parcel graph
