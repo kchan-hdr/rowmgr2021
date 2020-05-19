@@ -10,7 +10,10 @@ namespace SharePointInterface.Test
         [TestMethod, TestCategory("SharePointCRUD")]
         public void TestConnection()
         {
-            ISharePointCRUD sp = new SharePointCRUD();
+            ISharePointCRUD sp = new SharePointCRUD(
+                __appId: "77429b44-e9ab-403c-acfa-e90648aa4452", 
+                __appSecret: "",
+                _url: "https://atcpmp.sharepoint.com/atcrow/chc");
             var t = sp.GetSiteTitle();
             Assert.AreNotEqual("NA", t);
             Trace.WriteLine(t);
@@ -32,6 +35,22 @@ namespace SharePointInterface.Test
 
             SharePointCRUD spCRUD = new SharePointCRUD(); // _appId, _appSecret);
             Microsoft.SharePoint.Client.Folder folder = spCRUD.GetOrCreateFolder("Test");
+            bool docExists = spCRUD.DocExists(folder, "test2.txt");
+            if (!docExists)
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(fileName);
+                docExists = spCRUD.InsertDoc(folder, "test2.txt", bytes);
+            }
+            Assert.IsTrue(docExists);
+        }
+
+        [TestMethod, TestCategory("SharePointCRUD - Destructive")]
+        public void InsertDoc2()
+        {
+            string fileName = @"testdata\logs.csv";
+
+            SharePointCRUD spCRUD = new SharePointCRUD(); // _appId, _appSecret);
+            Microsoft.SharePoint.Client.Folder folder = spCRUD.GetOrCreateFolder("Test2", "DW_Documents");
             bool docExists = spCRUD.DocExists(folder, "test2.txt");
             if (!docExists)
             {

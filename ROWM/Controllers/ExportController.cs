@@ -1,11 +1,11 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders;
+using ROWM.Dal;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using ROWM.Dal;
-using System.IO;
 
 namespace ROWM.Controllers
 {
@@ -13,10 +13,15 @@ namespace ROWM.Controllers
     public class ExportController : Controller
     {
         OwnerRepository _repo;
+        IFileProvider _file;
+        string LogoPath;
 
-        public ExportController(OwnerRepository repo)
+        public ExportController(OwnerRepository repo, IFileProvider fileProvider)
         {
             _repo = repo;
+            _file = fileProvider;
+
+            LogoPath = GetLogo();
         }
 
         /// <summary>
@@ -34,19 +39,51 @@ namespace ROWM.Controllers
             if (logs.Count() <= 0)
                 return NoContent();
 
-            using (var s = new MemoryStream())
+            // to do. inject export engine
+            try
             {
-                using (var writer = new StreamWriter(s))
+                var d = logs.SelectMany(lx => lx.Parcel.Select(p =>
                 {
-                    writer.WriteLine(LogExport.Header());
+                    var rgi = lx.Landowner_Score?.ToString() ?? "";
+                    var l = new ExcelExport.AgentLogExport.AgentLog
+                    {
+                        agentname = lx.Agent.AgentName,
+                        contactchannel = lx.ContactChannel,
+                        dateadded = lx.DateAdded,
+                        notes = lx.Notes?.TrimEnd(',') ?? "",
+                        ownerfirstname = p.Ownership.FirstOrDefault()?.Owner.PartyName?.TrimEnd(',') ?? "",
+                        ownerlastname = p.Ownership.FirstOrDefault()?.Owner.PartyName?.TrimEnd(',') ?? "",
+                        parcelid = p.Assessor_Parcel_Number,
+                        parcelstatus = p.Parcel_Status.Description,
+                        parcelstatuscode = p.ParcelStatusCode,
+                        projectphase = lx.ProjectPhase,
+                        roestatus = rgi, // p.Roe_Status.Description,
+                        roestatuscode = p.RoeStatusCode,
+                        title = lx.Title?.TrimEnd(',') ?? ""
+                    };
+                    return l;
+                }));
 
-                    foreach (var l in logs.SelectMany(l => LogExport.Export(l)))
+                var e = new ExcelExport.AgentLogExport(d, LogoPath);
+                var bytes = e.Export();
+                return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "logs.xlsx");
+            }
+            catch (Exception)
+            {
+                using (var s = new MemoryStream())
+                {
+                    using (var writer = new StreamWriter(s))
+                    {
+                        writer.WriteLine(LogExport.Header());
+
+                    foreach (var l in logs.SelectMany(l => LogExport.Export(l)).OrderBy(l => l.Tracking))
                         writer.WriteLine(l);
 
-                    writer.Close();
+                        writer.Close();
+                    }
+
+                    return File(s.GetBuffer(), "text/csv", "logs.csv");
                 }
-                
-                return File(s.GetBuffer(), "text/csv", "logs.csv");
             }
         }
 
@@ -58,7 +95,7 @@ namespace ROWM.Controllers
         [HttpGet("export/documents")]
         public async Task<IActionResult> ExportDocumentg(string f)
         {
-            const string DOCUMENT_HEADER = "Parcel Id,Title,Content Type,Date Sent,Date Delivered,Client Tracking Number,Date Received,Date Signed,Check No,Date Recorded,Document ID";
+            const string DOCUMENT_HEADER = "NSR Number,Parcel Id,Title,Content Type,Date Sent,Date Delivered,Client Tracking Number,Date Received,Date Signed,Check No,Date Recorded,Document ID";
 
             if ("excel" != f)
                 return BadRequest($"not supported export '{f}'");
@@ -101,13 +138,14 @@ namespace ROWM.Controllers
             {
                 using (var writer = new StreamWriter(s))
                 {
-                    writer.WriteLine("Parcel ID,Owner,ROE Status,Date");
+                    writer.WriteLine("Parcel ID,Owner,ROE Status,Conditions,Date");
 
-                    foreach( var p in parcels.OrderBy(px=> px.Assessor_Parcel_Number))
+                    foreach (var p in parcels.OrderBy(px => px.Assessor_Parcel_Number))
                     {
                         var os = p.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
                         var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
-                        var row = $"{p.Assessor_Parcel_Number},\"{oname}\",{p.Roe_Status.Description},{p.LastModified.Date.ToShortDateString()}";
+                        var conditions = p.Conditions?.FirstOrDefault()?.Condition ?? "";
+                        var row = $"{p.Assessor_Parcel_Number},\"{oname}\",{p.Roe_Status.Description},{conditions},{p.LastModified.Date.ToShortDateString()}";
                         writer.WriteLine(row);
                     }
 
@@ -118,13 +156,16 @@ namespace ROWM.Controllers
             }
         }
 
+        //        return File(s.GetBuffer(), "text/csv", "acq.csv");
+        //    }
+        //}
         /// <summary>
         /// support excel only
         /// </summary>
         /// <param name="f"></param>
         /// <returns></returns>
         [HttpGet("export/contacts")]
-        public IActionResult ExportContract(string f)
+        public IActionResult ExportContact(string f)
         {
             if ("excel" != f)
                 return BadRequest($"not supported export '{f}'");
@@ -140,22 +181,52 @@ namespace ROWM.Controllers
             if (cc.Count() <= 0)
                 return NoContent();
 
-            using (var s = new MemoryStream())
+            // to do. inject export engine
+            try
             {
-                using (var writer = new StreamWriter(s))
+                var data = cc.OrderBy(cx => cx.PartyName)
+                                            .ThenByDescending(cx => cx.IsPrimary)
+                                            .ThenBy(cx => cx.LastName)
+                                            .Select(ccx => new ExcelExport.ContactListExport.ContactList
+                                            {
+                                                partyname = ccx.PartyName,
+                                                isprimarycontact = ccx.IsPrimary,
+                                                ownerfirstname = ccx.FirstName,
+                                                ownerlastname = ccx.LastName,
+                                                owneremail = ccx.Email,
+                                                ownercellphone = ccx.CellPhone,
+                                                ownerhomephone = ccx.HomePhone,
+                                                ownerstreetaddress = ccx.StreetAddress,
+                                                ownercity = ccx.City,
+                                                ownerstate = ccx.State,
+                                                ownerzip = ccx.ZIP,
+                                                representation = ccx.Representation,
+                                                parcelid = string.Join(",", ccx.ParcelId)
+                                            });
+
+                var e = new ExcelExport.ContactListExport(data, LogoPath);
+                var bytes = e.Export();
+                return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "contacts.xlsx");
+            }
+            catch (Exception)
+            {
+                using (var s = new MemoryStream())
                 {
-                    writer.WriteLine(ContactExport2.Header());
+                    using (var writer = new StreamWriter(s))
+                    {
+                        writer.WriteLine(ContactExport2.Header());
 
-                    foreach (var l in cc.OrderBy(cx => cx.PartyName)
-                                        .ThenByDescending(cx => cx.IsPrimary)
-                                        .ThenBy(cx => cx.LastName)
-                                        .Select(ccx => ccx.ToString()))
-                        writer.WriteLine(l);
+                        foreach (var l in cc.OrderBy(cx => cx.PartyName)
+                                            .ThenByDescending(cx => cx.IsPrimary)
+                                            .ThenBy(cx => cx.LastName)
+                                            .Select(ccx => ccx.ToString()))
+                            writer.WriteLine(l);
 
-                    writer.Close();
+                        writer.Close();
+                    }
+
+                    return File(s.GetBuffer(), "text/csv", "contacts.csv");
                 }
-
-                return File(s.GetBuffer(), "text/csv", "contacts.csv");
             }
         }
 
@@ -194,9 +265,17 @@ namespace ROWM.Controllers
                 return File(s.GetBuffer(), "text/csv", "contacts.csv");
             }
         }
+        #region logo image
+        string GetLogo()
+        {
+            var fileInfo = _file.GetFileInfo("wwwroot/assets/IDP-logo-color.png");
+            return  fileInfo.PhysicalPath;
+        }
+        #endregion
         #region helpers
         public class LogExport
         {
+            public string Tracking { get; set; }
             public string ParcelId { get; set; }
             public string ParcelStatusCode { get; set; }
             public string RoeStatusCode { get; set; }
@@ -214,6 +293,7 @@ namespace ROWM.Controllers
             {
                 return log.Parcel.Where(p => p.IsActive).Select(p => new LogExport
                 {
+                    Tracking = p.Tracking_Number,
                     ParcelId = p.Assessor_Parcel_Number,
                     ParcelStatusCode = p.ParcelStatusCode,
                     RoeStatusCode = log.Landowner_Score?.ToString() ?? "", // p.RoeStatusCode,
@@ -228,12 +308,12 @@ namespace ROWM.Controllers
             }
 
             public static string Header() =>
-                "Parcel ID,Landowner Score,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
+                "Parcel ID,Parcel Status,Landowner Score,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
 
             public override string ToString()
             {
                 var n = Notes.Replace('"', '\'');
-                return $"=\"{ParcelId}\",{RoeStatusCode},\"{ContactName}\",{DateAdded.Date.ToShortDateString()},{ContactChannel},{ProjectPhase},\"{Title}\",\"{n}\",\"{AgentName}\"";
+                return $"=\"{ParcelId}\",{ParcelStatusCode},{RoeStatusCode},\"{ContactName}\",{DateAdded.Date.ToShortDateString()},{ContactChannel},{ProjectPhase},\"{Title}\",\"{n}\",\"{AgentName}\"";
             }
         }
 
@@ -257,22 +337,22 @@ namespace ROWM.Controllers
 
             public static IEnumerable<ContactExport2> Export(IGrouping<Guid, Ownership> og)
             {
-                var relatedParcels = og.Select(p => p.Parcel.Assessor_Parcel_Number).OrderBy(p => p).ToArray<string>();
+                var relatedParcels = og.Select(p => $"{p.Parcel.Tracking_Number} ({p.Parcel.Assessor_Parcel_Number})").OrderBy(p => p).ToArray<string>();
 
                 var ox = og.First();
                 return ox.Owner.ContactInfo.Select(cx =>  new ContactExport2
                 {
                     PartyName = ox.Owner.PartyName?.TrimEnd(',') ?? "",
                     IsPrimary = cx.IsPrimaryContact,
-                    FirstName = cx.OwnerFirstName?.TrimEnd(',') ?? "",
-                    LastName = cx.OwnerLastName?.TrimEnd(',') ?? "",
-                    Email = cx.OwnerEmail?.TrimEnd(',') ?? "",
-                    CellPhone = cx.OwnerCellPhone?.TrimEnd(',') ?? "",
-                    HomePhone = cx.OwnerHomePhone?.TrimEnd(',') ?? "",
-                    StreetAddress = cx.OwnerStreetAddress?.TrimEnd(',') ?? "",
-                    City = cx.OwnerCity?.TrimEnd(',') ?? "",
-                    State = cx.OwnerState?.TrimEnd(',') ?? "",
-                    ZIP = cx.OwnerZIP?.TrimEnd(',') ?? "",
+                    FirstName = cx.FirstName?.TrimEnd(',') ?? "",
+                    LastName = cx.LastName?.TrimEnd(',') ?? "",
+                    Email = cx.Email?.TrimEnd(',') ?? "",
+                    CellPhone = cx.CellPhone?.TrimEnd(',') ?? "",
+                    HomePhone = cx.HomePhone?.TrimEnd(',') ?? "",
+                    StreetAddress = cx.StreetAddress?.TrimEnd(',') ?? "",
+                    City = cx.City?.TrimEnd(',') ?? "",
+                    State = cx.State?.TrimEnd(',') ?? "",
+                    ZIP = cx.ZIP?.TrimEnd(',') ?? "",
                     Representation = cx.Representation,
                     ParcelId = relatedParcels
                 });
@@ -311,15 +391,15 @@ namespace ROWM.Controllers
                     ParcelId = op.Parcel.Assessor_Parcel_Number,
                     PartyName = op.Owner.PartyName?.TrimEnd(',') ?? "",
                     IsPrimary = cx.IsPrimaryContact,
-                    FirstName = cx.OwnerFirstName?.TrimEnd(',') ?? "",
-                    LastName = cx.OwnerLastName?.TrimEnd(',') ?? "",
-                    Email = cx.OwnerEmail?.TrimEnd(',') ?? "",
-                    CellPhone = cx.OwnerCellPhone?.TrimEnd(',') ?? "",
-                    HomePhone = cx.OwnerHomePhone?.TrimEnd(',') ?? "",
-                    StreetAddress = cx.OwnerStreetAddress?.TrimEnd(',') ?? "",
-                    City = cx.OwnerCity?.TrimEnd(',') ?? "",
-                    State = cx.OwnerState,
-                    ZIP = cx.OwnerZIP,
+                    FirstName = cx.FirstName?.TrimEnd(',') ?? "",
+                    LastName = cx.LastName?.TrimEnd(',') ?? "",
+                    Email = cx.Email?.TrimEnd(',') ?? "",
+                    CellPhone = cx.CellPhone?.TrimEnd(',') ?? "",
+                    HomePhone = cx.HomePhone?.TrimEnd(',') ?? "",
+                    StreetAddress = cx.StreetAddress?.TrimEnd(',') ?? "",
+                    City = cx.City?.TrimEnd(',') ?? "",
+                    State = cx.State,
+                    ZIP = cx.ZIP,
                     Representation = cx.Representation
                 });
             }
