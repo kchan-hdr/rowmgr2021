@@ -1,9 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net471</TargetFramework>
     <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
     <UserSecretsId>4e6ae26c-e0fb-4704-956e-f3b98b5888da</UserSecretsId>
+    <LangVersion>7.3</LangVersion>
+    <Platforms>AnyCPU;x64</Platforms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,38 +18,50 @@
     <None Remove="Properties\PublishProfiles\ROWM-mezzy - Web Deploy.pubxml" />
     <None Remove="Properties\PublishProfiles\rowmgr2 - Web Deploy.pubxml" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.2.0" />
-    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.1.1" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.12.1" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.AzureKeyVault.HostingStartup" Version="2.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="1.1.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.1.1" />
+    <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="5.2.7" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.1.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.10" />
+    <PackageReference Include="Microsoft.WindowsAzure.ConfigurationManager" Version="3.2.3" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Swashbuckle" Version="5.6.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="2.5.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="WebEssentials.AspNetCore.PWA" Version="1.0.59" />
+    <PackageReference Include="WindowsAzure.Storage" Version="9.1.1" />
   </ItemGroup>
   <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.1" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AgsFeatureUpdate\AgsFeatureUpdate.csproj" />
     <ProjectReference Include="..\ExcelExport\ExcelExport.csproj" />
-    <ProjectReference Include="..\Export.Dal\Export.Dal.csproj" />
-    <ProjectReference Include="..\ROWM2.Dal\ROWM2.Dal.csproj" />
+    <ProjectReference Include="..\ROWM3.Dal\ROWM3.Dal.csproj" />
     <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj" />
-    <ProjectReference Include="..\SharePointUtil_Sunflower\SharePointUtil_Sunflower.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\PublishProfiles\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
   </ItemGroup>
 
 </Project>
