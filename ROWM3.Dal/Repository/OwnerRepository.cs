@@ -50,13 +50,13 @@ namespace ROWM.Dal
             var p = await ActiveParcels()
                 .Include(px => px.Ownership.Select( o=>o.Owner.ContactLog))
                 .Include(px => px.ContactLog)
-                .FirstOrDefaultAsync(px => px.Assessor_Parcel_Number == pid);
+                .FirstOrDefaultAsync(px => px.Tracking_Number == pid);
 
             return p;
         }
         public async Task<List<Document>> GetDocumentsForParcel(string pid)
         {
-            var p = await ActiveParcels().FirstOrDefaultAsync(px => px.Assessor_Parcel_Number.Equals(pid));
+            var p = await ActiveParcels().FirstOrDefaultAsync(px => px.Tracking_Number.Equals(pid));
             if ( p == null)
             {
                 throw new IndexOutOfRangeException($"cannot find parcel <{pid}>");
@@ -84,6 +84,17 @@ namespace ROWM.Dal
         }
         #endregion
 
+        public async Task<IEnumerable<StatusActivity>> GetStatusForParcel(string pid)
+        {
+            var p = await ActiveParcels().AsNoTracking()
+                .Include(px => px.Activities)
+                .FirstOrDefaultAsync(px => px.Tracking_Number.Equals(pid));
+
+            if ( p==null)
+                throw new IndexOutOfRangeException($"cannot find parcel <{pid}>");
+
+            return p.Activities.ToArray();
+        }
         public IEnumerable<string> GetParcels() => ActiveParcels().AsNoTracking().Select(px => px.Assessor_Parcel_Number);
         public IEnumerable<Parcel> GetParcels2() => ActiveParcels().Include(px => px.Ownership.Select( o => o.Owner )).Include(px => px.Conditions).AsNoTracking();
 

@@ -80,14 +80,7 @@ namespace ROWM
             services.AddSingleton<Microsoft.Extensions.FileProviders.IFileProvider>(filep);
             #endregion
 
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info { Title = "ROW Manager", Version = "v1" });
-            });
-            services.ConfigureSwaggerGen(o =>
-            {
-               o.OperationFilter<FileOperation>();
-            });
+            services.AddSwaggerDocument();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -117,11 +110,8 @@ namespace ROWM
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "ROW Manager V1");
-            });
+            app.UseOpenApi();
+            app.UseSwaggerUi3();
         }
     }
 }
