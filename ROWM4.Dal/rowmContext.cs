@@ -1,18 +1,20 @@
 ﻿using System;
+using Microsoft.Azure.Services.AppAuthentication;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace ROWM
+namespace ROWM.Dal
 {
-    public partial class rowmContext : DbContext
+    public partial class ROWM_Context : DbContext
     {
-        public rowmContext()
-        {
-        }
+        public ROWM_Context() { }
 
-        public rowmContext(DbContextOptions<rowmContext> options)
+        public ROWM_Context(DbContextOptions<ROWM_Context> options)
             : base(options)
         {
+            var conn = Database.GetDbConnection() as SqlConnection;
+            conn.AccessToken = (new AzureServiceTokenProvider()).GetAccessTokenAsync("https://database.windows.net/", "a4390e1c-661f-4cab-a1cd-a2a9d8508b98").Result;
         }
 
         public virtual DbSet<Agent> Agent { get; set; }
@@ -58,58 +60,12 @@ namespace ROWM
         {
             modelBuilder.Entity<Agent>(entity =>
             {
-                entity.ToTable("Agent", "ROWM");
-
                 entity.Property(e => e.AgentId).HasDefaultValueSql("(newid())");
-
-                entity.Property(e => e.AgentName)
-                    .IsRequired()
-                    .HasMaxLength(20);
-
-                entity.Property(e => e.ModifiedBy).HasMaxLength(50);
             });
 
             modelBuilder.Entity<Appraisal>(entity =>
             {
-                entity.ToTable("Appraisal", "ROWM");
-
-                entity.Property(e => e.AppraisalId)
-                    .HasColumnName("Appraisal_Id")
-                    .HasDefaultValueSql("(newid())");
-
-                entity.Property(e => e.AppraisalConditions).HasColumnName("Appraisal_Conditions");
-
-                entity.Property(e => e.AppraisalDate)
-                    .HasColumnName("Appraisal_Date")
-                    .HasColumnType("date");
-
-                entity.Property(e => e.AppraisalFirm)
-                    .HasColumnName("Appraisal_Firm")
-                    .HasMaxLength(200);
-
-                entity.Property(e => e.AppraisedAcrage).HasColumnName("Appraised_Acrage");
-
-                entity.Property(e => e.AppraisedValue)
-                    .HasColumnName("Appraised_Value")
-                    .HasColumnType("money");
-
-                entity.Property(e => e.AppraisedValueType)
-                    .HasColumnName("Appraised_Value_Type")
-                    .HasMaxLength(200);
-
-                entity.Property(e => e.Appraiser)
-                    .IsRequired()
-                    .HasMaxLength(200);
-
-                entity.Property(e => e.ReportDate)
-                    .HasColumnName("Report_Date")
-                    .HasColumnType("date");
-
-                entity.Property(e => e.ReportId).HasColumnName("Report_Id");
-
-                entity.Property(e => e.ReviewerApprovalDate)
-                    .HasColumnName("Reviewer_Approval_Date")
-                    .HasColumnType("date");
+                entity.Property(e => e.AppraisalId).HasDefaultValueSql("(newid())");
 
                 entity.HasOne(d => d.Agent)
                     .WithMany(p => p.Appraisal)
@@ -130,32 +86,19 @@ namespace ROWM
 
             modelBuilder.Entity<ContactChannel>(entity =>
             {
-                entity.HasKey(e => e.ContactTypeCode);
-
-                entity.ToTable("Contact_Channel", "ROWM");
-
-                entity.Property(e => e.ContactTypeCode)
-                    .HasMaxLength(20)
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.Description)
-                    .IsRequired()
-                    .HasMaxLength(20);
+                entity.HasKey(e => e.ContactTypeCode)
+                    .HasName("PK_ROWM.Contact_Channel");
             });
 
             modelBuilder.Entity<ContactFollowup>(entity =>
             {
-                entity.ToTable("Contact_Followup", "ROWM");
-
                 entity.HasIndex(e => e.ChildContactLogId)
                     .HasName("IX_ChildContactLogId");
 
                 entity.HasIndex(e => e.ParentContactLogId)
                     .HasName("IX_ParentContactLogId");
 
-                entity.Property(e => e.Id)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("(newsequentialid())");
+                entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
 
                 entity.HasOne(d => d.ChildContactLog)
                     .WithMany(p => p.ContactFollowupChildContactLog)
@@ -172,9 +115,8 @@ namespace ROWM
 
             modelBuilder.Entity<ContactInfo>(entity =>
             {
-                entity.HasKey(e => e.ContactId);
-
-                entity.ToTable("ContactInfo", "ROWM");
+                entity.HasKey(e => e.ContactId)
+                    .HasName("PK_ROWM.ContactInfo");
 
                 entity.HasIndex(e => e.ContactOwnerId)
                     .HasName("IX_ContactOwnerId");
@@ -183,30 +125,6 @@ namespace ROWM
                     .HasName("IX_OrganizationId");
 
                 entity.Property(e => e.ContactId).HasDefaultValueSql("(newsequentialid())");
-
-                entity.Property(e => e.City).HasMaxLength(100);
-
-                entity.Property(e => e.Email).HasMaxLength(256);
-
-                entity.Property(e => e.FirstName).HasMaxLength(50);
-
-                entity.Property(e => e.LastName).HasMaxLength(50);
-
-                entity.Property(e => e.ModifiedBy).HasMaxLength(50);
-
-                entity.Property(e => e.PreferredContactMode).HasMaxLength(10);
-
-                entity.Property(e => e.Representation)
-                    .IsRequired()
-                    .HasMaxLength(20);
-
-                entity.Property(e => e.State).HasMaxLength(20);
-
-                entity.Property(e => e.StreetAddress).HasMaxLength(400);
-
-                entity.Property(e => e.Zip)
-                    .HasColumnName("ZIP")
-                    .HasMaxLength(10);
 
                 entity.HasOne(d => d.ContactOwner)
                     .WithMany(p => p.ContactInfo)
@@ -226,19 +144,14 @@ namespace ROWM
 
             modelBuilder.Entity<ContactInfoContactLogs>(entity =>
             {
-                entity.HasKey(e => new { e.ContactInfoContactId, e.ContactLogContactLogId });
-
-                entity.ToTable("ContactInfoContactLogs", "ROWM");
+                entity.HasKey(e => new { e.ContactInfoContactId, e.ContactLogContactLogId })
+                    .HasName("PK_ROWM.ContactInfoContactLogs");
 
                 entity.HasIndex(e => e.ContactInfoContactId)
                     .HasName("IX_ContactInfo_ContactId");
 
                 entity.HasIndex(e => e.ContactLogContactLogId)
                     .HasName("IX_ContactLog_ContactLogId");
-
-                entity.Property(e => e.ContactInfoContactId).HasColumnName("ContactInfo_ContactId");
-
-                entity.Property(e => e.ContactLogContactLogId).HasColumnName("ContactLog_ContactLogId");
 
                 entity.HasOne(d => d.ContactInfoContact)
                     .WithMany(p => p.ContactInfoContactLogs)
@@ -253,8 +166,6 @@ namespace ROWM
 
             modelBuilder.Entity<ContactLog>(entity =>
             {
-                entity.ToTable("ContactLog", "ROWM");
-
                 entity.HasIndex(e => e.ContactAgentId)
                     .HasName("IX_ContactAgentId");
 
@@ -262,18 +173,6 @@ namespace ROWM
                     .HasName("IX_Owner_OwnerId");
 
                 entity.Property(e => e.ContactLogId).HasDefaultValueSql("(newsequentialid())");
-
-                entity.Property(e => e.ContactChannel).HasMaxLength(20);
-
-                entity.Property(e => e.LandownerScore).HasColumnName("Landowner_Score");
-
-                entity.Property(e => e.ModifiedBy).HasMaxLength(50);
-
-                entity.Property(e => e.OwnerOwnerId).HasColumnName("Owner_OwnerId");
-
-                entity.Property(e => e.ProjectPhase).HasMaxLength(50);
-
-                entity.Property(e => e.Title).HasMaxLength(200);
 
                 entity.HasOne(d => d.ContactAgent)
                     .WithMany(p => p.ContactLog)
@@ -288,22 +187,11 @@ namespace ROWM
 
             modelBuilder.Entity<ContactPurpose>(entity =>
             {
-                entity.HasKey(e => e.PurposeCode);
-
-                entity.ToTable("Contact_Purpose", "ROWM");
+                entity.HasKey(e => e.PurposeCode)
+                    .HasName("PK_ROWM.Contact_Purpose");
 
                 entity.HasIndex(e => e.MilestoneCode)
                     .HasName("IX_MilestoneCode");
-
-                entity.Property(e => e.PurposeCode)
-                    .HasMaxLength(50)
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.Description)
-                    .IsRequired()
-                    .HasMaxLength(50);
-
-                entity.Property(e => e.MilestoneCode).HasMaxLength(40);
 
                 entity.HasOne(d => d.MilestoneCodeNavigation)
                     .WithMany(p => p.ContactPurpose)
@@ -313,8 +201,6 @@ namespace ROWM
 
             modelBuilder.Entity<Document>(entity =>
             {
-                entity.ToTable("Document", "ROWM");
-
                 entity.HasIndex(e => e.ContactLogContactLogId)
                     .HasName("IX_ContactLog_ContactLogId");
 
@@ -323,34 +209,10 @@ namespace ROWM
 
                 entity.Property(e => e.DocumentId).HasDefaultValueSql("(newsequentialid())");
 
-                entity.Property(e => e.ClientTrackingNumber).HasMaxLength(100);
-
-                entity.Property(e => e.ContactLogContactLogId).HasColumnName("ContactLog_ContactLogId");
-
-                entity.Property(e => e.ContentType).HasMaxLength(100);
-
-                entity.Property(e => e.DocumentPackagePackageId).HasColumnName("DocumentPackage_PackageId");
-
-                entity.Property(e => e.DocumentType).HasMaxLength(200);
-
-                entity.Property(e => e.ModifiedBy).HasMaxLength(50);
-
-                entity.Property(e => e.Qcdate).HasColumnName("QCDate");
-
-                entity.Property(e => e.RowmTrackingNumber).HasMaxLength(100);
-
-                entity.Property(e => e.SourceFilename).HasMaxLength(500);
-
                 entity.HasOne(d => d.ContactLogContactLog)
                     .WithMany(p => p.Document)
                     .HasForeignKey(d => d.ContactLogContactLogId)
                     .HasConstraintName("FK_ROWM.Document_ROWM.ContactLog_ContactLog_ContactLogId");
-
-                entity.HasOne(d => d.DocumentNavigation)
-                    .WithOne(p => p.InverseDocumentNavigation)
-                    .HasForeignKey<Document>(d => d.DocumentId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Document_Document");
 
                 entity.HasOne(d => d.DocumentPackagePackage)
                     .WithMany(p => p.Document)
@@ -365,9 +227,8 @@ namespace ROWM
 
             modelBuilder.Entity<DocumentActivity>(entity =>
             {
-                entity.HasKey(e => e.ActivityId);
-
-                entity.ToTable("DocumentActivity", "ROWM");
+                entity.HasKey(e => e.ActivityId)
+                    .HasName("PK_ROWM.DocumentActivity");
 
                 entity.HasIndex(e => e.AgentId)
                     .HasName("IX_AgentId");
@@ -379,10 +240,6 @@ namespace ROWM
                     .HasName("IX_ParentDocumentId");
 
                 entity.Property(e => e.ActivityId).HasDefaultValueSql("(newsequentialid())");
-
-                entity.Property(e => e.Activity)
-                    .IsRequired()
-                    .HasMaxLength(100);
 
                 entity.HasOne(d => d.Agent)
                     .WithMany(p => p.DocumentActivity)
@@ -402,19 +259,14 @@ namespace ROWM
 
             modelBuilder.Entity<DocumentAgents>(entity =>
             {
-                entity.HasKey(e => new { e.AgentAgentId, e.DocumentDocumentId });
-
-                entity.ToTable("DocumentAgents", "ROWM");
+                entity.HasKey(e => new { e.AgentAgentId, e.DocumentDocumentId })
+                    .HasName("PK_ROWM.DocumentAgents");
 
                 entity.HasIndex(e => e.AgentAgentId)
                     .HasName("IX_Agent_AgentId");
 
                 entity.HasIndex(e => e.DocumentDocumentId)
                     .HasName("IX_Document_DocumentId");
-
-                entity.Property(e => e.AgentAgentId).HasColumnName("Agent_AgentId");
-
-                entity.Property(e => e.DocumentDocumentId).HasColumnName("Document_DocumentId");
 
                 entity.HasOne(d => d.AgentAgent)
                     .WithMany(p => p.DocumentAgents)
@@ -429,35 +281,19 @@ namespace ROWM
 
             modelBuilder.Entity<DocumentPackage>(entity =>
             {
-                entity.HasKey(e => e.PackageId);
-
-                entity.ToTable("DocumentPackage", "ROWM");
+                entity.HasKey(e => e.PackageId)
+                    .HasName("PK_ROWM.DocumentPackage");
 
                 entity.Property(e => e.PackageId).HasDefaultValueSql("(newsequentialid())");
-
-                entity.Property(e => e.ModifiedBy).HasMaxLength(50);
-
-                entity.Property(e => e.PackageName)
-                    .IsRequired()
-                    .HasMaxLength(100);
             });
 
             modelBuilder.Entity<DocumentType>(entity =>
             {
-                entity.HasKey(e => e.DocTypeName);
-
-                entity.ToTable("Document_Type", "ROWM");
+                entity.HasKey(e => e.DocTypeName)
+                    .HasName("PK_ROWM.Document_Type");
 
                 entity.HasIndex(e => e.MilestoneCode)
                     .HasName("IX_MilestoneCode");
-
-                entity.Property(e => e.DocTypeName)
-                    .HasMaxLength(200)
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.FolderPath).HasMaxLength(400);
-
-                entity.Property(e => e.MilestoneCode).HasMaxLength(40);
 
                 entity.HasOne(d => d.MilestoneCodeNavigation)
                     .WithMany(p => p.DocumentType)
@@ -467,55 +303,28 @@ namespace ROWM
 
             modelBuilder.Entity<LandownerScore>(entity =>
             {
-                entity.HasKey(e => e.Score);
-
-                entity.ToTable("Landowner_Score", "ROWM");
+                entity.HasKey(e => e.Score)
+                    .HasName("PK_ROWM.Landowner_Score");
 
                 entity.Property(e => e.Score).ValueGeneratedNever();
-
-                entity.Property(e => e.Caption).HasMaxLength(50);
             });
 
             modelBuilder.Entity<Map>(entity =>
             {
-                entity.ToTable("Map", "App");
-
-                entity.Property(e => e.Id)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("(newsequentialid())");
-
-                entity.Property(e => e.AgsUrl).HasMaxLength(2048);
-
-                entity.Property(e => e.LayerId).HasMaxLength(10);
+                entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
             });
 
             modelBuilder.Entity<Organization>(entity =>
             {
-                entity.ToTable("Organization", "ROWM");
-
                 entity.Property(e => e.OrganizationId).HasDefaultValueSql("(newsequentialid())");
-
-                entity.Property(e => e.ModifiedBy).HasMaxLength(50);
-
-                entity.Property(e => e.Name).HasMaxLength(200);
             });
 
             modelBuilder.Entity<Owner>(entity =>
             {
-                entity.ToTable("Owner", "ROWM");
-
                 entity.HasIndex(e => e.OwnerOwnerId)
                     .HasName("IX_Owner_OwnerId");
 
                 entity.Property(e => e.OwnerId).HasDefaultValueSql("(newsequentialid())");
-
-                entity.Property(e => e.ModifiedBy).HasMaxLength(50);
-
-                entity.Property(e => e.OwnerOwnerId).HasColumnName("Owner_OwnerId");
-
-                entity.Property(e => e.OwnerType).HasMaxLength(50);
-
-                entity.Property(e => e.PartyName).HasMaxLength(200);
 
                 entity.HasOne(d => d.OwnerOwner)
                     .WithMany(p => p.InverseOwnerOwner)
@@ -525,19 +334,14 @@ namespace ROWM
 
             modelBuilder.Entity<OwnerDocuments>(entity =>
             {
-                entity.HasKey(e => new { e.DocumentDocumentId, e.OwnerOwnerId });
-
-                entity.ToTable("OwnerDocuments", "ROWM");
+                entity.HasKey(e => new { e.DocumentDocumentId, e.OwnerOwnerId })
+                    .HasName("PK_ROWM.OwnerDocuments");
 
                 entity.HasIndex(e => e.DocumentDocumentId)
                     .HasName("IX_Document_DocumentId");
 
                 entity.HasIndex(e => e.OwnerOwnerId)
                     .HasName("IX_Owner_OwnerId");
-
-                entity.Property(e => e.DocumentDocumentId).HasColumnName("Document_DocumentId");
-
-                entity.Property(e => e.OwnerOwnerId).HasColumnName("Owner_OwnerId");
 
                 entity.HasOne(d => d.DocumentDocument)
                     .WithMany(p => p.OwnerDocuments)
@@ -552,8 +356,6 @@ namespace ROWM
 
             modelBuilder.Entity<Ownership>(entity =>
             {
-                entity.ToTable("Ownership", "ROWM");
-
                 entity.HasIndex(e => e.OwnerId)
                     .HasName("IX_OwnerId");
 
@@ -561,10 +363,6 @@ namespace ROWM
                     .HasName("IX_ParcelId");
 
                 entity.Property(e => e.OwnershipId).HasDefaultValueSql("(newsequentialid())");
-
-                entity.Property(e => e.ModifiedBy).HasMaxLength(50);
-
-                entity.Property(e => e.OwnershipT).HasColumnName("Ownership_t");
 
                 entity.HasOne(d => d.Owner)
                     .WithMany(p => p.Ownership)
@@ -579,8 +377,6 @@ namespace ROWM
 
             modelBuilder.Entity<Parcel>(entity =>
             {
-                entity.ToTable("Parcel", "ROWM");
-
                 entity.HasIndex(e => e.ParcelParcelId)
                     .HasName("IX_Parcel_ParcelId");
 
@@ -592,72 +388,9 @@ namespace ROWM
 
                 entity.Property(e => e.ParcelId).HasDefaultValueSql("(newsequentialid())");
 
-                entity.Property(e => e.AssessorParcelNumber)
-                    .IsRequired()
-                    .HasColumnName("Assessor_Parcel_Number")
-                    .HasMaxLength(128);
-
                 entity.Property(e => e.CountyFips)
-                    .IsRequired()
-                    .HasColumnName("County_FIPS")
-                    .HasMaxLength(5)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.CountyName)
-                    .HasColumnName("County_Name")
-                    .HasMaxLength(50);
-
-                entity.Property(e => e.FinalEasementOfferOfferAmount).HasColumnName("FinalEasementOffer_OfferAmount");
-
-                entity.Property(e => e.FinalEasementOfferOfferDate).HasColumnName("FinalEasementOffer_OfferDate");
-
-                entity.Property(e => e.FinalEasementOfferOfferNotes).HasColumnName("FinalEasementOffer_OfferNotes");
-
-                entity.Property(e => e.FinalOptionOfferOfferAmount).HasColumnName("FinalOptionOffer_OfferAmount");
-
-                entity.Property(e => e.FinalOptionOfferOfferDate).HasColumnName("FinalOptionOffer_OfferDate");
-
-                entity.Property(e => e.FinalOptionOfferOfferNotes).HasColumnName("FinalOptionOffer_OfferNotes");
-
-                entity.Property(e => e.FinalRoeofferOfferAmount).HasColumnName("FinalROEOffer_OfferAmount");
-
-                entity.Property(e => e.FinalRoeofferOfferDate).HasColumnName("FinalROEOffer_OfferDate");
-
-                entity.Property(e => e.FinalRoeofferOfferNotes).HasColumnName("FinalROEOffer_OfferNotes");
-
-                entity.Property(e => e.InitialEasementOfferOfferAmount).HasColumnName("InitialEasementOffer_OfferAmount");
-
-                entity.Property(e => e.InitialEasementOfferOfferDate).HasColumnName("InitialEasementOffer_OfferDate");
-
-                entity.Property(e => e.InitialEasementOfferOfferNotes).HasColumnName("InitialEasementOffer_OfferNotes");
-
-                entity.Property(e => e.InitialOptionOfferOfferAmount).HasColumnName("InitialOptionOffer_OfferAmount");
-
-                entity.Property(e => e.InitialOptionOfferOfferDate).HasColumnName("InitialOptionOffer_OfferDate");
-
-                entity.Property(e => e.InitialOptionOfferOfferNotes).HasColumnName("InitialOptionOffer_OfferNotes");
-
-                entity.Property(e => e.InitialRoeofferOfferAmount).HasColumnName("InitialROEOffer_OfferAmount");
-
-                entity.Property(e => e.InitialRoeofferOfferDate).HasColumnName("InitialROEOffer_OfferDate");
-
-                entity.Property(e => e.InitialRoeofferOfferNotes).HasColumnName("InitialROEOffer_OfferNotes");
-
-                entity.Property(e => e.LandownerScore).HasColumnName("Landowner_Score");
-
-                entity.Property(e => e.ModifiedBy).HasMaxLength(50);
-
-                entity.Property(e => e.ParcelParcelId).HasColumnName("Parcel_ParcelId");
-
-                entity.Property(e => e.ParcelStatusCode).HasMaxLength(40);
-
-                entity.Property(e => e.RoeStatusCode).HasMaxLength(40);
-
-                entity.Property(e => e.SitusAddress).HasMaxLength(800);
-
-                entity.Property(e => e.TrackingNumber)
-                    .HasColumnName("Tracking_Number")
-                    .HasMaxLength(100);
+                    .IsUnicode(false)
+                    .IsFixedLength();
 
                 entity.HasOne(d => d.ParcelParcel)
                     .WithMany(p => p.InverseParcelParcel)
@@ -677,19 +410,14 @@ namespace ROWM
 
             modelBuilder.Entity<ParcelContactInfo>(entity =>
             {
-                entity.HasKey(e => new { e.ContactInfoContactId, e.ParcelParcelId });
-
-                entity.ToTable("ParcelContactInfo", "ROWM");
+                entity.HasKey(e => new { e.ContactInfoContactId, e.ParcelParcelId })
+                    .HasName("PK_ROWM.ParcelContactInfo");
 
                 entity.HasIndex(e => e.ContactInfoContactId)
                     .HasName("IX_ContactInfo_ContactId");
 
                 entity.HasIndex(e => e.ParcelParcelId)
                     .HasName("IX_Parcel_ParcelId");
-
-                entity.Property(e => e.ContactInfoContactId).HasColumnName("ContactInfo_ContactId");
-
-                entity.Property(e => e.ParcelParcelId).HasColumnName("Parcel_ParcelId");
 
                 entity.HasOne(d => d.ContactInfoContact)
                     .WithMany(p => p.ParcelContactInfo)
@@ -704,19 +432,14 @@ namespace ROWM
 
             modelBuilder.Entity<ParcelContactLogs>(entity =>
             {
-                entity.HasKey(e => new { e.ContactLogContactLogId, e.ParcelParcelId });
-
-                entity.ToTable("ParcelContactLogs", "ROWM");
+                entity.HasKey(e => new { e.ContactLogContactLogId, e.ParcelParcelId })
+                    .HasName("PK_ROWM.ParcelContactLogs");
 
                 entity.HasIndex(e => e.ContactLogContactLogId)
                     .HasName("IX_ContactLog_ContactLogId");
 
                 entity.HasIndex(e => e.ParcelParcelId)
                     .HasName("IX_Parcel_ParcelId");
-
-                entity.Property(e => e.ContactLogContactLogId).HasColumnName("ContactLog_ContactLogId");
-
-                entity.Property(e => e.ParcelParcelId).HasColumnName("Parcel_ParcelId");
 
                 entity.HasOne(d => d.ContactLogContactLog)
                     .WithMany(p => p.ParcelContactLogs)
@@ -731,19 +454,14 @@ namespace ROWM
 
             modelBuilder.Entity<ParcelDocuments>(entity =>
             {
-                entity.HasKey(e => new { e.DocumentDocumentId, e.ParcelParcelId });
-
-                entity.ToTable("ParcelDocuments", "ROWM");
+                entity.HasKey(e => new { e.DocumentDocumentId, e.ParcelParcelId })
+                    .HasName("PK_ROWM.ParcelDocuments");
 
                 entity.HasIndex(e => e.DocumentDocumentId)
                     .HasName("IX_Document_DocumentId");
 
                 entity.HasIndex(e => e.ParcelParcelId)
                     .HasName("IX_Parcel_ParcelId");
-
-                entity.Property(e => e.DocumentDocumentId).HasColumnName("Document_DocumentId");
-
-                entity.Property(e => e.ParcelParcelId).HasColumnName("Parcel_ParcelId");
 
                 entity.HasOne(d => d.DocumentDocument)
                     .WithMany(p => p.ParcelDocuments)
@@ -758,17 +476,8 @@ namespace ROWM
 
             modelBuilder.Entity<ParcelStatus>(entity =>
             {
-                entity.HasKey(e => e.Code);
-
-                entity.ToTable("Parcel_Status", "ROWM");
-
-                entity.Property(e => e.Code)
-                    .HasMaxLength(40)
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.Description).HasMaxLength(200);
-
-                entity.Property(e => e.ParentStatusCode).HasMaxLength(40);
+                entity.HasKey(e => e.Code)
+                    .HasName("PK_ROWM.Parcel_Status");
 
                 entity.HasOne(d => d.ParentStatusCodeNavigation)
                     .WithMany(p => p.InverseParentStatusCodeNavigation)
@@ -778,46 +487,25 @@ namespace ROWM
 
             modelBuilder.Entity<PreferredContactMode>(entity =>
             {
-                entity.HasKey(e => e.Mode);
-
-                entity.ToTable("Preferred_Contact_Mode", "ROWM");
-
-                entity.Property(e => e.Mode)
-                    .HasMaxLength(10)
-                    .ValueGeneratedNever();
+                entity.HasKey(e => e.Mode)
+                    .HasName("PK__Preferre__2488AC273F1BD714");
             });
 
             modelBuilder.Entity<RepresentationType>(entity =>
             {
-                entity.HasKey(e => e.RelationTypeCode);
-
-                entity.ToTable("Representation_Type", "ROWM");
-
-                entity.Property(e => e.RelationTypeCode)
-                    .HasMaxLength(20)
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.Description)
-                    .IsRequired()
-                    .HasMaxLength(20);
+                entity.HasKey(e => e.RelationTypeCode)
+                    .HasName("PK_ROWM.Repesentation_Type");
             });
 
             modelBuilder.Entity<RoeConditions>(entity =>
             {
-                entity.HasKey(e => e.ConditionId);
-
-                entity.ToTable("RoeConditions", "ROWM");
+                entity.HasKey(e => e.ConditionId)
+                    .HasName("PK_dbo.RoeConditions");
 
                 entity.HasIndex(e => e.ParcelParcelId)
                     .HasName("IX_Parcel_ParcelId");
 
                 entity.Property(e => e.ConditionId).HasDefaultValueSql("(newid())");
-
-                entity.Property(e => e.Condition).IsRequired();
-
-                entity.Property(e => e.ModifiedBy).HasMaxLength(50);
-
-                entity.Property(e => e.ParcelParcelId).HasColumnName("Parcel_ParcelId");
 
                 entity.HasOne(d => d.ContactNavigation)
                     .WithMany(p => p.RoeConditions)
@@ -832,22 +520,14 @@ namespace ROWM
 
             modelBuilder.Entity<RoeStatus>(entity =>
             {
-                entity.HasKey(e => e.Code);
-
-                entity.ToTable("Roe_Status", "ROWM");
-
-                entity.Property(e => e.Code)
-                    .HasMaxLength(40)
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.Description).HasMaxLength(200);
+                entity.HasKey(e => e.Code)
+                    .HasName("PK_ROWM.Roe_Status");
             });
 
             modelBuilder.Entity<StatusActivity>(entity =>
             {
-                entity.HasKey(e => e.ActivityId);
-
-                entity.ToTable("StatusActivity", "ROWM");
+                entity.HasKey(e => e.ActivityId)
+                    .HasName("PK_ROWM.StatusActivity");
 
                 entity.HasIndex(e => e.AgentId)
                     .HasName("IX_AgentId");
@@ -856,14 +536,6 @@ namespace ROWM
                     .HasName("IX_ParentParcelId");
 
                 entity.Property(e => e.ActivityId).HasDefaultValueSql("(newid())");
-
-                entity.Property(e => e.OrigianlParcelStatusCode).HasMaxLength(40);
-
-                entity.Property(e => e.OriginalRoeStatusCode).HasMaxLength(40);
-
-                entity.Property(e => e.ParcelStatusCode).HasMaxLength(40);
-
-                entity.Property(e => e.RoeStatusCode).HasMaxLength(40);
 
                 entity.HasOne(d => d.Agent)
                     .WithMany(p => p.StatusActivity)
@@ -875,6 +547,10 @@ namespace ROWM
                     .HasForeignKey(d => d.ParentParcelId)
                     .HasConstraintName("FK_ROWM.StatusActivity_ROWM.Parcel_ParentParcelId");
             });
+
+            OnModelCreatingPartial(modelBuilder);
         }
+
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

@@ -106,6 +106,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IRenderer.cs" />
+    <Compile Include="WhartonParcel.cs" />
     <Compile Include="DenverParcel.cs" />
     <Compile Include="AgsSchema.cs" />
     <Compile Include="AtcParcel.cs" />

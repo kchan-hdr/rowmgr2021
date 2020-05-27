@@ -34,4 +34,9 @@
     {
         public string SiteTitle() => "ATC Cardinal-Hickory Creek";
     }
+
+    public class Wharton: SiteDecoration
+    {
+        public string SiteTitle() => "City of Wharton";
+    }
 }
