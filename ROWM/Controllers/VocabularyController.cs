@@ -68,8 +68,9 @@ namespace ROWM.Controllers
             var pStatus = _Context.Parcel_Status.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.DisplayOrder).ToList();
 
             var ss = from p in pStatus
-                     join sy in sym on p.DomainValue equals sy.Code
-                     select new StatusDto(p.DisplayOrder, p.Code, p.Description, p.ParentStatusCode, sy.Hex);
+                     join sy in sym on p.DomainValue equals sy.Code into rr
+                     from rrx in rr.DefaultIfEmpty()
+                     select new StatusDto(p.DisplayOrder, p.Code, p.Description, p.ParentStatusCode, rrx?.Hex ?? "#ffffff");
 
             return ss;
         }
