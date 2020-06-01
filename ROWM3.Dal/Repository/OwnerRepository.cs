@@ -76,18 +76,21 @@ AND p.parcelid = p2.parcelid", new SqlParameter("@pid", pid));
                 throw new IndexOutOfRangeException($"cannot find parcel <{pid}>");
             }
 
-            //var query = p.Document.Select(dx => new { dx.DocumentId, dx.DocumentType, dx.Title });
+            var query = p.Document.Select(dx => new Document
+            {
+                DocumentId = dx.DocumentId,
+                DocumentType = dx.DocumentType,
+                Title = dx.Title,
+                DateRecorded = dx.DateRecorded,
+                Created = dx.Created,
+                LastModified = dx.LastModified
+            });
 
-            //return query.Select(dx => new Document
-            //{
-            //    DocumentId = dx.DocumentId,
-            //    Title = dx.Title,
-            //    DocumentType = dx.DocumentType
-            //}).ToList();
+            return query.ToList();
 
-            var q = _ctx.Database.SqlQuery<DocumentH>("SELECT d.DocumentId, d.DocumentType, d.title FROM rowm.ParcelDocuments pd INNER JOIN rowm.Document d on pd.document_documentid = d.documentid WHERE pd.parcel_parcelId = @pid and d.IsDeleted = 0", new System.Data.SqlClient.SqlParameter("@pid", p.ParcelId));
-            var ds = await q.ToListAsync();
-            return ds.Select(dx => new Document { Title = dx.Title, DocumentId = dx.DocumentId, DocumentType = dx.DocumentType }).ToList();
+            //var q = _ctx.Database.SqlQuery<DocumentH>("SELECT d.DocumentId, d.DocumentType, d.title FROM rowm.ParcelDocuments pd INNER JOIN rowm.Document d on pd.document_documentid = d.documentid WHERE pd.parcel_parcelId = @pid and d.IsDeleted = 0", new System.Data.SqlClient.SqlParameter("@pid", p.ParcelId));
+            //var ds = await q.ToListAsync();
+            //return ds.Select(dx => new Document { Title = dx.Title, DocumentId = dx.DocumentId, DocumentType = dx.DocumentType }).ToList();
         }
         #region Db dto
         public class DocumentH
