@@ -57,6 +57,7 @@ namespace ROWM.Dal
                 var history = new StatusActivity();
 
                 var pid = p.Assessor_Parcel_Number;
+                var track = p.Tracking_Number;
 
                 if (this.AcquisitionStatus != null && p.ParcelStatusCode != this.AcquisitionStatus)
                 {
@@ -67,7 +68,7 @@ namespace ROWM.Dal
                     dirty = true;
 
                     var dv = _statusHelper.GetDomainValue(AcquisitionStatus);
-                    tks.Add(this._featureUpdate.UpdateFeature(pid, dv));
+                    tks.Add(this._featureUpdate.UpdateFeature(pid, track, dv));
                 }
 
                 if (this.RoeStatus != null && p.RoeStatusCode != this.RoeStatus)
@@ -85,7 +86,7 @@ namespace ROWM.Dal
 
                     var roeDV = _statusHelper.GetRoeDomainValue(RoeStatus);
                     tks.Add(string.IsNullOrWhiteSpace(RoeCondition) ?
-                        _featureUpdate.UpdateFeatureRoe(pid, roeDV) : _featureUpdate.UpdateFeatureRoe_Ex(pid, roeDV, RoeCondition));
+                        _featureUpdate.UpdateFeatureRoe(pid, track, roeDV) : _featureUpdate.UpdateFeatureRoe_Ex(pid, track, roeDV, RoeCondition));
                 }
 
                 if (dirty)
@@ -103,9 +104,18 @@ namespace ROWM.Dal
                 }
             }
 
-            tks.Add(this._context.SaveChangesAsync());
+            // tks.Add(this._context.SaveChangesAsync());
 
             await Task.WhenAll(tks);
+
+            try
+            {
+                this._context.SaveChanges();
+            }
+            catch( Exception e)
+            {
+                throw;
+            }
 
             return 0;
         }

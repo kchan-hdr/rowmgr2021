@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -84,12 +85,12 @@ namespace geographia.ags
             return await base.Update(_LAYERID, reqContent);
         }
 
-        async Task<bool> IFeatureUpdate.UpdateFeatureDocuments(string parcelId, string documentURL)
+        async Task<bool> IFeatureUpdate.UpdateFeatureDocuments(string parcelId, string track, string documentURL)
         {
-            if (string.IsNullOrWhiteSpace(parcelId))
-                throw new ArgumentNullException(nameof(parcelId));
+            if (string.IsNullOrWhiteSpace(track))
+                throw new ArgumentNullException(nameof(track));
 
-            var oid = await Find(0, $"{_PARCEL_KEY}='{parcelId}'");
+            var oid = await Find(0, $"{_PARCEL_KEY}='{track}'");
             var u = oid.Select(i => new UpdateFeature
             {
                 attributes = new Status_Req
@@ -101,12 +102,12 @@ namespace geographia.ags
             return await this.Update(u);
         }
 
-        async Task<bool> IFeatureUpdate.UpdateFeature(string parcelId, int status)
+        async Task<bool> IFeatureUpdate.UpdateFeature(string parcelId, string track, int status)
         {
-            if (string.IsNullOrWhiteSpace(parcelId))
-                throw new ArgumentNullException(nameof(parcelId));
+            if (string.IsNullOrWhiteSpace(track))
+                throw new ArgumentNullException(nameof(track));
 
-            var oid = await Find(0, $"{_PARCEL_KEY}='{parcelId}'");
+            var oid = await Find(0, $"{_PARCEL_KEY}='{track}'");
             var u = oid.Select(i => new UpdateFeature
             {
                 attributes = new Status_Req
@@ -118,9 +119,9 @@ namespace geographia.ags
             return await this.Update(u);
         }
 
-        async Task<bool> IFeatureUpdate.UpdateFeatureRoe(string parcelId, int status) => await UpdateFeatureRoe_Impl(parcelId, status, "");
+        async Task<bool> IFeatureUpdate.UpdateFeatureRoe(string parcelId, string track, int status) => await UpdateFeatureRoe_Impl(track, status, "");
 
-        async Task<bool> IFeatureUpdate.UpdateFeatureRoe_Ex(string parcelId, int status, string condition) => await UpdateFeatureRoe_Impl(parcelId, status, condition);
+        async Task<bool> IFeatureUpdate.UpdateFeatureRoe_Ex(string parcelId, string track, int status, string condition) => await UpdateFeatureRoe_Impl(track, status, condition);
 
         async Task<bool> UpdateFeatureRoe_Impl(string parcelId, int status, string condition)
         {
@@ -140,7 +141,7 @@ namespace geographia.ags
             return await this.Update(u);
         }
 
-        Task<bool> IFeatureUpdate.UpdateRating(string parcelId, int rating) => Task.FromResult(false); // no op
+        Task<bool> IFeatureUpdate.UpdateRating(string parcelId, string track, int rating) => Task.FromResult(false); // no op
 
         public async Task<IEnumerable<DomainValue>> GetDomainValues(int layerId)
         {
