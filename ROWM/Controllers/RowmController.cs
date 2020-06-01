@@ -305,8 +305,8 @@ namespace ROWM.Controllers
                 }
             }
 
-            var current = st.LastOrDefault().ParcelStatusCode ?? "";
-            var status = MasterParcelStatus.Single(sx => sx.Code == current);
+            var current = st.LastOrDefault()?.ParcelStatusCode ?? "";
+            var status = MasterParcelStatus.SingleOrDefault(sx => sx.Code == current) ?? MasterParcelStatus.First();
             var statusCode = string.IsNullOrEmpty(status.ParentStatusCode) ? status.Code : status.ParentStatusCode;
 
             return new ParcelStatusHistoryDto
@@ -707,7 +707,7 @@ namespace ROWM.Controllers
                         p.ModifiedBy = _APP_NAME;
                         touched++;
 
-                        tasks.Add(_featureUpdate.UpdateRating(p.Assessor_Parcel_Number, score));
+                        tasks.Add(_featureUpdate.UpdateRating(p.Assessor_Parcel_Number, p.Tracking_Number, score));
                         tasks.Add(_repo.UpdateParcel(p));
                     }
                 }
