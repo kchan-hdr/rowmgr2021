@@ -65,12 +65,13 @@ namespace ROWM.Controllers
         {
             var sym = await _renderer.GetDomainValues(0);
 
-            var pStatus = _Context.Parcel_Status.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.DisplayOrder).ToList();
+            //            var pStatus = _Context.Parcel_Status.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.DisplayOrder).ToList();
+            var pStatus = _Context.Roe_Status.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.DisplayOrder).ToList();
 
             var ss = from p in pStatus
                      join sy in sym on p.DomainValue equals sy.Code into rr
                      from rrx in rr.DefaultIfEmpty()
-                     select new StatusDto(p.DisplayOrder, p.Code, p.Description, p.ParentStatusCode, rrx?.Hex ?? "#ffffff");
+                     select new StatusDto(p.DisplayOrder, p.Code, p.Description, null/* p.ParentStatusCode */, rrx?.Hex ?? "#ffffff");
 
             return ss;
         }
