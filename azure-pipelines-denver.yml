@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
 trigger:
-- sh72
+- denver-dev
 
 pool:
   vmImage: 'windows-latest'
@@ -12,7 +12,7 @@ pool:
 variables:
   solution: 'ROWM.sln'
   myProject: 'ROWM/ROWM.csproj'
-  buildPlatform: 'AnyCPU'
+  buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
 steps:
