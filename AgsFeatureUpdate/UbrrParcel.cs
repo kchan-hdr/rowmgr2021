@@ -89,7 +89,7 @@ namespace geographia.ags
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
 
-            var oid = await Find(0, $"{_PARCEL_KEY}='{parcelId}'");
+            var oid = await Find(_LAYERID, $"{_PARCEL_KEY}='{parcelId}'");
             var u = oid.Select(i => new UpdateFeature
             {
                 attributes = new Status_Req
@@ -106,7 +106,7 @@ namespace geographia.ags
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
 
-            var oid = await Find(0, $"{_PARCEL_KEY}='{parcelId}'");
+            var oid = await Find(_LAYERID, $"{_PARCEL_KEY}='{parcelId}'");
             var u = oid.Select(i => new UpdateFeature
             {
                 attributes = new Status_Req
@@ -127,7 +127,7 @@ namespace geographia.ags
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
 
-            var oid = await Find(0, $"{_PARCEL_KEY}='{parcelId}'");
+            var oid = await Find(_LAYERID, $"{_PARCEL_KEY}='{parcelId}'");
             var u = oid.Select(i => new UpdateFeature
             {
                 attributes = new Status_Req
