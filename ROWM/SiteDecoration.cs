@@ -39,4 +39,9 @@
     {
         public string SiteTitle() => "City of Wharton";
     }
+
+    public class Sh72: SiteDecoration
+    {
+        public string SiteTitle() => "Yoakum SH-72";
+    }
 }
