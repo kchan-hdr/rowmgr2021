@@ -1,0 +1,58 @@
+# ASP.NET
+# Build and test ASP.NET projects.
+# Add steps that publish symbols, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+
+trigger:
+- denver-dev
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: 'ROWM.sln'
+  myProject: 'ROWM/ROWM.csproj'
+  buildPlatform: 'AnyCPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+
+- task: DownloadBuildArtifacts@0
+  inputs:
+    buildType: 'specific'
+    project: 'e4d72519-e605-422b-a2bb-d974d9bc3279'
+    pipeline: '3'
+    specificBuildWithTriggering: true
+    buildVersionToDownload: 'latest'
+    downloadType: 'specific'
+    itemPattern: '*.js'
+    downloadPath: '$(Build.SourcesDirectory)\ROWM\wwwroot\js'
+
+- task: DownloadBuildArtifacts@0
+  inputs:
+    buildType: 'specific'
+    project: 'e4d72519-e605-422b-a2bb-d974d9bc3279'
+    pipeline: '3'
+    specificBuildWithTriggering: true
+    buildVersionToDownload: 'latest'
+    downloadType: 'specific'
+    itemPattern: '*.css'
+    downloadPath: '$(Build.SourcesDirectory)\ROWM\wwwroot\css'
+
+- task: VSBuild@1
+  inputs:
+    solution: '$(myProject)'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+    clean: true
+
+- task: VSTest@2
+  inputs:
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
