@@ -61,19 +61,25 @@ namespace ROWM.Controllers
         }
 
         [HttpGet("api/parcelStatus")]
-        public async Task<IEnumerable<StatusDto>> GetParcelStatus()
+        public async Task<IEnumerable<IEnumerable<StatusDto>>> GetParcelStatus()
         {
-            var sym = await _renderer.GetDomainValues(0);
+            var roe = await _renderer.GetDomainValues(3);   
+            var sym = await _renderer.GetDomainValues(4);
 
-            //            var pStatus = _Context.Parcel_Status.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.DisplayOrder).ToList();
-            var pStatus = _Context.Roe_Status.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.DisplayOrder).ToList();
+            var pStatus = _Context.Parcel_Status.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.DisplayOrder).ToList();
+            var rStatus = _Context.Roe_Status.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.DisplayOrder).ToList();
 
             var ss = from p in pStatus
                      join sy in sym on p.DomainValue equals sy.Code into rr
                      from rrx in rr.DefaultIfEmpty()
                      select new StatusDto(p.DisplayOrder, p.Code, p.Description, null/* p.ParentStatusCode */, rrx?.Hex ?? "#ffffff");
 
-            return ss;
+            var ss2 = from p in rStatus
+                     join sy in roe on p.DomainValue equals sy.Code into rr
+                     from rrx in rr.DefaultIfEmpty()
+                     select new StatusDto(p.DisplayOrder, p.Code, p.Description, null/* p.ParentStatusCode */, rrx?.Hex ?? "#ffffff");
+
+            return new List<IEnumerable<StatusDto>> { ss, ss2 };
         }
 
         [HttpGet("api/DocTypes")]
