@@ -42,6 +42,6 @@
 
     public class Uinta : SiteDecoration
     {
-        public string SiteTitle() => "Uinta Basin Railway";
+        public string SiteTitle() => "Uinta Basin Railway (pre-release)";
     }
 }
