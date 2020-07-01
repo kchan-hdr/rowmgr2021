@@ -5,7 +5,7 @@
 
 trigger:
 - master
-- unita*
+- uinta*
 
 pool:
   vmImage: 'windows-latest'
