@@ -12,7 +12,7 @@ pool:
 
 variables:
   solution: 'ROWM.sln'
-  myProject: "ROWM/ROWM.csprog"
+  myProject: "ROWM/ROWM.csproj"
   buildPlatform: 'AnyCPU'
   buildConfiguration: 'Release'
 
