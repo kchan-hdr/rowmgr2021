@@ -37,7 +37,7 @@ steps:
     project: '42c00845-cefc-4c11-9fb2-3103516553eb'
     definition: '9'
     buildVersionToDownload: 'latest'
-    itemPattern: '*.js'
+    itemPattern: '**\*.js'
     targetPath: '$(Build.SourcesDirectory)\ROWM\wwwroot\js'
 
 - task: DownloadPipelineArtifact@2
@@ -46,7 +46,7 @@ steps:
     project: '42c00845-cefc-4c11-9fb2-3103516553eb'
     definition: '9'
     buildVersionToDownload: 'latest'
-    itemPattern: '*.css'
+    itemPattern: '**\*.css'
     targetPath: '$(Build.SourcesDirectory)\ROWM\wwwroot\css'
 
 - task: VSBuild@1
