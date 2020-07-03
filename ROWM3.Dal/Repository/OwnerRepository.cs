@@ -253,7 +253,7 @@ namespace ROWM.Dal
                 _ctx.Entry<ContactLog>(log).State = EntityState.Modified;
             }
 
-            var existingPids = log.Parcel.Select(p => p.Assessor_Parcel_Number).ToList();
+            var existingPids = log.Parcel.Select(p => p.Tracking_Number).ToList();
             var existingCids = log.ContactInfo.Select(c => c.ContactId).ToList();
 
             // Find Deleted & added parcels & contacts
@@ -267,7 +267,7 @@ namespace ROWM.Dal
             {
                 foreach (var pid in deletedPids)
                 {
-                    var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
+                    var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.Tracking_Number.Equals(pid));
                     if (px == null)
                     {
                         Trace.TraceWarning($"invalid parcel {pid}");
