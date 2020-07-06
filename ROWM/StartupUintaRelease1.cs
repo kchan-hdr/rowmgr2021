@@ -55,7 +55,7 @@ namespace ROWM
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<Models.UpdateParcelStatus2>();
 
-            var feat = new UbrrParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Utah/UBRY_Parcel_FS/FeatureServer");
+            var feat = new UbrrParcel("https://maps.hdrgateway.com/arcgis/rest/services/Utah/UBRY_Parcel_FS/FeatureServer");
             services.AddSingleton<IFeatureUpdate>(feat);
             services.AddSingleton<IRenderer>(feat);
 
