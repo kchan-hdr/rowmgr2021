@@ -21,9 +21,11 @@
     <None Remove="Properties\PublishProfiles\ROWM - Web Deploy.pubxml" />
     <None Remove="Properties\PublishProfiles\ROWM-mezzy - Web Deploy.pubxml" />
     <None Remove="Properties\PublishProfiles\rowmgr2 - Web Deploy.pubxml" />
+    <None Remove="ReportTemplates\N94.docx" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.11.0" />
     <PackageReference Include="EntityFramework" Version="6.2.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.12.1" />
     <PackageReference Include="Microsoft.ApplicationInsights.Web" Version="2.14.0" />
@@ -56,6 +58,9 @@
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
     <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ReportTemplates\N94.docx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AgsFeatureUpdate\AgsFeatureUpdate.csproj" />
