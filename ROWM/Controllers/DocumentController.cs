@@ -68,6 +68,8 @@ namespace ROWM.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            var touched = false;
+
             var d = _repo.GetDocument(docId);
             d.ApprovedDate = info.ApprovedDate;
             d.ClientSignatureDate = info.ClientSignatureDate;
@@ -85,6 +87,12 @@ namespace ROWM.Controllers
 
             if (!string.IsNullOrWhiteSpace(info.Title)) // allow title change now, kklc 2020.2.8
                 d.Title = info.Title;
+
+            if (!string.IsNullOrWhiteSpace(info.DocumentType))
+            {
+                d.DocumentType = info.DocumentType;
+                touched = true;
+            }
 
             d.LastModified = DateTimeOffset.Now;
 
