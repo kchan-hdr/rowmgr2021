@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.FileProviders;
 using ROWM.Dal;
+using ROWM.Reports;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,15 +18,50 @@ namespace ROWM.Controllers
     {
         OwnerRepository _repo;
         IFileProvider _file;
-        string LogoPath;
+        IRowmReports _reports;
+        Lazy<string> LogoPath;
 
-        public ExportController(OwnerRepository repo, IFileProvider fileProvider)
+        readonly LinkGenerator _links;
+
+        public ExportController(OwnerRepository repo, LinkGenerator g, IFileProvider fileProvider = null, IRowmReports reports = null)
         {
             _repo = repo;
             _file = fileProvider;
+            _reports = reports;
+            _links = g;
 
-            LogoPath = GetLogo();
+            LogoPath = new Lazy<string>( () => GetLogo());
         }
+
+        #region new reporting engine
+        [HttpGet("api/export2")]
+        public IEnumerable<ReportDef> GetReportsList()
+        {
+            var myList = _reports.GetReports();
+            return myList.Select( rx => { rx.ReportUrl = $"//{HttpContext.Request.Host.Value}/export2/{rx.ReportCode}"; return rx; });
+        }
+
+        [HttpGet("export2/{reportCode}")]
+        public async Task<ActionResult> GetReport(string reportCode)
+        {
+            var m = _reports.GetReports();
+            var r = m.FirstOrDefault(x => x.ReportCode == reportCode);
+            if (r == null)
+                return BadRequest();
+
+            var payload = await _reports.GenerateReport(r);
+            return File(payload.Content, payload.Mime, payload.Filename);
+        }
+
+        [HttpGet("export/acq")]
+        public async Task<IActionResult> DummyReport()
+        {
+            var m = _reports.GetReports();
+            var r = m.FirstOrDefault(x => x.ReportCode == "internal" );
+            var payload = await _reports.GenerateReport(r);
+            return File(payload.Content, payload.Mime, payload.Filename);
+        }
+        #endregion
 
         /// <summary>
         /// support excel only
@@ -64,7 +103,7 @@ namespace ROWM.Controllers
                     return l;
                 }));
 
-                var e = new ExcelExport.AgentLogExport(d, LogoPath);
+                var e = new ExcelExport.AgentLogExport(d, LogoPath.Value);
                 var bytes = e.Export();
                 return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "logs.xlsx");
             }
@@ -204,7 +243,7 @@ namespace ROWM.Controllers
                                                 parcelid = string.Join(",", ccx.ParcelId)
                                             });
 
-                var e = new ExcelExport.ContactListExport(data, LogoPath);
+                var e = new ExcelExport.ContactListExport(data, LogoPath.Value);
                 var bytes = e.Export();
                 return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "contacts.xlsx");
             }
@@ -268,6 +307,9 @@ namespace ROWM.Controllers
         #region logo image
         string GetLogo()
         {
+            if (_file == null)
+                return string.Empty;
+
             var fileInfo = _file.GetFileInfo("wwwroot/assets/IDP-logo-color.png");
             return  fileInfo.PhysicalPath;
         }
