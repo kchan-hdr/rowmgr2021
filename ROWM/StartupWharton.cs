@@ -18,6 +18,7 @@ using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Azure.KeyVault;
 using Microsoft.AspNetCore.Mvc;
 using ROWM.Models;
+using ROWM.Reports;
 
 namespace ROWM
 {
@@ -42,11 +43,7 @@ namespace ROWM
 
             // Add framework services.
             services.AddApplicationInsightsTelemetry();
-            services.AddMvc()
-                .AddJsonOptions(o =>
-                {
-                    o.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-                });
+            services.AddMvc();
 
             services.Configure<FormOptions>(o =>
             {
@@ -79,17 +76,21 @@ namespace ROWM
             //var apps = vaultClient.GetSecretAsync("https://denver-dev-keys.vault.azure.net/", "sharepoint-api").GetAwaiter().GetResult();
             services.AddScoped<ISharePointCRUD, DenverNoOp>();
 
+            services.AddScoped<IRowmReports, WhartonReport>();
+
             services.AddSingleton<SiteDecoration, Wharton>();
 
             services.AddSwaggerDocument();
+
+            services.AddLogging(b => {
+                b.AddConsole();
+                b.AddDebug();
+            });            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
-
             app.UseExceptionHandler("/Home/Error");
  
             app.UseStaticFiles();
