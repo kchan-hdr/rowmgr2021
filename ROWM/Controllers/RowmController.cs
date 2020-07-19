@@ -31,8 +31,9 @@ namespace ROWM.Controllers
         readonly UpdateParcelStatus2 _updater;
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
+        readonly DocTypes _docTypes;
 
-        public RowmController(ROWM_Context ctx, OwnerRepository r, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, UpdateParcelStatus2 u, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
+        public RowmController(ROWM_Context ctx, OwnerRepository r, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, UpdateParcelStatus2 u, ParcelStatusHelper h, DocTypes dts, IFeatureUpdate f, ISharePointCRUD s)
         {
             _ctx = ctx;
             _repo = r;
@@ -43,6 +44,7 @@ namespace ROWM.Controllers
             _featureUpdate = f;
             _spDocument = s;
             _updater = u;
+            _docTypes = dts;
         }
         #endregion
         #region owner
@@ -562,7 +564,10 @@ namespace ROWM.Controllers
             };
 
             var log = await _repo.AddContactLog(myParcels, logRequest.ContactIds, l);
-            var touched = await PromptStatus(myParcels);
+
+            var updater = new UpdateParcelStatus_Ex(_ctx, _repo, _featureUpdate, _docTypes);
+            _ = await updater.Update(myParcels, a, logRequest.Notes, dt, null, log);
+
 
             var sites = _featureUpdate as ReservoirParcel;
             if (sites != null)
@@ -585,7 +590,7 @@ namespace ROWM.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(this.ModelState);
 
-            var dt = DateTimeOffset.Now;
+            var dt = DateTimeOffset.UtcNow;
 
             var p = await _repo.GetParcel(pid);
             var a = await _repo.GetAgent(logRequest.AgentName);
@@ -609,7 +614,9 @@ namespace ROWM.Controllers
             await UpdateLandownerScore(logRequest.Score, dt, myParcels);
 
             var log = await _repo.UpdateContactLog(myParcels, logRequest.ContactIds, l);
-            var touched = await PromptStatus(myParcels);
+
+            var updater = new UpdateParcelStatus_Ex(_ctx, _repo, _featureUpdate, _docTypes);
+            _ = await updater.Update(myParcels, a, logRequest.Notes, dt, null, log);
 
             var sites = _featureUpdate as ReservoirParcel;
             if (sites != null)
@@ -621,6 +628,7 @@ namespace ROWM.Controllers
             return Json(new ContactLogDto(log));
         }
 
+        [Obsolete]
         async Task<int> PromptStatus(IEnumerable<string> pids)
         {
             // way too convoluted. TODO: 2020.3.24

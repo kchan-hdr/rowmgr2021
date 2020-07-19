@@ -10,6 +10,7 @@ using ROWM.Models;
 using SharePointInterface;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 // using Sunflower = com.hdr.Rowm.Sunflower;
 using System.Diagnostics;
 using System.Globalization;
@@ -83,10 +84,17 @@ namespace ROWM.Controllers
             d.DateRecorded = info.DateRecorded;
             d.CheckNo = info.CheckNo;
 
+            d.DocumentType = info.DocumentType;
+
             if (!string.IsNullOrWhiteSpace(info.Title)) // allow title change now, kklc 2020.2.8
                 d.Title = info.Title;
 
             d.LastModified = DateTimeOffset.Now;
+            
+            var agent = await _repo.GetAgent(HttpContext.User?.Identity.Name) ?? await _repo.GetDefaultAgent();
+
+            var updater = new UpdateParcelStatus_Ex(_ctx, _repo, _featureUpdate, _docTypes);
+            _ = await updater.Update(d.Parcel, agent, string.Empty, DateTimeOffset.UtcNow, d, null);
 
             return CreatedAtRoute("UpdateDocuMeta", new DocumentInfo(await _repo.UpdateDocument(d)));
         }
@@ -373,22 +381,26 @@ namespace ROWM.Controllers
             // Add document to parcels
             var myParcels = header.ParcelIds.Distinct();
 
+            var updater = new UpdateParcelStatus_Ex(_ctx, _repo, _featureUpdate, _docTypes);
+            _ = await updater.Update(myParcels, agent, string.Empty, DateTimeOffset.UtcNow, d, null);
+
+
             foreach (string pid in myParcels)
             {
                 var myParcel = await _repo.GetParcel(pid);
                 myParcel.Document.Add(d);
 
-                var (t, s) = await _updater.DoUpdate(myParcel);
-                if (t)
-                {
-                    var ud = new UpdateParcelStatus(new Parcel[] { myParcel }, agent, context: _ctx, _repo, _featureUpdate, _statusHelper)
-                    {
-                        AcquisitionStatus = s.Code,
-                        ModifiedBy = User?.Identity?.Name ?? _APP_NAME
-                    };
+                //var (t, s) = await _updater.DoUpdate(myParcel);
+                //if (t)
+                //{
+                //    var ud = new UpdateParcelStatus(new Parcel[] { myParcel }, agent, context: _ctx, _repo, _featureUpdate, _statusHelper)
+                //    {
+                //        AcquisitionStatus = s.Code,
+                //        ModifiedBy = User?.Identity?.Name ?? _APP_NAME
+                //    };
 
-                    await ud.Apply();
-                }
+                //    await ud.Apply();
+                //}
 
                 header.DocumentId = d.DocumentId;
 
