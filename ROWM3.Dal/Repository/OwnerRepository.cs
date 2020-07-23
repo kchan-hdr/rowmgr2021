@@ -287,7 +287,7 @@ namespace ROWM.Dal
             {
                 foreach (var pid in newPids)
                 {
-                    var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
+                    var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.Tracking_Number.Equals(pid));
                     if (px == null)
                     {
                         Trace.TraceWarning($"invalid parcel {pid}");
