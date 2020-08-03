@@ -18,6 +18,8 @@ using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Azure.KeyVault;
 using Microsoft.AspNetCore.Mvc;
 using ROWM.Models;
+using TxDotNeogitations;
+using Microsoft.EntityFrameworkCore;
 
 namespace ROWM
 {
@@ -59,6 +61,12 @@ namespace ROWM
             {
                 return new Dal.ROWM_Context(cs);
             });
+            services.AddScoped(fac =>
+            {
+                var opts = new DbContextOptionsBuilder<Sh72_Context>();
+                opts.UseSqlServer(cs);
+                return new Sh72_Context(opts.Options);
+            });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddScoped<ROWM.Dal.ContactInfoRepository>();
@@ -72,6 +80,8 @@ namespace ROWM
             var feat = new WhartonParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Texas/SH72_Parcel_FS/FeatureServer");
             services.AddSingleton<IFeatureUpdate>(feat);
             services.AddSingleton<IRenderer>(feat);
+
+            services.AddSingleton<TxDotNeogitations.ITxDotNegotiation, TxDotNeogitations.Sh72>();
 
             //var msi = new AzureServiceTokenProvider();
             //var vaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(msi.KeyVaultTokenCallback));
