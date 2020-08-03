@@ -46,7 +46,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlackHillsDocumentToSharePo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ROWM4.Dal", "ROWM4.Dal\ROWM4.Dal.csproj", "{C1B93865-17E1-4CAD-A349-AC3864ECE446}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dal.Test", "Dal.Test\Dal.Test.csproj", "{51478B34-EBD1-498E-90C9-4EBB88041A22}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dal.Test", "Dal.Test\Dal.Test.csproj", "{51478B34-EBD1-498E-90C9-4EBB88041A22}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TxDotNeogitations", "TxDotNeogitations\TxDotNeogitations.csproj", "{BE8EF88A-BA94-4543-A774-C553766DAE2A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TxDotNegotiations.Test", "TxDOTNegotiations.Test\TxDotNegotiations.Test.csproj", "{FC2F5578-F1B9-49A1-B6A2-A55400A1EC34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -224,6 +228,22 @@ Global
 		{51478B34-EBD1-498E-90C9-4EBB88041A22}.Release|Any CPU.Build.0 = Release|Any CPU
 		{51478B34-EBD1-498E-90C9-4EBB88041A22}.Release|x64.ActiveCfg = Release|Any CPU
 		{51478B34-EBD1-498E-90C9-4EBB88041A22}.Release|x64.Build.0 = Release|Any CPU
+		{BE8EF88A-BA94-4543-A774-C553766DAE2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE8EF88A-BA94-4543-A774-C553766DAE2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE8EF88A-BA94-4543-A774-C553766DAE2A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BE8EF88A-BA94-4543-A774-C553766DAE2A}.Debug|x64.Build.0 = Debug|Any CPU
+		{BE8EF88A-BA94-4543-A774-C553766DAE2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE8EF88A-BA94-4543-A774-C553766DAE2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE8EF88A-BA94-4543-A774-C553766DAE2A}.Release|x64.ActiveCfg = Release|Any CPU
+		{BE8EF88A-BA94-4543-A774-C553766DAE2A}.Release|x64.Build.0 = Release|Any CPU
+		{FC2F5578-F1B9-49A1-B6A2-A55400A1EC34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC2F5578-F1B9-49A1-B6A2-A55400A1EC34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC2F5578-F1B9-49A1-B6A2-A55400A1EC34}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FC2F5578-F1B9-49A1-B6A2-A55400A1EC34}.Debug|x64.Build.0 = Debug|Any CPU
+		{FC2F5578-F1B9-49A1-B6A2-A55400A1EC34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC2F5578-F1B9-49A1-B6A2-A55400A1EC34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC2F5578-F1B9-49A1-B6A2-A55400A1EC34}.Release|x64.ActiveCfg = Release|Any CPU
+		{FC2F5578-F1B9-49A1-B6A2-A55400A1EC34}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

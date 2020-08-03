@@ -1,7 +1,6 @@
 ﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
-using ROWM.Dal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using TxDotNeogitations;
 
 namespace ROWM.Models
 {
@@ -23,8 +23,36 @@ namespace ROWM.Models
             _Schema = properties.ToDictionary<PropertyInfo, string>(px => px.Name.ToLower());
         }
 
-        N94_dto MakeData(Parcel p)
+        //N94_dto MakeData(Parcel p)
+        //{
+        //    var o = p.Ownership.FirstOrDefault()?.Owner ?? throw new IndexOutOfRangeException("missing owner");
+
+        //    return new N94_dto
+        //    {
+        //        Highway = "SH 72",
+        //        District = "Yoakum",
+        //        Project_No = "N/A",
+        //        ROW_CSJ = "0270-01-055",
+        //        Owner = o.PartyName,
+        //        Address = p.SitusAddress,
+        //        Parcel = p.Tracking_Number,
+        //        Persons = string.Join(", ", o.ContactInfo.Select(px => px.FirstName)),
+        //        Telephone = "",
+        //        Where_Contacted = "where",
+                
+        //        Negotiator = "whomever",
+
+        //        OfferAmt = p.InitialEasementOffer_OfferAmount,
+        //        ContactDt = p.InitialEasementOffer_OfferDate,
+
+        //        Action_Taken = "test",
+        //        Comments = "this is a test"
+        //    };
+        //}
+
+        N94_dto MakeData(NegotiationHistory n)
         {
+            var p = n.NegotiationParcels.FirstOrDefault()?.Parcel ?? throw new IndexOutOfRangeException($"cannot find parcel for negotiation");
             var o = p.Ownership.FirstOrDefault()?.Owner ?? throw new IndexOutOfRangeException("missing owner");
 
             return new N94_dto
@@ -35,24 +63,27 @@ namespace ROWM.Models
                 ROW_CSJ = "0270-01-055",
                 Owner = o.PartyName,
                 Address = p.SitusAddress,
-                Parcel = p.Tracking_Number,
-                Persons = string.Join(", ", o.ContactInfo.Select(px => px.FirstName)),
-                Telephone = "",
-                Where_Contacted = "where",
+                Parcel = p.TrackingNumber,
                 
-                Negotiator = "whomever",
+                Persons = n.ContactPersonName,
+                Telephone = n.ContactNumber,
+                Where_Contacted = n.ContactMethod,
 
-                OfferAmt = p.InitialEasementOffer_OfferAmount,
-                ContactDt = p.InitialEasementOffer_OfferDate,
+                Negotiator = n.Negotiator?.AgentName ?? string.Empty,
 
-                Action_Taken = "test",
-                Comments = "this is a test"
+                ContactDt = n.ContactDate,
+
+                OfferAmt = n.OfferAmount.HasValue ? Convert.ToDouble(n.OfferAmount) : 0,
+                CounterAmt = n.CounterOfferAmount.HasValue ? Convert.ToDouble(n.CounterOfferAmount) : 0,
+
+                Action_Taken = n.Action,
+                Comments = n.Notes
             };
         }
 
-        internal async Task<byte[]> Generate(Parcel p)
+        internal async Task<byte[]> Generate(NegotiationHistory n)
         {
-            var dto = MakeData(p);
+            var dto = MakeData(n);
 
             var mergefield = new Regex("MERGEFIELD (?<key>.+)");
 
@@ -191,7 +222,7 @@ namespace ROWM.Models
         public string ROW_CSJ { get; set; }
         public string Highway { get; set; }
         public string Date => this.ContactDt.HasValue ? this.ContactDt.Value.Date.ToLongDateString() : "";
-        public string Time => this.ContactDt.HasValue ? this.ContactDt.Value.TimeOfDay.ToString() : "";
+        public string Time => this.ContactDt.HasValue ? this.ContactDt.Value.ToString("t") : "";
         public string Offer => this.OfferAmt.HasValue ? $"{this.OfferAmt:C}" : "";
         public string CounterOffer => this.CounterAmt.HasValue ? $"{this.CounterAmt:C}" : "";
         public string Comments { get; set; }
