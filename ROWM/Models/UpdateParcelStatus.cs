@@ -7,10 +7,25 @@ using System.Threading.Tasks;
 
 namespace ROWM.Dal
 {
+    public interface IUpdateParcelStatus
+    {
+        Agent myAgent { get; set; }
+        IEnumerable<Parcel> myParcels { get; set; }
+
+        DateTimeOffset StatusChangeDate { get; set; }
+        string AcquisitionStatus { get; set; }
+        string RoeStatus { get; set; }
+        string RoeCondition { get; set; }
+        string Notes { get; set; }
+        string ModifiedBy { get; set; }
+
+        Task<int> Apply();
+    }
+
     /// <summary>
     /// Implements parcel status update
     /// </summary>
-    public class UpdateParcelStatus
+    public class UpdateParcelStatus : IUpdateParcelStatus
     {
         readonly OwnerRepository repo;
         readonly IFeatureUpdate _featureUpdate;
@@ -18,8 +33,8 @@ namespace ROWM.Dal
         readonly ROWM_Context _context;
 
 
-        Agent myAgent;
-        IEnumerable<Parcel> myParcels;
+        public Agent myAgent { get; set; }
+        public IEnumerable<Parcel> myParcels { get; set; }
 
         public DateTimeOffset StatusChangeDate { get; set; } = DateTimeOffset.Now;
         public string AcquisitionStatus { get; set; }
