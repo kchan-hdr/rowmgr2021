@@ -7,25 +7,11 @@ using System.Threading.Tasks;
 
 namespace ROWM.Dal
 {
-    public interface IUpdateParcelStatus
-    {
-        Agent myAgent { get; set; }
-        IEnumerable<Parcel> myParcels { get; set; }
-
-        DateTimeOffset StatusChangeDate { get; set; }
-        string AcquisitionStatus { get; set; }
-        string RoeStatus { get; set; }
-        string RoeCondition { get; set; }
-        string Notes { get; set; }
-        string ModifiedBy { get; set; }
-
-        Task<int> Apply();
-    }
-
     /// <summary>
-    /// Implements parcel status update
+    /// Implements parcel status update.
+    /// this is a ludicrous work around for wharton
     /// </summary>
-    public class UpdateParcelStatus : IUpdateParcelStatus
+    public class UpdateParcelStatus_wharton : IUpdateParcelStatus
     {
         readonly OwnerRepository repo;
         readonly IFeatureUpdate _featureUpdate;
@@ -35,7 +21,7 @@ namespace ROWM.Dal
 
         public Agent myAgent { get; set; }
         public IEnumerable<Parcel> myParcels { get; set; }
-
+        
         public DateTimeOffset StatusChangeDate { get; set; } = DateTimeOffset.Now;
         public string AcquisitionStatus { get; set; }
         public string RoeStatus { get; set; }
@@ -44,10 +30,10 @@ namespace ROWM.Dal
 
         public string ModifiedBy { get; set; } = "UP";
 
-        public UpdateParcelStatus(IEnumerable<Parcel> parcels, Agent agent, ROWM_Context context, OwnerRepository repository, IFeatureUpdate featureUpdate, ParcelStatusHelper h)
+        public UpdateParcelStatus_wharton(/* IEnumerable<Parcel> parcels, Agent agent, */ROWM_Context context, OwnerRepository repository, IFeatureUpdate featureUpdate, ParcelStatusHelper h)
         {
-            this.myAgent = agent;
-            this.myParcels = parcels;
+            //this.myAgent = agent;
+            //this.myParcels = parcels;
 
             this._context = context;
             this.repo = repository;
@@ -62,7 +48,7 @@ namespace ROWM.Dal
 
 
             var dt = DateTimeOffset.Now;
-
+            var target = this._statusHelper.GetRank(this.AcquisitionStatus);
             var tks = new List<Task>();
 
             // foreach parcel
@@ -79,11 +65,16 @@ namespace ROWM.Dal
                     history.OrigianlParcelStatusCode = p.ParcelStatusCode;
                     history.ParcelStatusCode = this.AcquisitionStatus;
 
-                    p.ParcelStatusCode = this.AcquisitionStatus;
                     dirty = true;
 
-                    var dv = _statusHelper.GetDomainValue(AcquisitionStatus);
-                    tks.Add(this._featureUpdate.UpdateFeature(pid, track, dv));
+                    // wharton silliness ...
+                    if (target > p.Parcel_Status.DisplayOrder)
+                    {
+                        p.ParcelStatusCode = this.AcquisitionStatus;
+
+                        var dv = _statusHelper.GetDomainValue(AcquisitionStatus);
+                        tks.Add(this._featureUpdate.UpdateFeature(pid, track, dv));
+                    }
                 }
 
                 if (this.RoeStatus != null && p.RoeStatusCode != this.RoeStatus)
