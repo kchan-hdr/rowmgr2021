@@ -1,6 +1,7 @@
 using geographia.ags;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using ROWM.Dal;
 using ROWM.Models;
 using SharePointInterface;
@@ -10,6 +11,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography.Xml;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 // using TxDotNeogitations;
 
@@ -29,11 +31,12 @@ namespace ROWM.Controllers
         readonly StatisticsRepository _statistics;
         readonly DeleteHelper _delete;
         readonly ParcelStatusHelper _statusHelper;
+        readonly IUpdateParcelStatus _statusUpdate;
         readonly UpdateParcelStatus2 _updater;
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
 
-        public RowmController(ROWM_Context ctx, OwnerRepository r, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, UpdateParcelStatus2 u, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
+        public RowmController(ROWM_Context ctx, OwnerRepository r, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, UpdateParcelStatus2 u, IUpdateParcelStatus w, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
         {
             _ctx = ctx;
             _repo = r;
@@ -43,6 +46,7 @@ namespace ROWM.Controllers
             _statusHelper = h;
             _featureUpdate = f;
             _spDocument = s;
+            _statusUpdate = w;
             _updater = u;
         }
         #endregion
@@ -262,7 +266,7 @@ namespace ROWM.Controllers
 
             if ( MasterParcelStatus == null )
             {
-                MasterParcelStatus = _ctx.Parcel_Status.AsNoTracking().ToArray();
+                MasterParcelStatus = _ctx.Parcel_Status.AsNoTracking().Where(s=> s.IsActive).ToArray();
             }
 
             var q = from s in MasterParcelStatus
@@ -275,7 +279,10 @@ namespace ROWM.Controllers
                               ParentCode = s.ParentStatusCode,
                               DisplayOrder = s.DisplayOrder, 
                               IsSet = evt != null,
-                              Stage = ( evt?.ActivityDate == null ) ? StatusDto.StageCode.Pending.ToString() : s.IsAbort == true ? StatusDto.StageCode.Aborted.ToString() : StatusDto.StageCode.Completed.ToString() 
+                              Stage = ( evt?.ActivityDate == null ) ? StatusDto.StageCode.Pending.ToString() : s.IsAbort == true ? StatusDto.StageCode.Aborted.ToString() : StatusDto.StageCode.Completed.ToString(),
+                              ActivityDate = evt?.ActivityDate.UtcDateTime ?? null,
+                              StatusAgent = evt?.AgentId ?? null,
+                              StatusHistory = evt?.ActivityId ?? null
                           };
 
             var history = q.Where(x => x.Code != "No_Activity" ).ToArray();
@@ -438,17 +445,28 @@ namespace ROWM.Controllers
         [HttpPut("parcels/{pid}/status")]
         public async Task<ActionResult<ParcelGraph>> UpdateStatus(string pid, [FromBody] AcqRequest request)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var p = await _repo.GetParcel(pid);
             if (p == null)
                 return BadRequest();
 
             var a = await _repo.GetAgent(request.AgentId);
 
-            var update = new UpdateParcelStatus(new[] { p }, a, this._ctx, this._repo, this._featureUpdate, this._statusHelper);
-            update.AcquisitionStatus = request.StatusCode;
-            update.Notes = request.Notes;
-            update.ModifiedBy = User?.Identity?.Name ?? _APP_NAME;
-            await update.Apply();
+            this._statusUpdate.myParcels = new[] { p };
+            this._statusUpdate.myAgent = a;
+            this._statusUpdate.AcquisitionStatus = request.StatusCode;
+            this._statusUpdate.Notes = request.Notes;
+            this._statusUpdate.ModifiedBy = User?.Identity?.Name ?? _APP_NAME;
+            await this._statusUpdate.Apply();
+            
+            //var update = new UpdateParcelStatus(new[] { p }, a, this._ctx, this._repo, this._featureUpdate, this._statusHelper);
+            //update.AcquisitionStatus = request.StatusCode;
+            //update.Notes = request.Notes;
+            //update.ModifiedBy = User?.Identity?.Name ?? _APP_NAME;
+            //await update.Apply();
+            
             return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
         }
         #endregion
@@ -1007,6 +1025,12 @@ namespace ROWM.Controllers
         public int DisplayOrder { get; set; }
         public string Stage { get; set; }
         public bool IsSet { get; set; } = false;
+        [JsonProperty(NullValueHandling =NullValueHandling.Include)]
+        public Guid? StatusHistory { get; set; } = null;
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public Guid? StatusAgent { get; set; } = null;
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public DateTime? ActivityDate { get; set; } = null;
     }
     #endregion
     #region parcel graph
