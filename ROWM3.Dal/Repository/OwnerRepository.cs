@@ -87,7 +87,9 @@ namespace ROWM.Dal
         }
         #endregion
 
-        public async Task<IEnumerable<StatusActivity>> GetStatusForParcel(string pid)
+        public async Task<IEnumerable<StatusActivity>> GetStatusForParcel(string pid) => await GetStatusForParcel(pid, false);
+
+        public async Task<IEnumerable<StatusActivity>> GetStatusForParcel(string pid, bool all = false)
         {
             var p = await ActiveParcels().AsNoTracking()
                 .Include(px => px.Activities)
@@ -96,7 +98,18 @@ namespace ROWM.Dal
             if ( p==null)
                 throw new IndexOutOfRangeException($"cannot find parcel <{pid}>");
 
-            return p.Activities.ToArray();
+            if (all)
+            {
+                return p.Activities.ToArray();
+            } 
+            else           
+            {
+                var q = from a in p.Activities
+                        group a by a.ParcelStatusCode into ag
+                        select ag.OrderByDescending(ax => ax.ActivityDate).Take(1);
+
+                return q.SelectMany(qx => qx);
+            }
         }
         public IEnumerable<string> GetParcels() => ActiveParcels().AsNoTracking().Select(px => px.Assessor_Parcel_Number);
         public IEnumerable<Parcel> GetParcels2() => ActiveParcels().Include(px => px.Ownership.Select( o => o.Owner )).Include(px => px.Conditions).AsNoTracking();

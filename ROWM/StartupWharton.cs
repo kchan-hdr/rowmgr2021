@@ -64,6 +64,7 @@ namespace ROWM
             services.AddScoped<DeleteHelper>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new DocTypes(fac.GetRequiredService<ROWM_Context>()));
             services.AddScoped<Controllers.ParcelStatusHelper>();
+            services.AddScoped<IUpdateParcelStatus,UpdateParcelStatus_wharton>();
             services.AddScoped<UpdateParcelStatus2>();
 
             var feat = new WhartonParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Texas/CoW_Parcel_FS/FeatureServer");
