@@ -456,6 +456,7 @@ namespace ROWM.Controllers
             this._statusUpdate.myParcels = new[] { p };
             this._statusUpdate.myAgent = a;
             this._statusUpdate.AcquisitionStatus = request.StatusCode;
+            this._statusUpdate.StatusChangeDate = request.ChangeDate;
             this._statusUpdate.Notes = request.Notes;
             this._statusUpdate.ModifiedBy = User?.Identity?.Name ?? _APP_NAME;
             await this._statusUpdate.Apply();
