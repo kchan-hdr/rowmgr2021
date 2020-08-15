@@ -58,7 +58,7 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, B2hParcel>( fac => 
-                new B2hParcel("https://gis05.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer")
+                new B2hParcel("https://maps.hdrgateway.com/arcgis/rest/services/Idaho/B2H_ROW_Parcels_FS/FeatureServer")
             );
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
