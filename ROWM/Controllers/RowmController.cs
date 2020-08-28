@@ -242,7 +242,10 @@ namespace ROWM.Controllers
             if (p == null)
                 return BadRequest();
 
-            return Json(new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid)));
+            var g = new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
+            g.AddRelated(await _repo.GetRelatedParcel(pid));
+
+            return Json(g);
         }
         #region offer
         [Route("parcels/{pid}/initialOffer"), HttpPut]
@@ -917,6 +920,8 @@ namespace ROWM.Controllers
         public IEnumerable<ContactLogDto> ContactsLog { get; set; }
         public IEnumerable<DocumentHeader> Documents { get; set; }
 
+        public IEnumerable<string> Related { get; set; } = Array.Empty<string>();
+
         internal ParcelGraph(Parcel p, IEnumerable<Document> d)
         {
             ParcelId = p.Assessor_Parcel_Number;
@@ -940,6 +945,14 @@ namespace ROWM.Controllers
             Owners = p.Ownership.Select(ox => new OwnerDto(ox.Owner));
             ContactsLog = p.ContactLog.Where(cx => !cx.IsDeleted).Select(cx => new ContactLogDto(cx));
             Documents = d.Where(dx => !dx.IsDeleted).Select(dx => new DocumentHeader(dx));
+        }
+
+        internal void AddRelated(IEnumerable<string> trackings)
+        {
+            var rel = this.Owners.First().OwnedParcel.Select(px => px.ParcelId).ToList();
+            if ( trackings.Any())
+                rel.AddRange(trackings);
+            this.Related = rel.Distinct().OrderBy(px => px);
         }
     }
     #endregion

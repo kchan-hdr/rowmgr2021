@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Diagnostics;
 using System.Data.Entity;
+using System.Data.SqlClient;
 
 namespace ROWM.Dal
 {
@@ -54,6 +55,19 @@ namespace ROWM.Dal
 
             return p;
         }
+
+        // HACK: testing related parcels
+        public async Task<IEnumerable<string>> GetRelatedParcel(string pid)
+        {
+            var q = _ctx.Database.SqlQuery<string>(@"SELECT p.tracking_number 
+FROM rowm.parcel p, rowm.parcel_node p1, rowm.parcel_node p2, rowm.relatedparcel_edge e 
+WHERE MATCH( p1-(e)->p2 ) 
+AND p1.tracking_number = @pid 
+AND p.parcelid = p2.parcelid", new SqlParameter("@pid", pid));
+
+            return await q.ToArrayAsync();
+        }
+
         public async Task<List<Document>> GetDocumentsForParcel(string pid)
         {
             var p = await ActiveParcels().FirstOrDefaultAsync(px => px.Assessor_Parcel_Number.Equals(pid));

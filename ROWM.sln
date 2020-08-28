@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30223.230
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ROWM", "ROWM\ROWM.csproj", "{31360B6A-20FE-4159-A5F6-081E6126D04A}"
 EndProject
@@ -43,6 +43,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharePointHelper", "SharePointHelper\SharePointHelper.csproj", "{F895F201-0A4F-4D9F-B41E-18A226FAAF22}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlackHillsDocumentToSharePoint", "BlackHillsDocumentToSharePoint\BlackHillsDocumentToSharePoint.csproj", "{F828AD5F-B737-4FBC-82AA-78A384E01D31}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrackingNumber.Test", "TrackingNumber.Test\TrackingNumber.Test.csproj", "{B03AEBDE-F482-4F8D-9FFB-EFAAB9B6B7B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -126,6 +128,10 @@ Global
 		{F828AD5F-B737-4FBC-82AA-78A384E01D31}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F828AD5F-B737-4FBC-82AA-78A384E01D31}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F828AD5F-B737-4FBC-82AA-78A384E01D31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B03AEBDE-F482-4F8D-9FFB-EFAAB9B6B7B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B03AEBDE-F482-4F8D-9FFB-EFAAB9B6B7B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B03AEBDE-F482-4F8D-9FFB-EFAAB9B6B7B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B03AEBDE-F482-4F8D-9FFB-EFAAB9B6B7B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
