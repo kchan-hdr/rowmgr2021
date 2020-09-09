@@ -19,6 +19,7 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.AspNetCore.Mvc;
 using ROWM.Models;
 using ROWM.Reports;
+using ROWM.Dal.Repository;
 
 namespace ROWM
 {
@@ -58,6 +59,7 @@ namespace ROWM
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
+            services.AddScoped<ParcelStatusRepository>();
             services.AddScoped<ROWM.Dal.ContactInfoRepository>();
             services.AddScoped<ROWM.Dal.StatisticsRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
