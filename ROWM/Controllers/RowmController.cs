@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ROWM.Dal;
+using ROWM.Dal.Repository;
 using ROWM.Models;
 using SharePointInterface;
 using System;
@@ -26,6 +27,7 @@ namespace ROWM.Controllers
         #region ctor
         readonly ROWM_Context _ctx;
         readonly OwnerRepository _repo;
+        readonly ParcelStatusRepository _parcelList;
         readonly ContactInfoRepository _contactRepo;
         readonly StatisticsRepository _statistics;
         readonly DeleteHelper _delete;
@@ -35,10 +37,11 @@ namespace ROWM.Controllers
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
 
-        public RowmController(ROWM_Context ctx, OwnerRepository r, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, UpdateParcelStatus2 u, IUpdateParcelStatus w, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
+        public RowmController(ROWM_Context ctx, OwnerRepository r, ParcelStatusRepository l, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, UpdateParcelStatus2 u, IUpdateParcelStatus w, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
         {
             _ctx = ctx;
             _repo = r;
+            _parcelList = l;
             _contactRepo = c;
             _delete = del;
             _statistics = sr;
@@ -318,11 +321,29 @@ namespace ROWM.Controllers
 
             return new ParcelStatusHistoryDto
             {
-                ParcelUrl = Url.Link("GetParcel", pid ),
+                ParcelUrl = Url.Action("GetParcel", new { pid }),
                 Status = statusCode,
                 History = history
             };
         }
+
+        [HttpGet("status/{milestone}/parcels")]
+        public async Task<ActionResult<IEnumerable<ParcelHistory>>> GetParcelsByStatus(string milestone)
+        {
+            if (_parcelList == null)
+                return NoContent();
+
+            var keys = await _parcelList.GetStages(milestone);
+            var parcels = await _parcelList.GetParcelList(milestone);
+
+            foreach( var p in parcels)
+            {
+                p.ParcelUrl = Url.Action("GetParcel", new { pid = p.Tracking_Number });
+            }
+
+            return parcels.ToArray();
+        }
+
         #region offer
         [Route("parcels/{pid}/initialOffer"), HttpPut]
         [ProducesResponseType(typeof(ParcelGraph), 202)]
