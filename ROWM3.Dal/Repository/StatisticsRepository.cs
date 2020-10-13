@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.Entity;
 using System.Linq;
 using System.Text;
@@ -77,6 +78,20 @@ namespace ROWM.Dal
                    select new SubTotal { Title = b.Title, Caption = b.Caption, Count = sub?.Count ?? 0 };
         }
 
+        public async Task<Financials> GetFinancials()
+        {
+            var p = await ActiveParcels().ToArrayAsync();
+
+            return new Financials
+            {
+                Appraisal = p.Sum(px => px.InitialROEOffer_OfferAmount) ?? 0,
+                Settlement = p.Sum(px => px.FinalROEOffer_OfferAmount) ?? 0,
+                ApprovedOffer = p.Sum(px => px.InitialOptionOffer_OfferAmount) ?? 0,
+                Sales = p.Sum(px => px.FinalOptionOffer_OfferAmount) ?? 0,
+                Closing = p.Sum(px => px.InitialEasementOffer_OfferAmount) ?? 0
+            };
+        }
+
         #region helper
         private IEnumerable<SubTotal> MakeBaseParcels() => _context.Parcel_Status.Where(px => px.IsActive).OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, Count = 0 }).ToArray();
         private IEnumerable<SubTotal> MakeBaseRoes() => _context.Roe_Status.Where(px => px.IsActive).OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code , Caption = px.Description, Count = 0 }).ToArray();
@@ -87,6 +102,24 @@ namespace ROWM.Dal
             public string Title { get; set; }
             public string Caption { get; set; }
             public int Count { get; set; }
+        }
+
+        public class Financials
+        {
+            [DisplayName("Appraisal Value")]
+            public double Appraisal { get; set; }    // Initial ROE Offer
+
+            [DisplayName("Admin Settlement")]
+            public double Settlement { get; set; }   // Final ROE Offer
+
+            [DisplayName("Approved Offer")]
+            public double ApprovedOffer { get; set; }    // Initial Option Offer
+
+            [DisplayName("Contract Sales Price")]
+            public double Sales { get; set; }    // Final Option Offer
+
+            [DisplayName("Closing Cost")]
+            public double Closing { get; set; } // Initial Easement
         }
         #endregion
     }
