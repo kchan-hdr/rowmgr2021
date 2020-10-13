@@ -316,7 +316,7 @@ namespace ROWM.Controllers
                 }
             }
 
-            var current = st.LastOrDefault()?.ParcelStatusCode ?? "";
+            var current = st.OrderByDescending(sx => sx.ActivityDate).FirstOrDefault()?.ParcelStatusCode ?? "";
             var status = MasterParcelStatus.SingleOrDefault(sx => sx.Code == current) ?? MasterParcelStatus.First();
             var statusCode = string.IsNullOrEmpty(status.ParentStatusCode) ? status.Code : status.ParentStatusCode;
 
@@ -781,6 +781,9 @@ namespace ROWM.Controllers
                 Access = await _statistics.SnapshotAccessLikelihood()
             };
         }
+
+        [HttpGet("financials")]
+        public async Task<StatisticsRepository.Financials> GetFinancials() => await _statistics.GetFinancials();
         #endregion
     }
 
