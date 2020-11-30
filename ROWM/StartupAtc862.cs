@@ -1,12 +1,17 @@
-﻿using geographia.ags;
+﻿using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using geographia.ags;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Azure.KeyVault;
+using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ROWM.Dal;
 using SharePointInterface;
+using System.Threading.Tasks;
 
 namespace ROWM
 {
@@ -63,9 +68,9 @@ namespace ROWM
             services.AddScoped<IFeatureUpdate, AtcParcel>(fac =>
                 new AtcParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/California/ATC_Line862_Parcel_FS/FeatureServer"));
 
-            services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac => new SharePointCRUD("e8d38b84-11bb-43df-b07d-a549b05eab19", "/kzpHsp4A8NXWYyhGOGI8LmA8jdBwZCtKjqLrfN3W3A=", "https://atcpmp.sharepoint.com/line6943",
-                d: fac.GetRequiredService<Dal.DocTypes>()));
-
+            var sec = AtcSharePointConfig.SharePointAppSecret();
+            services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac => new SharePointCRUD(
+               d: fac.GetRequiredService<DocTypes>(), __appId: sec.AppId, __appSecret: sec.AppSec, _url: "https://atcpmp.sharepoint.com/atcrow/test862"));
 
             services.AddSingleton<SiteDecoration, Atc862>();
 

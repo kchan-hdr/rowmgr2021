@@ -52,8 +52,10 @@ namespace ROWM
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, AtcParcel>(fac =>
                 new AtcParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/California/ATC_CHC_Parcel_FS/FeatureServer"));
+
+            var sec = AtcSharePointConfig.SharePointAppSecret();
             services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac =>
-                new SharePointCRUD("14e5814e-95f9-4aee-9890-e82fa00b323f", "Mc2nMSCT0Rq2AcR5vrzDAH38dqdUh6R/wHPS/EmjTgc=", "https://atcpmp.sharepoint.com/line6943",
+                new SharePointCRUD(sec.AppId, sec.AppSec, "https://atcpmp.sharepoint.com/atcrow/testchc",
                 d: fac.GetRequiredService<DocTypes>()));
 
             services.AddSingleton<SiteDecoration, AtcChc>();
