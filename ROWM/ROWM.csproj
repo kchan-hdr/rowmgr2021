@@ -14,6 +14,21 @@
 
   <ItemGroup>
     <Compile Remove="FileOperation.cs" />
+    <Compile Remove="Startup.cs" />
+    <Compile Remove="StartupAtc6943.cs" />
+    <Compile Remove="StartupAtc6943Release1.cs" />
+    <Compile Remove="StartupAtc862.cs" />
+    <Compile Remove="StartupAtc862Release1.cs" />
+    <Compile Remove="StartupAtcChc.cs" />
+    <Compile Remove="StartupAtcChcRelease1.cs" />
+    <Compile Remove="StartupB2h.cs" />
+    <Compile Remove="StartupB2hRelease1.cs" />
+    <Compile Remove="StartupBhNBridge.cs" />
+    <Compile Remove="StartupDw1.cs" />
+    <Compile Remove="StartupDwRelease1.cs" />
+    <Compile Remove="StartupRelease1.cs" />
+    <Compile Remove="StartupReservoir.cs" />
+    <Compile Remove="StartupReservoirRelease1.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,6 +79,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.6" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.1.6" />
     <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="5.2.8" />
+    <PackageReference Include="Microsoft.NET.Sdk.Razor" Version="3.1.10" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.4" />
     <PackageReference Include="Microsoft.WindowsAzure.ConfigurationManager" Version="3.2.3" />
@@ -95,6 +111,14 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Update="appsettings.Wharton.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
