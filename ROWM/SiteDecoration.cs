@@ -39,4 +39,9 @@
     {
         public string SiteTitle() => "City of Wharton";
     }
+
+    public class Dripping : SiteDecoration
+    {
+        public string SiteTitle() => "City of Dripping Springs";
+    }
 }
