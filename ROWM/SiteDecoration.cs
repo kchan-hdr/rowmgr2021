@@ -44,4 +44,9 @@
     {
         public string SiteTitle() => "Yoakum SH-72";
     }
+
+    public class Dripping : SiteDecoration
+    {
+        public string SiteTitle() => "City of Dripping Springs";
+    }
 }
