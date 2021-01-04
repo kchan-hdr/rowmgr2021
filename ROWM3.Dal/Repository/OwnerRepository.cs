@@ -59,7 +59,7 @@ namespace ROWM.Dal
             var p = await ActiveParcels().FirstOrDefaultAsync(px => px.Tracking_Number.Equals(pid));
             if ( p == null)
             {
-                throw new IndexOutOfRangeException($"cannot find parcel <{pid}>");
+                throw new ArgumentOutOfRangeException($"cannot find parcel <{pid}>");
             }
 
             var query = p.Document.Select(dx => new Document
@@ -69,7 +69,8 @@ namespace ROWM.Dal
                 Title = dx.Title,
                 DateRecorded = dx.DateRecorded,
                 Created = dx.Created,
-                LastModified = dx.LastModified
+                LastModified = dx.LastModified,
+                IsDeleted = dx.IsDeleted
             });
 
             return query.ToList();
