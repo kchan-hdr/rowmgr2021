@@ -54,7 +54,7 @@ namespace ROWM.Controllers
         #endregion
 
         [HttpGet("api/documents/{docId:Guid}/info")]
-        public DocumentInfo GetDocument(Guid docId) => new DocumentInfo(_repo.GetDocument(docId));
+        public DocumentInfo GetDocument(Guid docId) => new DocumentInfo(_repo.GetDocument(docId), _docTypes);
 
         [HttpDelete("api/documents/{docId:Guid}")]
         public async Task<IActionResult> DeleteDocument(Guid docId)
@@ -92,7 +92,7 @@ namespace ROWM.Controllers
 
             d.LastModified = DateTimeOffset.Now;
 
-            return CreatedAtRoute("UpdateDocuMeta", new DocumentInfo(await _repo.UpdateDocument(d)));
+            return CreatedAtRoute("UpdateDocuMeta", new DocumentInfo(await _repo.UpdateDocument(d), _docTypes));
         }
 
         [HttpGet("api/documents/{docId:Guid}")]
@@ -544,7 +544,7 @@ namespace ROWM.Controllers
         /// </summary>
         public DocumentInfo() { }
 
-        internal DocumentInfo(Document d)
+        internal DocumentInfo(Document d, DocTypes docTypes)
         {
             DocumentId = d.DocumentId;
             DocumentType = d.DocumentType;
@@ -568,6 +568,9 @@ namespace ROWM.Controllers
 
             SharePointUrl = d.SharePointUrl;
             BlobId = d.AzureBlobId;
+
+            var t = docTypes.Find(d.DocumentType);
+            DocumentType = t.Description;
         }
     }
     #endregion
