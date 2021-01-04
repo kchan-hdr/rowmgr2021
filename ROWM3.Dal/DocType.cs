@@ -13,6 +13,7 @@ namespace ROWM.Dal
     public class DocType
     {
         public string DocTypeName { get; set; }
+        public string Description { get; set; }
         public string FolderPath { get; set; }
         public int DisplayOrder { get; set; }
         public bool IsDisplayed { get; set; }
@@ -41,6 +42,6 @@ namespace ROWM.Dal
             _Master = new Lazy<IEnumerable<DocType>>(DocTypeLoad, System.Threading.LazyThreadSafetyMode.PublicationOnly);
         }
 
-        IEnumerable<DocType> DocTypeLoad() => _ctx.Document_Type.AsNoTracking().Select(dt => new DocType { DocTypeName = dt.DocTypeName, DisplayOrder = dt.DisplayOrder, FolderPath = dt.FolderPath, IsDisplayed = dt.IsActive, Milestone = dt.Milestone }).ToArray();
+        IEnumerable<DocType> DocTypeLoad() => _ctx.Document_Type.AsNoTracking().Select(dt => new DocType { DocTypeName = dt.DocTypeName, Description = dt.Description, DisplayOrder = dt.DisplayOrder, FolderPath = dt.FolderPath, IsDisplayed = dt.IsActive, Milestone = dt.Milestone }).ToArray();
     }
 }
