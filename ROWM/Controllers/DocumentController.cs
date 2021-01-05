@@ -86,6 +86,9 @@ namespace ROWM.Controllers
             if (!string.IsNullOrWhiteSpace(info.Title)) // allow title change now, kklc 2020.2.8
                 d.Title = info.Title;
 
+            if (! (string.IsNullOrWhiteSpace(info.DocumentType) && d.DocumentType.Equals(info.DocumentType)))
+                d.DocumentType = info.DocumentType;
+
             d.LastModified = DateTimeOffset.Now;
 
             return CreatedAtRoute("UpdateDocuMeta", new DocumentInfo(await _repo.UpdateDocument(d), _docTypes));

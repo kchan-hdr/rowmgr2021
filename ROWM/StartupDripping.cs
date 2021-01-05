@@ -69,15 +69,22 @@ namespace ROWM
             services.AddScoped<IUpdateParcelStatus,UpdateParcelStatus_wharton>();
             services.AddScoped<UpdateParcelStatus2>();
 
-            var feat = new WhartonParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Texas/CoW_Parcel_FS/FeatureServer");
+            var feat = new WhartonParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Texas/CoDS_Parcel_FS/FeatureServer");
             services.AddSingleton<IFeatureUpdate>(feat);
             services.AddSingleton<IRenderer>(feat);
 
-            //var msi = new AzureServiceTokenProvider();
-            //var vaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(msi.KeyVaultTokenCallback));
-            //var appid = vaultClient.GetSecretAsync("https://denver-dev-keys.vault.azure.net/", "sharepoint-client-id").GetAwaiter().GetResult();
-            //var apps = vaultClient.GetSecretAsync("https://denver-dev-keys.vault.azure.net/", "sharepoint-api").GetAwaiter().GetResult();
-            services.AddScoped<ISharePointCRUD, DenverNoOp>();
+            var msi = new AzureServiceTokenProvider();
+            var vaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(msi.KeyVaultTokenCallback));
+            var appid = vaultClient.GetSecretAsync("https://drippingsprings-keys.vault.azure.net/", "dev-id").GetAwaiter().GetResult();
+            var apps = vaultClient.GetSecretAsync("https://drippingsprings-keys.vault.azure.net/", "springs-secret").GetAwaiter().GetResult();
+            //services.AddScoped<ISharePointCRUD, DenverNoOp>();
+            services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac => new SharePointCRUD(
+                __appId: appid.Value,
+                __appSecret: apps.Value,
+                _url: "https://hdroneview.sharepoint.com/sites/CoDS",
+                subfolder: "Parcels",
+                template: "Shared Documents/Parcels/_PARCEL_PARCEL No",
+                d: fac.GetRequiredService<DocTypes>()));
 
             services.AddScoped<IRowmReports, WhartonReport>();
 
