@@ -32,49 +32,23 @@ namespace SharePointInterface
         // staging URL to move to app config
         static readonly string _STAGING_SITE_URL = "https://hdroneview.sharepoint.com/ROW_Dev";
 
-        // static readonly string _DOCUMENT_LIST_BASE = "DW_Documents"; // "Shared Documents";
-        //private string _parcelsFolderName = "";
-        //private string _parcelsFolderTemplate = "DW_Documents/_Track_No_LO Name"; // "Folder_Template";
-
         static readonly string _DOCUMENT_LIST_BASE = "Shared Documents";
         private string _parcelsFolderName = "ROW";
-        private string _parcelsFolderTemplate = "ROW/_Track_No_LO Name"; // "Folder_Template";
+        private string _parcelsFolderTemplate = "ROW/_Track_No_LO Name";
 
         private ClientContext _ctx;
         private string _siteUrl = _STAGING_SITE_URL;
-        // private Dictionary<string, string> _docTypes;
         private DocTypes _docTypes;
 
         private string _appId = "";
         private string _appSecret = "";
 
-        public SharePointCRUD (string __appId = null, string __appSecret = null, string _url = null, DocTypes d = null) // Dictionary<string,string> docTypes = null)
+        public SharePointCRUD (string __appId = null, string __appSecret = null, string _url = null, string subfolder="ROW", string template = "ROW/_Track_No_LO Name", DocTypes d = null)
         {
             _docTypes = d;
-
-            //_parcelsFolderName = "4.0 ROW/4.3 Parcels";
+            _parcelsFolderName = subfolder;
+            _parcelsFolderTemplate = template;
             _siteUrl = "https://hdroneview.sharepoint.com/sites/DW_ROW";
-
-
-            /*
-             * STAGING---
-             * 
-             * The app identifier has been successfully created.
-            Client Id:  	26589ee5-16ef-4444-9143-cfea08cba1cc
-            Client Secret:  	B0YOp5dB4DKsEGH93FT5cvR8EriFyxgDT/H/mhSS+3E=
-            Title:  	rowm_staging
-            App Domain:  	rowm_staging.hdrinc.com
-            Redirect URI:  	https://rowm_staging.hdrinc.com
-             
-
-
-            The app identifier has been successfully created.
-Client Id:  	cffcadac-22ec-433f-a045-4a1d79527554
-Client Secret:  	PACWIOp2J6+T9m2mZ3y1mCZ2J77rO8Qa9rFSSFBhoGg=
-Title:  	rowmgr
-App Domain:  	www.denver-rowmgr.com
-Redirect URI:  	https://denver-rowmgr.azurewebsites.net
-             */
 
             if (__appId == null || __appSecret == null )
             {
@@ -84,12 +58,6 @@ Redirect URI:  	https://denver-rowmgr.azurewebsites.net
                 _appId = "1bca8e9c-15ac-41b0-9869-1e93d4a5d779";
                 _appSecret = "13+Rj3uGBRFR7FN5FgfGImEn6eEWqK06qUOfJ+XmY9o=";
                 _siteUrl = string.IsNullOrWhiteSpace(_url) ? _STAGING_SITE_URL : _url;
-
-            // if (__appId == null || __appSecret == null )
-            // {
-            //     _appId = "e8d38b84-11bb-43df-b07d-a549b05eab19";
-            //     _appSecret = "/kzpHsp4A8NXWYyhGOGI8LmA8jdBwZCtKjqLrfN3W3A=";
-            //     _siteUrl = "https://atcpmp.sharepoint.com/line6943";
             }
             else
             {
