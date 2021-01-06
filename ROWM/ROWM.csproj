@@ -121,6 +121,9 @@
     <WCFMetadata Include="Connected Services" />
   </ItemGroup>
   <ItemGroup>
+    <Content Update="appsettings.DrippingRelease1.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
