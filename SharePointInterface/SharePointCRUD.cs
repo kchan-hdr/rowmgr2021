@@ -88,7 +88,10 @@ namespace SharePointInterface
             if (_ctx != null)
                 return _ctx;
 
-            var c = new System.Security.Cryptography.X509Certificates.X509Certificate2(Convert.FromBase64String(_appSecret));
+            var c = new System.Security.Cryptography.X509Certificates.X509Certificate2(Convert.FromBase64String(_appSecret), string.Empty, 
+                System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.MachineKeySet |
+                System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.PersistKeySet |
+                System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.Exportable );
             AuthenticationManager authManager = new AuthenticationManager();
             _ctx = authManager.GetAzureADAppOnlyAuthenticatedContext(_siteUrl, _appId, "hdroneview.onmicrosoft.com", c);
             return _ctx;
