@@ -73,6 +73,7 @@ namespace ROWM.Controllers
                 return BadRequest(ModelState);
 
             var d = _repo.GetDocument(docId);
+            Trace.TraceInformation($"{d.Agent.Count()}");
             d.ApprovedDate = info.ApprovedDate;
             d.ClientSignatureDate = info.ClientSignatureDate;
             d.ClientTrackingNumber = info.ClientTrackingNumber;
@@ -90,7 +91,7 @@ namespace ROWM.Controllers
             if (!string.IsNullOrWhiteSpace(info.Title)) // allow title change now, kklc 2020.2.8
                 d.Title = info.Title;
 
-            if (! (string.IsNullOrWhiteSpace(info.DocumentType) && d.DocumentType.Equals(info.DocumentType)))
+            if (!(string.IsNullOrWhiteSpace(info.DocumentType) || d.DocumentType.Equals(info.DocumentType)))
                 d.DocumentType = info.DocumentType;
 
             d.LastModified = DateTimeOffset.Now;
