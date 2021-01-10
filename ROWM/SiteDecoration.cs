@@ -40,13 +40,18 @@
         public string SiteTitle() => "City of Wharton";
     }
 
+    public class Dripping : SiteDecoration
+    {
+        public string SiteTitle() => "City of Dripping Springs";
+    }
+    
     public class Sh72: SiteDecoration
     {
         public string SiteTitle() => "Yoakum SH-72";
     }
-
-    public class Dripping : SiteDecoration
+    
+    public class TxDotDemo : SiteDecoration
     {
-        public string SiteTitle() => "City of Dripping Springs";
+        public string SiteTitle() => "TxDOT unknown";
     }
 }

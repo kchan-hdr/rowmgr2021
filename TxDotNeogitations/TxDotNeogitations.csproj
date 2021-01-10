@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="W:\sh72\row-services-base\ROWM3.Dal\ROWM3.Dal.csproj" />
+    <ProjectReference Include="..\ROWM3.Dal\ROWM3.Dal.csproj" />
   </ItemGroup>
 
 </Project>
