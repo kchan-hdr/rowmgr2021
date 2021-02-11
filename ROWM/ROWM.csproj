@@ -39,6 +39,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <_WebToolingArtifacts Remove="Properties\PublishProfiles\rose-dev-rowmgr.PublishSettings" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Azure.Security.KeyVault.Keys" Version="4.0.0" />
     <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.0.0" />
     <PackageReference Include="EntityFramework" Version="6.4.4" />
@@ -89,13 +93,15 @@
     <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="wwwroot\js\" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services" />
   </ItemGroup>
   <ItemGroup>
+    <Content Update="appsettings.Rose.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
     <Content Update="appsettings.DrippingRelease1.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>

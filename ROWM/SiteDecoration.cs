@@ -44,4 +44,9 @@
     {
         public string SiteTitle() => "City of Dripping Springs";
     }
+
+    public class RoseQuarter : SiteDecoration
+    {
+        public string SiteTitle() => "Rose Quarter";
+    }
 }
