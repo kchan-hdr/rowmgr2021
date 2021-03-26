@@ -38,7 +38,7 @@ namespace ROWM.Controllers
         readonly TxDotNeogitations.ITxDotNegotiation _txDotHelper;
         readonly DeleteHelper _deleteHelper;
 
-        public DocumentController(ROWM_Context c, OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, UpdateParcelStatus2 u, IFeatureUpdate f, DeleteHelper del, sh72.ITxDotNegotiation tx, DocTypes d)
+        public DocumentController(ROWM_Context c, OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, UpdateParcelStatus2 u, IFeatureUpdate f, DeleteHelper del, DocTypes d)
         {
             _ctx = c;
             _repo = r;
@@ -49,7 +49,7 @@ namespace ROWM.Controllers
             _statusHelper = h;
             _docTypes = d;
 
-            _txDotHelper = tx;
+            //_txDotHelper = tx;
         }
         #endregion
 
