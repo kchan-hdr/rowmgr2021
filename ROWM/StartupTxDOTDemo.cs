@@ -73,6 +73,8 @@ namespace ROWM
             services.AddSingleton<IFeatureUpdate>(feat);
             services.AddSingleton<IRenderer>(feat);
 
+            services.AddSingleton<TxDotNeogitations.ITxDotNegotiation, TxDotNeogitations.Sh72>();
+
             services.AddScoped<ISharePointCRUD, DenverNoOp>();
             //var msi = new AzureServiceTokenProvider();
             //var vaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(msi.KeyVaultTokenCallback));
