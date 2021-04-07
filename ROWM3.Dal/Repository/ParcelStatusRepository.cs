@@ -38,7 +38,7 @@ namespace ROWM.Dal.Repository
             return _cache.Set(STATUS_KEY, await MakeReverseKey(), new TimeSpan(12, 0, 0));
         }
 
-        async Task<ILookup<string, Parcel_Status>> MakeReverseKey() => (await _ctx.Parcel_Status.AsNoTracking().ToArrayAsync()).ToLookup(sx => sx.ParentStatusCode);
+        async Task<ILookup<string, Parcel_Status>> MakeReverseKey() => (await _ctx.Parcel_Status.AsNoTracking().ToArrayAsync()).ToLookup(sx => sx.Code);
 
 
         async Task<IEnumerable<ParcelHistory>> GetList(string m)
@@ -60,7 +60,7 @@ namespace ROWM.Dal.Repository
                 return Array.Empty<ParcelHistory>();
 
             var p = await _ctx.Parcel.AsNoTracking()
-                .Where(px => px.IsActive && px.IsDeleted == false)
+                .Where(px => px.IsActive && !px.IsDeleted)
                 .Select(px => new { px.ParcelId, px.ParcelStatusCode })
                 .ToListAsync();
             var c = h[milestone].Select(hx=> hx.Code);
