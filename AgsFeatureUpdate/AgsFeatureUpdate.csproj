@@ -107,6 +107,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IRenderer.cs" />
+    <Compile Include="RoseParcel.cs" />
     <Compile Include="WhartonParcel.cs" />
     <Compile Include="DenverParcel.cs" />
     <Compile Include="AgsSchema.cs" />

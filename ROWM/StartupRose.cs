@@ -69,7 +69,7 @@ namespace ROWM
             services.AddScoped<IUpdateParcelStatus,UpdateParcelStatus_wharton>();
             services.AddScoped<UpdateParcelStatus2>();
 
-            var feat = new WhartonParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Oregon/RQ_Parcel_FS/FeatureServer");
+            var feat = new RoseParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Oregon/RQ_Parcel_FS/FeatureServer");
             services.AddSingleton<IFeatureUpdate>(feat);
             services.AddSingleton<IRenderer>(feat);
 

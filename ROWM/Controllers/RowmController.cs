@@ -481,13 +481,24 @@ namespace ROWM.Controllers
             this._statusUpdate.Notes = request.Notes;
             this._statusUpdate.ModifiedBy = User?.Identity?.Name ?? _APP_NAME;
             await this._statusUpdate.Apply();
-            
+
+            try
+            {
+                var dv = _statusHelper.GetDomainValue(request.StatusCode);
+                await _featureUpdate.UpdateFeature(pid, p.Tracking_Number, dv);
+            }
+            catch (InvalidOperationException)
+            {
+                Trace.TraceWarning($"bad parcel status domain {request.StatusCode}");
+            }
+
+
             //var update = new UpdateParcelStatus(new[] { p }, a, this._ctx, this._repo, this._featureUpdate, this._statusHelper);
             //update.AcquisitionStatus = request.StatusCode;
             //update.Notes = request.Notes;
             //update.ModifiedBy = User?.Identity?.Name ?? _APP_NAME;
             //await update.Apply();
-            
+
             return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
         }
         #endregion
