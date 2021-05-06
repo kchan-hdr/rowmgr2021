@@ -54,4 +54,9 @@
     {
         public string SiteTitle() => "TxDOT unknown";
     }
+
+    public class Atp : SiteDecoration
+    {
+        public string SiteTitle() => "ATP";
+    }
 }
