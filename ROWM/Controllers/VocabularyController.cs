@@ -53,11 +53,12 @@ namespace ROWM.Controllers
             var purposes = _Context.Contact_Purpose.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
             var rels = _Context.Repesentation_Type.Where(r => r.IsActive).OrderBy(r => r.DisplayOrder);
 
-            var pStatus = _Context.Parcel_Status.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
-            var rStatus = _Context.Roe_Status.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
+            var pStatus = _Context.Parcel_Status.Where(p => p.IsActive && p.Category == "acquisition").OrderBy(p => p.DisplayOrder);
+            var rStatus = _Context.Parcel_Status.Where(p => p.IsActive && p.Category == "roe").OrderBy(p => p.DisplayOrder);
+            var cStatus = _Context.Parcel_Status.Where(p => p.IsActive && p.Category == "clearance").OrderBy(p => p.DisplayOrder);
             var llScore = _Context.Landowner_Score.Where(s => s.IsActive ?? false).OrderBy(s => s.DisplayOrder);
 
-            return new Vocabulary(agents, channels, purposes, rels, pStatus, rStatus, llScore);
+            return new Vocabulary(agents, channels, purposes, rels, pStatus, rStatus, cStatus, llScore);
         }
 
         [HttpGet("api/parcelStatus")]
@@ -70,7 +71,7 @@ namespace ROWM.Controllers
             var ss = from p in pStatus
                      join sy in sym on p.DomainValue equals sy.Code into rr
                      from rrx in rr.DefaultIfEmpty()
-                     select new StatusDto(p.DisplayOrder, p.Code, p.Description, p.ParentStatusCode, rrx?.Hex ?? "#ffffff");
+                     select new StatusDto(p.DisplayOrder ?? 0, p.Code, p.Description, p.ParentStatusCode, p.Category, rrx?.Hex ?? "#ffffff");
 
             return ss;
         }
@@ -93,9 +94,10 @@ namespace ROWM.Controllers
             public string Caption { get; private set; }
             public string Color { get; private set; }
 
+            public string Category { get; private set; }
             public string ParentCode { get; private set; }
 
-            internal StatusDto(int i, string value, string label, string parent, string hex) => (DisplayOrder, Code, Caption, ParentCode, Color) = (i, value, label, parent, hex);
+            internal StatusDto(int i, string value, string label, string parent, string category, string hex) => (DisplayOrder, Code, Caption, ParentCode, Category, Color) = (i, value, label, parent, category, hex);
         }
         #region lookups
         public class Lookup
@@ -113,6 +115,7 @@ namespace ROWM.Controllers
             public IEnumerable<Lookup> RelationTypes { get; set; }
             public IEnumerable<Lookup> ParcelStatus { get; set; }
             public IEnumerable<Lookup> RoeStatus { get; set; }
+            public IEnumerable<Lookup> ClearanceStatus { get; set; }
             public IEnumerable<Lookup> Score { get; set; }
 
             internal Vocabulary(
@@ -121,7 +124,8 @@ namespace ROWM.Controllers
                 IEnumerable<Contact_Purpose> purposes,
                 IEnumerable<Repesentation_Type> rels,
                 IEnumerable<Parcel_Status> p,
-                IEnumerable<Roe_Status> r,
+                IEnumerable<Parcel_Status> r,
+                IEnumerable<Parcel_Status> cl,
                 IEnumerable<Landowner_Score> s)
             {
                 Agents = agents.Select(a => new Lookup { Code = a.AgentId.ToString(), Description = a.AgentName });
@@ -129,8 +133,9 @@ namespace ROWM.Controllers
                 Purposes = purposes.Select(c => new Lookup { Code = c.PurposeCode, Description = c.Description, DisplayOrder = c.DisplayOrder });
                 RelationTypes = rels.Select(c => new Lookup { Code = c.RelationTypeCode, Description = c.Description, DisplayOrder = c.DisplayOrder });
 
-                ParcelStatus = p.Select(c => new Lookup { Code = c.Code, Description = c.Description, DisplayOrder = c.DisplayOrder });
-                RoeStatus = r.Select(c => new Lookup { Code = c.Code, DisplayOrder = c.DisplayOrder, Description = c.Description });
+                ParcelStatus = p.Select(c => new Lookup { Code = c.Code, Description = c.Description, DisplayOrder = c.DisplayOrder ?? 0});
+                RoeStatus = r.Select(c => new Lookup { Code = c.Code, DisplayOrder = c.DisplayOrder ?? 0, Description = c.Description });
+                ClearanceStatus = cl.Select(c => new Lookup { Code = c.Code, DisplayOrder = c.DisplayOrder ?? 0, Description = c.Description });
                 Score = s.Select(c => new Lookup { Code = c.Score.ToString(), DisplayOrder = c.DisplayOrder ?? 0, Description = c.Caption });
             }
         }

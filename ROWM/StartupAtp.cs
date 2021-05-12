@@ -72,6 +72,7 @@ namespace ROWM
             var feat = new WhartonParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Texas/ATP_Parcel_FS/FeatureServer");
             services.AddSingleton<IFeatureUpdate>(feat);
             services.AddSingleton<IRenderer>(feat);
+            services.AddSingleton<IMapSymbology, AtpSymbology>();
 
             services.AddSingleton<TxDotNeogitations.ITxDotNegotiation, TxDotNeogitations.Sh72>();
 
