@@ -27,7 +27,7 @@ namespace ROWM.Controllers
         public int GetDomainValue(string status)
         {
             var s = _Status.Single(sx => sx.Code.Equals(status));
-            return s.DomainValue;
+            return s.DomainValue ?? 0;
         }
 
         public int GetRank(string status) => _Status.SingleOrDefault(sx => sx.Code.Equals(status))?.DisplayOrder ?? 0;
