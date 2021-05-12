@@ -279,8 +279,9 @@ namespace ROWM.Controllers
                           select new StatusDto { 
                               Code = s.Code, 
                               Label = s.Description,
+                              Category = s.Category,
                               ParentCode = s.ParentStatusCode,
-                              DisplayOrder = s.DisplayOrder, 
+                              DisplayOrder = s.DisplayOrder ?? 0, 
                               IsSet = evt != null,
                               Stage = ( evt?.ActivityDate == null ) ? StatusDto.StageCode.Pending.ToString() : s.IsAbort == true ? StatusDto.StageCode.Aborted.ToString() : StatusDto.StageCode.Completed.ToString(),
                               ActivityDate = evt?.ActivityDate.UtcDateTime ?? null,
@@ -768,7 +769,7 @@ namespace ROWM.Controllers
         }
         #endregion
         #region statistics
-        [HttpGet("statistics")]
+        [HttpGet("statistics_no_color")]
         public async Task<StatisticsDto> GetStatistics()
         {
             var s = await _statistics.Snapshot();
@@ -778,6 +779,7 @@ namespace ROWM.Controllers
                 NumberOfParcels = s.nParcels,
                 ParcelStatus = await _statistics.SnapshotParcelStatus(),
                 RoeStatus = await _statistics.SnapshotRoeStatus(),
+                ClearStatus = await _statistics.SnapshotClearanceStatus(),
                 Access = await _statistics.SnapshotAccessLikelihood()
             };
         }
@@ -862,6 +864,7 @@ namespace ROWM.Controllers
 
         public IEnumerable<StatisticsRepository.SubTotal> ParcelStatus { get; set; }
         public IEnumerable<StatisticsRepository.SubTotal> RoeStatus { get; set; }
+        public IEnumerable<StatisticsRepository.SubTotal> ClearStatus { get; set; }
         public IEnumerable<StatisticsRepository.SubTotal> Access { get; set; }
         public IEnumerable<StatisticsRepository.SubTotal> Compensations { get; set; }
     }
@@ -1046,6 +1049,7 @@ namespace ROWM.Controllers
         public enum StageCode { Pending, InProgress, Completed, Aborted };
         public string Label { get; set; }
         public string Code { get; set; }
+        public string Category { get; set; }
         public string ParentCode { get; set; }
         public int DisplayOrder { get; set; }
         public string Stage { get; set; }

@@ -38,6 +38,7 @@ namespace ROWM.Dal
         public virtual DbSet<Followup> Followup { get; set; }
         public virtual DbSet<Organization> Organization { get; set; }
         public virtual DbSet<MapConfiguration> MapConfiguration { get; set; }
+        public virtual DbSet<StatusCategory> StatusCategory { get; set; } 
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
