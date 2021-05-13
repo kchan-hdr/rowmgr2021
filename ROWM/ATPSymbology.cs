@@ -33,9 +33,9 @@ namespace ROWM
             if (this.hasSymbology)
                 return true;
 
-            this.RoeSymbols = await _renderer.GetDomainValues(0);
-            this.ClearanceSymbols = await _renderer.GetDomainValues(0);
-            this.AcquisitionSymbols = await _renderer.GetDomainValues(0);
+            this.RoeSymbols = await _renderer.GetDomainValues(10);
+            this.ClearanceSymbols = await _renderer.GetDomainValues(10);
+            this.AcquisitionSymbols = await _renderer.GetDomainValues(11);
 
             return true;
         }

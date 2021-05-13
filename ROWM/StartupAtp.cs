@@ -69,9 +69,9 @@ namespace ROWM
             services.AddScoped<IUpdateParcelStatus,UpdateParcelStatus_wharton>();
             services.AddScoped<UpdateParcelStatus2>();
 
-            var feat = new WhartonParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Texas/ATP_Parcel_FS/FeatureServer");
+            var feat = new AtpParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Texas/ATP_Parcel_FS/FeatureServer");
             services.AddSingleton<IFeatureUpdate>(feat);
-            services.AddSingleton<IRenderer>(feat);
+            services.AddSingleton<IRenderer>(new AtpParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Texas/ATP_ROW_MapService/MapServer"));
             services.AddSingleton<IMapSymbology, AtpSymbology>();
 
             services.AddSingleton<TxDotNeogitations.ITxDotNegotiation, TxDotNeogitations.Sh72>();

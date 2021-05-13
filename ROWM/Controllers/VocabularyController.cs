@@ -64,7 +64,7 @@ namespace ROWM.Controllers
         [HttpGet("api/parcelStatus")]
         public async Task<IEnumerable<StatusDto>> GetParcelStatus()
         {
-            var sym = await _renderer.GetDomainValues(0);
+            var sym = await _renderer.GetDomainValues(11);
 
             var pStatus = _Context.Parcel_Status.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.DisplayOrder).ToList();
 
