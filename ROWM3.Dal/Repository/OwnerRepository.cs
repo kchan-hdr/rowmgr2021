@@ -90,7 +90,7 @@ namespace ROWM.Dal
 
         public async Task<IEnumerable<StatusActivity>> GetStatusForParcel(string pid) => await GetStatusForParcel(pid, false);
 
-        public async Task<IEnumerable<StatusActivity>> GetStatusForParcel(string pid, bool all = false)
+        public async Task<IEnumerable<StatusActivity>> GetStatusForParcel(string pid, bool all)
         {
             var p = await ActiveParcels().AsNoTracking()
                 .Include(px => px.Activities)
@@ -106,7 +106,7 @@ namespace ROWM.Dal
             else           
             {
                 var q = from a in p.Activities
-                        group a by a.ParcelStatusCode into ag
+                        group a by a.StatusCode into ag
                         select ag.OrderByDescending(ax => ax.ActivityDate).Take(1);
 
                 return q.SelectMany(qx => qx);

@@ -92,8 +92,8 @@ namespace ROWM.Dal.Repository
             Assessor_Parcel_Number = p.Assessor_Parcel_Number;
 
             Status = p.Activities
-                .Where(ax => filters.Contains(ax.ParcelStatusCode))
-                .Select(ax => new StatusActivity { ActivityId = ax.ActivityId, ActivityDate = ax.ActivityDate, Notes = ax.Notes, ParcelStatusCode = ax.ParcelStatusCode });
+                .Where(ax => filters.Contains(ax.StatusCode))
+                .Select(ax => new StatusActivity { ActivityId = ax.ActivityId, ActivityDate = ax.ActivityDate, Notes = ax.Notes, StatusCode = ax.StatusCode });
         }
     }
 
