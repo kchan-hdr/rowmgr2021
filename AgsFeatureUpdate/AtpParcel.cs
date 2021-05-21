@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection.Emit;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace geographia.ags
@@ -13,6 +11,7 @@ namespace geographia.ags
     public class AtpParcel : FeatureService_Base, IFeatureUpdate, IRenderer
     {
         static readonly string _PARCEL_KEY = "Assessor_Parcel_Number";
+        readonly AgsSchema _layers;
 
         public AtpParcel(string url = "")
         {
@@ -23,6 +22,8 @@ namespace geographia.ags
             _LAYERID = 0;
 
             SetSecured();
+
+            _layers = new AgsSchema(this);
         }
 
         public async Task<IEnumerable<Status_dto>> GetAllParcels()
@@ -143,6 +144,10 @@ namespace geographia.ags
 
         Task<bool> IFeatureUpdate.UpdateRating(string parcelId, string track, int rating) => Task.FromResult(false); // no op
 
+        public async Task<IEnumerable<DomainValue>> GetDomainValues(string layerName) =>
+            await GetDomainValues(await _layers.GetId(layerName));
+
+
         public async Task<IEnumerable<DomainValue>> GetDomainValues(int layerId)
         {
             var desc = await Describe(layerId);
@@ -187,7 +192,6 @@ namespace geographia.ags
             public string Documents { get; set; }
         }
         #endregion
-
         #region dto
         public class Status_dto
         {
@@ -199,7 +203,6 @@ namespace geographia.ags
             public string Documents { get; set; }
         }
         #endregion
-    
         #region symbol
 
         public class MapD

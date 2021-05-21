@@ -143,6 +143,11 @@ namespace geographia.ags
 
         Task<bool> IFeatureUpdate.UpdateRating(string parcelId, string track, int rating) => Task.FromResult(false); // no op
 
+        public Task<IEnumerable<DomainValue>> GetDomainValues(string layerName)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<IEnumerable<DomainValue>> GetDomainValues(int layerId)
         {
             var desc = await Describe(layerId);
