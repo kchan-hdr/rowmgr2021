@@ -111,7 +111,7 @@ namespace ROWM.Reports
 
             var statusGruops = await _context.Activities
                 .Include(a => a.ParentParcel)
-                .GroupBy(a => a.ParcelStatusCode)
+                .GroupBy(a => a.StatusCode)
                 .ToListAsync();
 
 
@@ -222,7 +222,7 @@ namespace ROWM.Reports
                     {
                         foreach( var a in par.Activities)
                         {
-                            var col = _status.FirstOrDefault(sx => sx.StatusCode.Equals(a.ParcelStatusCode, StringComparison.CurrentCultureIgnoreCase));
+                            var col = _status.FirstOrDefault(sx => sx.StatusCode.Equals(a.StatusCode, StringComparison.CurrentCultureIgnoreCase));
 
                             if ( col != null)
                             {
@@ -259,7 +259,7 @@ namespace ROWM.Reports
                     {
                         ++col2;
 
-                        var evt = parcel.Activities.FirstOrDefault(ax => ax.ParcelStatusCode == stx.Code);
+                        var evt = parcel.Activities.FirstOrDefault(ax => ax.StatusCode == stx.Code);
                         if (evt != null)
                         {
                             addr = ExcelRange.GetAddress(row2, col2);

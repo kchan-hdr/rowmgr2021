@@ -42,6 +42,9 @@ namespace ROWM.Dal
         public string RoeCondition { get; set; }
         public string Notes { get; set; }
 
+        public DateTimeOffset? ConditionStartDate { get; set; }
+        public DateTimeOffset? ConditionEndDate { get; set; }
+
         public string ModifiedBy { get; set; } = "UP";
 
         public UpdateParcelStatus(IEnumerable<Parcel> parcels, Agent agent, ROWM_Context context, OwnerRepository repository, IFeatureUpdate featureUpdate, ParcelStatusHelper h)
@@ -76,8 +79,8 @@ namespace ROWM.Dal
 
                 if (this.AcquisitionStatus != null && p.ParcelStatusCode != this.AcquisitionStatus)
                 {
-                    history.OrigianlParcelStatusCode = p.ParcelStatusCode;
-                    history.ParcelStatusCode = this.AcquisitionStatus;
+                    history.OriginalStatusCode = p.ParcelStatusCode;
+                    history.StatusCode = this.AcquisitionStatus;
 
                     p.ParcelStatusCode = this.AcquisitionStatus;
                     dirty = true;
@@ -88,15 +91,15 @@ namespace ROWM.Dal
 
                 if (this.RoeStatus != null && p.RoeStatusCode != this.RoeStatus)
                 {
-                    history.OriginalRoeStatusCode = p.RoeStatusCode;
-                    history.RoeStatusCode = this.RoeStatus;
+                    history.OriginalStatusCode = p.RoeStatusCode;
+                    history.StatusCode = this.RoeStatus;
 
                     p.RoeStatusCode = this.RoeStatus;
                     dirty = true;
 
                     if (!string.IsNullOrWhiteSpace(RoeCondition))
                     {
-                        p.Conditions.Add(new Dal.RoeCondition { Condition = RoeCondition, Created = dt, LastModified = dt, ModifiedBy = this.ModifiedBy });
+                        p.Conditions.Add(new Dal.RoeCondition { Condition = RoeCondition, EffectiveEndDate = ConditionStartDate, EffectiveStartDate = ConditionEndDate, Created = dt, LastModified = dt, ModifiedBy = this.ModifiedBy });
                     }
 
                     var roeDV = _statusHelper.GetRoeDomainValue(RoeStatus);
