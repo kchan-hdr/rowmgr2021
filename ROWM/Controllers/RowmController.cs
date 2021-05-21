@@ -273,7 +273,7 @@ namespace ROWM.Controllers
             }
 
             var q = from s in MasterParcelStatus
-                          join sx in st on s.Code equals sx.ParcelStatusCode into h
+                          join sx in st on s.Code equals sx.StatusCode into h
                           from evt in h.DefaultIfEmpty()
                           orderby s.DisplayOrder
                           select new StatusDto { 
@@ -317,7 +317,7 @@ namespace ROWM.Controllers
                 }
             }
 
-            var current = st.OrderByDescending(sx => sx.ActivityDate).FirstOrDefault()?.ParcelStatusCode ?? "";
+            var current = st.OrderByDescending(sx => sx.ActivityDate).FirstOrDefault()?.StatusCode ?? "";
             var status = MasterParcelStatus.SingleOrDefault(sx => sx.Code == current) ?? MasterParcelStatus.First();
             var statusCode = string.IsNullOrEmpty(status.ParentStatusCode) ? status.Code : status.ParentStatusCode;
 
@@ -495,12 +495,12 @@ namespace ROWM.Controllers
         #endregion
         #region roe status
         [HttpPut("parcels/{pid}/roe/{statusCode}")]
-        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus(string pid, string statusCode) => await UpdateRoeStatusImpl(pid, Guid.Empty, statusCode, null);
+        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus(string pid, string statusCode) => await UpdateRoeStatusImpl(pid, Guid.Empty, statusCode, null, DateTimeOffset.UtcNow, null, null);
 
         [HttpPut("parcels/{pid}/roe")]
-        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus2(string pid, [FromBody] RoeRequest r) => await UpdateRoeStatusImpl(pid, r.AgentId, r.StatusCode, r.Condition);
+        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus2(string pid, [FromBody] RoeRequest r) => await UpdateRoeStatusImpl(pid, r.AgentId, r.StatusCode, r.Condition, r.ChangeDate, r.EffectiveStart, r.EffectiveEnd);
 
-        private async Task<ActionResult<ParcelGraph>> UpdateRoeStatusImpl(string pid, Guid agentId, string statusCode, string condition)
+        private async Task<ActionResult<ParcelGraph>> UpdateRoeStatusImpl(string pid, Guid agentId, string statusCode, string condition, DateTimeOffset changeDate, DateTimeOffset? startDate, DateTimeOffset? endDate)
         {
             var p = await _repo.GetParcel(pid);
             if (p == null)
@@ -511,7 +511,11 @@ namespace ROWM.Controllers
             {
                 RoeCondition = condition,
                 RoeStatus = statusCode,
-                ModifiedBy = User?.Identity?.Name ?? _APP_NAME
+                ModifiedBy = User?.Identity?.Name ?? _APP_NAME,
+
+                StatusChangeDate = changeDate,
+                ConditionStartDate = startDate,
+                ConditionEndDate = endDate
             };
 
             await ud.Apply();
@@ -844,6 +848,8 @@ namespace ROWM.Controllers
         public Guid AgentId { get; set; }
         public string StatusCode { get; set; }
         public DateTimeOffset ChangeDate { get; set; }
+        public DateTimeOffset? EffectiveStart { get; set; }
+        public DateTimeOffset? EffectiveEnd { get; set; }
         public string Condition { get; set; }
     }
     #endregion
