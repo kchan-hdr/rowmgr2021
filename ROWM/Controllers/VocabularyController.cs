@@ -48,6 +48,8 @@ namespace ROWM.Controllers
         [HttpGet("api/vocabulary")]
         public Vocabulary Get()
         {
+            var titles = _Context.DocumentTitlePicklist.ToArray();
+
             var agents = _Context.Agent.Where(a => a.IsActive);
             var channels = _Context.Contact_Channel.Where(c => c.IsActive).OrderBy(c => c.DisplayOrder);
             var purposes = _Context.Contact_Purpose.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
@@ -58,7 +60,7 @@ namespace ROWM.Controllers
             var cStatus = _Context.Parcel_Status.Where(p => p.IsActive && p.Category == "clearance").OrderBy(p => p.DisplayOrder);
             var llScore = _Context.Landowner_Score.Where(s => s.IsActive ?? false).OrderBy(s => s.DisplayOrder);
 
-            return new Vocabulary(agents, channels, purposes, rels, pStatus, rStatus, cStatus, llScore);
+            return new Vocabulary(agents, channels, purposes, rels, pStatus, rStatus, cStatus, llScore, titles);
         }
 
         [HttpGet("api/parcelStatus")]
@@ -117,6 +119,7 @@ namespace ROWM.Controllers
             public IEnumerable<Lookup> RoeStatus { get; set; }
             public IEnumerable<Lookup> ClearanceStatus { get; set; }
             public IEnumerable<Lookup> Score { get; set; }
+            public IEnumerable<DocumentTiltlePl> TitlePicklist { get; set; }
 
             internal Vocabulary(
                 IEnumerable<Agent> agents,
@@ -126,7 +129,8 @@ namespace ROWM.Controllers
                 IEnumerable<Parcel_Status> p,
                 IEnumerable<Parcel_Status> r,
                 IEnumerable<Parcel_Status> cl,
-                IEnumerable<Landowner_Score> s)
+                IEnumerable<Landowner_Score> s,
+                IEnumerable<DocumentTiltlePl> titles)
             {
                 Agents = agents.Select(a => new Lookup { Code = a.AgentId.ToString(), Description = a.AgentName });
                 Channels = channels.Select(c => new Lookup { Code = c.ContactTypeCode, Description = c.Description, DisplayOrder = c.DisplayOrder });
@@ -137,6 +141,8 @@ namespace ROWM.Controllers
                 RoeStatus = r.Select(c => new Lookup { Code = c.Code, DisplayOrder = c.DisplayOrder ?? 0, Description = c.Description });
                 ClearanceStatus = cl.Select(c => new Lookup { Code = c.Code, DisplayOrder = c.DisplayOrder ?? 0, Description = c.Description });
                 Score = s.Select(c => new Lookup { Code = c.Score.ToString(), DisplayOrder = c.DisplayOrder ?? 0, Description = c.Caption });
+
+                TitlePicklist = titles;
             }
         }
         #endregion

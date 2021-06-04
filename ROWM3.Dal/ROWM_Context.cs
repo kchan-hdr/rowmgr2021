@@ -40,6 +40,8 @@ namespace ROWM.Dal
         public virtual DbSet<MapConfiguration> MapConfiguration { get; set; }
         public virtual DbSet<StatusCategory> StatusCategory { get; set; } 
 
+        public virtual DbSet<DocumentTiltlePl> DocumentTitlePicklist { get; set; }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Agent>()

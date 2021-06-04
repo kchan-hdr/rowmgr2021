@@ -90,6 +90,7 @@
     <Compile Include="Document.cs" />
     <Compile Include="DocumentActivity.cs" />
     <Compile Include="DocumentPackage.cs" />
+    <Compile Include="DocumentTiltlePl.cs" />
     <Compile Include="Document_Type.cs" />
     <Compile Include="Followup.cs" />
     <Compile Include="Landowner_Score.cs" />
