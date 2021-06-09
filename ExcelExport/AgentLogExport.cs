@@ -31,8 +31,8 @@ namespace ExcelExport
             // column heading --                "Parcel ID,RGI,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
             var hr = InsertRow(row++, d);
             var c = 0;
-            WriteText(hr, GetColumnCode(c++), "Parcel ID", 1);
-            WriteText(hr, GetColumnCode(c++), "RGI", 1);
+            WriteText(hr, GetColumnCode(c++), "Parcel CAD", 1);
+            //WriteText(hr, GetColumnCode(c++), "RGI", 1);
             WriteText(hr, GetColumnCode(c++), "Contact Name", 1);
             WriteText(hr, GetColumnCode(c++), "Date", 1);
             WriteText(hr, GetColumnCode(c++), "Channel", 1);
@@ -46,7 +46,7 @@ namespace ExcelExport
                 var r = InsertRow(row++, d);
                 c = 0;
                 WriteText(r, GetColumnCode(c++), log.parcelid);
-                WriteText(r, GetColumnCode(c++), log.roestatus);
+                //WriteText(r, GetColumnCode(c++), log.roestatus);
                 WriteText(r, GetColumnCode(c++), log.ownerfirstname ?? "");     // this is a heck. to do
                 WriteText(r, GetColumnCode(c++), log.dateadded.Date.ToShortDateString());
                 WriteText(r, GetColumnCode(c++), log.contactchannel);

@@ -134,7 +134,7 @@ namespace ROWM.Controllers
         [HttpGet("export/documents")]
         public async Task<IActionResult> ExportDocumentg(string f)
         {
-            const string DOCUMENT_HEADER = "NSR Number,Parcel Id,Title,Content Type,Date Sent,Date Delivered,Client Tracking Number,Date Received,Date Signed,Check No,Date Recorded,Document ID";
+            const string DOCUMENT_HEADER = "Parcel CAD,Title,Content Type,Date Sent,Date Delivered,Client Tracking Number,Date Received,Date Signed,Check No,Date Recorded,Document ID";
 
             if ("excel" != f)
                 return BadRequest($"not supported export '{f}'");
@@ -177,7 +177,7 @@ namespace ROWM.Controllers
             {
                 using (var writer = new StreamWriter(s))
                 {
-                    writer.WriteLine("Parcel ID,Owner,ROE Status,Conditions,Date");
+                    writer.WriteLine("Parcel CAD,Owner,ROE Status,Conditions,Date");
 
                     foreach (var p in parcels.OrderBy(px => px.Assessor_Parcel_Number))
                     {
