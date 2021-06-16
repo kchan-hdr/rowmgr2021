@@ -18,7 +18,7 @@ namespace Dal.Test
 
             // Data Source=wharton-dev-rowm.database.windows.net;Initial Catalog=rowm;User ID=kchan@hdrinc.com;Password=********;Connect Timeout=30;Encrypt=True;TrustServerCertificate=False;Authentication="Active Directory Password";ApplicationIntent=ReadWrite;MultiSubnetFailover=False
             var b = new DbContextOptionsBuilder<ROWM_Context>();
-            b.UseSqlServer("server=tcp:wharton-dev-rowm.database.windows.net,1433;database=rowm;encrypt=true;trustservercertificate=false;"
+            b.UseSqlServer("server=tcp:atp-rowm-dev.database.windows.net,1433;database=rowm;encrypt=true;trustservercertificate=false;Authentication=Active Directory Interactive"
                 , o => o.EnableRetryOnFailure());
             _DB = b.Options;
         }
@@ -27,9 +27,9 @@ namespace Dal.Test
         public void Simple_Parcel_Status()
         {
             var ctx = new ROWM_Context(_DB);
-            var status = ctx.ParcelStatus.ToArray();
+            var status = ctx.Parcel_Status.ToArray();
 
-            var top = status.Where(sx => sx.ParentStatusCodeNavigation == null);
+            var top = status.Where(sx => string.IsNullOrWhiteSpace(sx.ParentStatusCode));
             Assert.NotEmpty(top);
 
             foreach (var s in top)
