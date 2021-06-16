@@ -1,16 +1,15 @@
 ﻿
 using geographia.ags;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace Ags.Test
 {
-    [TestClass]
     public class TokenTests
     {
-        [TestMethod, TestCategory("AGS")]
+        [Fact, Trait("Category","AGS")]
         public async Task Normal_Token_Gen()
         {
             var server = "http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS_stg/FeatureServer";
@@ -20,34 +19,34 @@ namespace Ags.Test
             // Assert.IsTrue(good);
 
             var token = await h.GetToken();
-            Assert.IsFalse(string.IsNullOrWhiteSpace(token));
+            Assert.False(string.IsNullOrWhiteSpace(token));
         }
 
-        [TestMethod, TestCategory("AGS")]
+        [Fact, Trait("Category", "AGS")]
         public async Task Normal_Prod_Token_Gen()
         {
             var server = "http://gis05.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer";
             var h = new TokenHelper(server);
             var token = await h.GetToken();
-            Assert.IsFalse(string.IsNullOrWhiteSpace(token));
+            Assert.False(string.IsNullOrWhiteSpace(token));
         }
 
-        [TestMethod, TestCategory("AGS"), ExpectedException(typeof(KeyNotFoundException))]
+        [Fact, Trait("Category", "AGS")]
         public async Task Bad_Service_Url()
         {
             var server = "http://gis05s.hdrgateway.com/arcgis/rest";
             var h = new TokenHelper(server);
-            var token = await h.GetToken();
+
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => h.GetToken());
         }
 
-        [TestMethod, TestCategory("AGS"), ExpectedException(typeof(ApplicationException))]
+        [Fact, Trait("Category", "AGS")]
         public async Task Bad_Service()
         {
             var server = "http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS_stgg/FeatureServer";
             var h = new TokenHelper(server);
-            var bad = await h.Validate();
 
-            Assert.IsFalse(bad);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => h.Validate());
         }
     }
 }

@@ -1,29 +1,34 @@
 ﻿using geographia.ags;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ags.Test
 {
-    [TestClass]
     public class OIDTests
     {
-        static readonly List<string> parcels = new List<string>
-        {
+        readonly ITestOutputHelper _log;
+        public OIDTests(ITestOutputHelper h) => _log = h;
 
+        readonly static List<IFeatureUpdate> parcels = new()
+        {
             // 6934
-            "https://gis05s.hdrgateway.com/arcgis/rest/services/California/ATC_Line6943_Parcel_FS/FeatureServer",
-            "https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_Line6943_Parcel_FS/FeatureServer",
+            new AtcParcel("https://gis05s.hdrgateway.com/arcgis/rest/services/California/ATC_Line6943_Parcel_FS/FeatureServer"),
+            new AtcParcel("https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_Line6943_Parcel_FS/FeatureServer"),
 
             // 862
-            "https://maps-stg.hdrgateway.com/arcgis/rest/services/California/ATC_Line862_Parcel_FS/FeatureServer",
-            "https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_Line862_Parcel_FS/FeatureServer",
+            new AtcParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/California/ATC_Line862_Parcel_FS/FeatureServer"),
+            new AtcParcel("https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_Line862_Parcel_FS/FeatureServer"),
 
             // chc
-            "https://maps-stg.hdrgateway.com/arcgis/rest/services/California/ATC_CHC_Parcel_FS/FeatureServer",
-            "https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_CHC_Parcel_FS/FeatureServer"
+            new AtcParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/California/ATC_CHC_Parcel_FS/FeatureServer"),
+            new AtcParcel("https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_CHC_Parcel_FS/FeatureServer"),
+
+            new AtpParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Texas/ATP_Parcel_FS/FeatureServer"),
+            new AtpParcel("https://maps.hdrgateway.com/arcgis/rest/services/Texas/ATP_Parcel_FS/FeatureServer")
         };
 
         public static IEnumerable<object[]> GetProviders()
@@ -32,26 +37,45 @@ namespace Ags.Test
                 yield return new object[] { p };
         }
 
-        [DataTestMethod, TestCategory("AGS")]
-        [DynamicData("GetProviders", DynamicDataSourceType.Method)]
-        public async Task Simple_OBJECT_ID(string u)
+        [Theory]
+        [Trait ("Category","AGS")]
+        [MemberData(nameof(GetProviders))]
+        public async Task Simple_OBJECT_ID(FeatureService_Base f)
         {
-            Trace.WriteLine(u);
-            var f = new AtcParcel(u);
-
             var sch = new AgsSchema(f);
-            Assert.IsNotNull(sch);
+            Assert.NotNull(sch);
 
             var desc = await f.Describe(0);
-            Trace.WriteLine(desc);
+            _log.WriteLine(desc);
 
             //
-            var p = await f.GetAllParcels();
+            switch (f)
+            {
+                case AtcParcel atc:
+                    {
+                        var p = await atc.GetAllParcels();
+                        Assert.NotNull(p);
+                        Assert.True(p.Any());
 
-            Assert.IsNotNull(p);
-            Assert.IsTrue(p.Any());
+                        _log.WriteLine($"{p.Count()}");
+                        foreach (var px in p)
+                            _log.WriteLine($"{px.Attributes.OBJECTID} {px.Attributes.ParcelId}");
 
-            Trace.WriteLine(p.Count());
+                        break;
+                    }
+                case AtpParcel atp:
+                    {
+                        var p = await atp.GetAllParcels();
+                        Assert.NotNull(p);
+                        Assert.True(p.Any());
+
+                        _log.WriteLine($"{p.Count()}");
+                        foreach (var px in p)
+                            _log.WriteLine($"{px.Attributes.OBJECTID} {px.Attributes.ParcelId}");
+
+                        break;
+                    }
+            }
         }
     }
 }
