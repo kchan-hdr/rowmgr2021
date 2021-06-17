@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Entity;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ROWM.Dal
@@ -92,6 +91,51 @@ namespace ROWM.Dal
                    select new SubTotal { Title = b.Title, Caption = b.Caption, Count = sub?.Count ?? 0 };
         }
 
+        /// <summary>
+        /// Get snapshot counts. Parameterized to replace the other snapshots
+        /// </summary>
+        /// <param name="cat"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<SubTotal>> Snapshot(string cat)
+        {
+            var baseCounts = await MakeBaseCounts(cat);
+            if (!baseCounts.Any())
+                throw new KeyNotFoundException($"no category {cat}");
+
+            var snap = GetSnapshot(cat);
+
+            return from b in baseCounts
+                   join pg in snap on b.Title equals pg.Title into matg
+                   from sub in matg.DefaultIfEmpty()
+                   select new SubTotal { Title = b.Title, Caption = b.Caption, DomainValue = b.DomainValue, Count = sub?.Count ?? 0 };
+        }
+
+        public IQueryable<SubTotal> GetSnapshot(string cat)
+        {
+            IQueryable<IGrouping<string, Parcel>> myQuery;
+
+            switch ( cat )
+            {
+                case "acquisition":
+                    myQuery = ActiveParcels().GroupBy(p => p.ParcelStatusCode).DefaultIfEmpty();
+                    break;
+                case "roe":
+                    myQuery = ActiveParcels().GroupBy(p => p.RoeStatusCode).DefaultIfEmpty();
+                    break;
+                case "engagement":
+                    myQuery = ActiveParcels().GroupBy(p => p.OutreachStatusCode).DefaultIfEmpty();
+                    break;
+                case "clearance":
+                    myQuery = ActiveParcels().GroupBy(p => p.RoeStatusCode).DefaultIfEmpty();
+                    break;
+                default:
+                    myQuery = ActiveParcels().GroupBy(p => p.ParcelStatusCode).DefaultIfEmpty();
+                    break;
+            }
+
+            return myQuery.Select(pg => new SubTotal { Title = pg.Key, Count = pg.Count() });
+        }
+
         public async Task<Financials> GetFinancials()
         {
             var p = await ActiveParcels().ToArrayAsync();
@@ -110,6 +154,12 @@ namespace ROWM.Dal
         private IEnumerable<SubTotal> MakeBaseParcels() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "acquisition").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
         private IEnumerable<SubTotal> MakeBaseRoes() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "roe").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code , Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
         private IEnumerable<SubTotal> MakeBaseClearances() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "clearance").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
+
+        private async Task<IEnumerable<SubTotal>> MakeBaseCounts(string cat) =>
+            await _context.Parcel_Status.Where(px => px.IsActive && px.Category == cat)
+                .OrderBy(px => px.DisplayOrder)
+                .Select(px => new SubTotal { Title = px.Code, Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 })
+                .ToArrayAsync();
         #endregion
         #region dto
         public class SubTotal

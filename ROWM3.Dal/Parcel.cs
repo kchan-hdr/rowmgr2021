@@ -90,6 +90,9 @@ namespace ROWM.Dal
         [StringLength(40)]
         public string RoeStatusCode { get; set; }
 
+        [StringLength(40)]
+        public string OutreachStatusCode { get; set; }
+
         public bool IsActive { get; set; }
 
         public int? Landowner_Score { get; set; }

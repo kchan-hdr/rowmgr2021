@@ -58,9 +58,10 @@ namespace ROWM.Controllers
             var pStatus = _Context.Parcel_Status.Where(p => p.IsActive && p.Category == "acquisition").OrderBy(p => p.DisplayOrder);
             var rStatus = _Context.Parcel_Status.Where(p => p.IsActive && p.Category == "roe").OrderBy(p => p.DisplayOrder);
             var cStatus = _Context.Parcel_Status.Where(p => p.IsActive && p.Category == "clearance").OrderBy(p => p.DisplayOrder);
+            var oStatus = _Context.Parcel_Status.Where(p => p.IsActive && p.Category == "engagement").OrderBy(p => p.DisplayOrder);
             var llScore = _Context.Landowner_Score.Where(s => s.IsActive ?? false).OrderBy(s => s.DisplayOrder);
 
-            return new Vocabulary(agents, channels, purposes, rels, pStatus, rStatus, cStatus, llScore, titles);
+            return new Vocabulary(agents, channels, purposes, rels, pStatus, rStatus, cStatus, oStatus, llScore, titles);
         }
 
         [HttpGet("api/parcelStatus")]
@@ -118,6 +119,7 @@ namespace ROWM.Controllers
             public IEnumerable<Lookup> ParcelStatus { get; set; }
             public IEnumerable<Lookup> RoeStatus { get; set; }
             public IEnumerable<Lookup> ClearanceStatus { get; set; }
+            public IEnumerable<Lookup> OutreachStatus { get; set; }
             public IEnumerable<Lookup> Score { get; set; }
             public IEnumerable<DocumentTiltlePl> TitlePicklist { get; set; }
 
@@ -129,6 +131,7 @@ namespace ROWM.Controllers
                 IEnumerable<Parcel_Status> p,
                 IEnumerable<Parcel_Status> r,
                 IEnumerable<Parcel_Status> cl,
+                IEnumerable<Parcel_Status> outreach,
                 IEnumerable<Landowner_Score> s,
                 IEnumerable<DocumentTiltlePl> titles)
             {
@@ -140,6 +143,8 @@ namespace ROWM.Controllers
                 ParcelStatus = p.Select(c => new Lookup { Code = c.Code, Description = c.Description, DisplayOrder = c.DisplayOrder ?? 0});
                 RoeStatus = r.Select(c => new Lookup { Code = c.Code, DisplayOrder = c.DisplayOrder ?? 0, Description = c.Description });
                 ClearanceStatus = cl.Select(c => new Lookup { Code = c.Code, DisplayOrder = c.DisplayOrder ?? 0, Description = c.Description });
+                OutreachStatus = outreach.Select(c => new Lookup { Code = c.Code, DisplayOrder = c.DisplayOrder ?? 0, Description = c.Description });
+
                 Score = s.Select(c => new Lookup { Code = c.Score.ToString(), DisplayOrder = c.DisplayOrder ?? 0, Description = c.Caption });
 
                 TitlePicklist = titles;

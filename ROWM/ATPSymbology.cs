@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.UI.HtmlControls;
 
 namespace ROWM
 {
@@ -11,6 +12,7 @@ namespace ROWM
         IEnumerable<DomainValue> RoeSymbols { get; }
         IEnumerable<DomainValue> ClearanceSymbols { get; }
         IEnumerable<DomainValue> AcquisitionSymbols { get; }
+        IEnumerable<DomainValue> OutreachSymbols { get; }
 
         Task<bool> ExtractSymbology();
 
@@ -21,6 +23,7 @@ namespace ROWM
         public IEnumerable<DomainValue> RoeSymbols { get; private set; }
         public IEnumerable<DomainValue> ClearanceSymbols { get; private set; }
         public IEnumerable<DomainValue> AcquisitionSymbols { get; private set;  }
+        public IEnumerable<DomainValue> OutreachSymbols { get; private set; }
 
         readonly IRenderer _renderer;
         bool hasSymbology = false;
@@ -36,6 +39,7 @@ namespace ROWM
             this.RoeSymbols = await _renderer.GetDomainValues("parcel roe status");
             this.ClearanceSymbols = new List<DomainValue>();
             this.AcquisitionSymbols = await _renderer.GetDomainValues("parcel acquisition status");
+            this.OutreachSymbols = await _renderer.GetDomainValues("community engagement status");
 
             return true;
         }

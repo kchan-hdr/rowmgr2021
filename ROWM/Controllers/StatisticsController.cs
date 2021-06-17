@@ -29,6 +29,7 @@ namespace ROWM.Controllers
             var t_ParcelStatus = await _statistics.SnapshotParcelStatus();
             var t_RoeStatus = await _statistics.SnapshotRoeStatus();
             var t_ClearStatus = await _statistics.SnapshotClearanceStatus();
+            var t_Outreach = await _statistics.Snapshot("engagement");
 
             return new Statistics2Dto
             {
@@ -37,6 +38,7 @@ namespace ROWM.Controllers
                 ParcelStatus = Colorize(t_ParcelStatus, _renderer.AcquisitionSymbols),
                 RoeStatus = Colorize(t_RoeStatus, _renderer.RoeSymbols),
                 ClearStatus = Colorize(t_ClearStatus, _renderer.ClearanceSymbols),
+                OutreachStatus = Colorize(t_Outreach, _renderer.OutreachSymbols),
                 Access = await _statistics.SnapshotAccessLikelihood()
             };
         }
@@ -55,6 +57,7 @@ namespace ROWM.Controllers
 
             public IEnumerable<SubTotal2> ParcelStatus { get; set; }
             public IEnumerable<SubTotal2> RoeStatus { get; set; }
+            public IEnumerable<SubTotal2> OutreachStatus { get; set; }
             public IEnumerable<SubTotal2> ClearStatus { get; set; }
             public IEnumerable<StatisticsRepository.SubTotal> Access { get; set; }
             public IEnumerable<StatisticsRepository.SubTotal> Compensations { get; set; }
