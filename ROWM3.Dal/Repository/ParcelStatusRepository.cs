@@ -38,8 +38,9 @@ namespace ROWM.Dal.Repository
             return _cache.Set(STATUS_KEY, await MakeReverseKey(), new TimeSpan(12, 0, 0));
         }
 
-        async Task<ILookup<string, Parcel_Status>> MakeReverseKey() => (await _ctx.Parcel_Status.AsNoTracking().ToArrayAsync()).ToLookup(sx => sx.ParentStatusCode);
+        async Task<ILookup<string, Parcel_Status>> MakeReverseKey() => (await _ctx.Parcel_Status.AsNoTracking().ToArrayAsync()).ToLookup(sx => sx.ParentStatusCode ?? sx.Code);
 
+        async Task<string> GetCategory(string m) => (await _ctx.Parcel_Status.FirstOrDefaultAsync(sx => sx.Code == m))?.Category ?? string.Empty;
 
         async Task<IEnumerable<ParcelHistory>> GetList(string m)
         {
@@ -59,21 +60,32 @@ namespace ROWM.Dal.Repository
             if (!h.Contains(milestone))
                 return Array.Empty<ParcelHistory>();
 
-            var p = await _ctx.Parcel.AsNoTracking()
-                .Where(px => px.IsActive && px.IsDeleted == false)
-                .Select(px => new { px.ParcelId, px.ParcelStatusCode })
-                .ToListAsync();
+            var cat = (await GetCategory(milestone));
+
+            var p = (cat == "roe") ? ParcelStatusList((px) => new Tuple<Guid, string>(px.ParcelId, px.RoeStatusCode))
+                : (cat == "engagement") ? ParcelStatusList((px) => new Tuple<Guid, string>(px.ParcelId, px.OutreachStatusCode))
+                : ParcelStatusList(px => new Tuple<Guid, string>(px.ParcelId, px.ParcelStatusCode));
+
+
             var c = h[milestone].Select(hx=> hx.Code);
-            var p2 =  p.Where(px => px.ParcelStatusCode == milestone || c.Contains(px.ParcelStatusCode));
+            var p2 =  p.Where(px => px.Item2 == milestone || c.Contains(px.Item2));
 
             var list = new List<ParcelHistory>();
             foreach( var parcel in p2)
             {
-                var px = await _ctx.Parcel.Include(pxx => pxx.Activities).FirstOrDefaultAsync(pxx => pxx.ParcelId == parcel.ParcelId);
+                var px = await _ctx.Parcel.Include(pxx => pxx.Activities).FirstOrDefaultAsync(pxx => pxx.ParcelId == parcel.Item1);
                 list.Add(new ParcelHistory(px, c));
             }
 
             return list;
+        }
+
+        IEnumerable<Tuple<Guid,string>> ParcelStatusList(Func<Parcel, Tuple<Guid,string>> sel)
+        {
+            return _ctx.Parcel.AsNoTracking()
+                .Where(px => px.IsActive && !px.IsDeleted)
+                .Select(sel)
+                .ToArray();
         }
         #endregion
     }
@@ -96,6 +108,5 @@ namespace ROWM.Dal.Repository
                 .Select(ax => new StatusActivity { ActivityId = ax.ActivityId, ActivityDate = ax.ActivityDate, Notes = ax.Notes, StatusCode = ax.StatusCode });
         }
     }
-
     #endregion
 }
