@@ -1,9 +1,6 @@
 namespace ROWM.Dal
 {
-    using System;
     using System.Data.Entity;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Linq;
 
     public partial class ROWM_Context : DbContext
     {
@@ -18,6 +15,7 @@ namespace ROWM.Dal
         }
 
         public virtual DbSet<Agent> Agent { get; set; }
+        public virtual DbSet<ActionItem> ActionItem { get; set; }
         public virtual DbSet<Contact_Channel> Contact_Channel { get; set; }
         public virtual DbSet<Contact_Purpose> Contact_Purpose { get; set; }
         public virtual DbSet<ContactInfo> ContactInfo { get; set; }

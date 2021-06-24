@@ -80,6 +80,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionItem.cs" />
     <Compile Include="Agent.cs" />
     <Compile Include="Compensation_t.cs" />
     <Compile Include="ContactInfo.cs" />

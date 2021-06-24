@@ -1,5 +1,6 @@
 using geographia.ags;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ROWM.Dal;
@@ -32,13 +33,13 @@ namespace ROWM.Controllers
         readonly ContactInfoRepository _contactRepo;
         readonly StatisticsRepository _statistics;
         readonly DeleteHelper _delete;
-        readonly ParcelStatusHelper _statusHelper;
+        readonly IParcelStatusHelper _statusHelper;
         readonly IUpdateParcelStatus _statusUpdate;
         readonly UpdateParcelStatus2 _updater;
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
 
-        public RowmController(ROWM_Context ctx, OwnerRepository r, ParcelStatusRepository l, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, UpdateParcelStatus2 u, IUpdateParcelStatus w, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
+        public RowmController(ROWM_Context ctx, OwnerRepository r, ParcelStatusRepository l, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, UpdateParcelStatus2 u, IUpdateParcelStatus w, IParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
         {
             _ctx = ctx;
             _repo = r;
@@ -439,29 +440,6 @@ namespace ROWM.Controllers
 
             await ud.Apply();
 
-            //List<Task> tks = new List<Task>();
-
-            //try
-            //{
-            //    var dv = _statusHelper.GetDomainValue(statusCode);
-            //    tks.Add( _featureUpdate.UpdateFeature(pid, dv));
-            //}
-            //catch( InvalidOperationException)
-            //{
-            //    Trace.TraceWarning($"bad parcel status domain {statusCode}");
-            //}
-
-
-
-            //p.ParcelStatusCode = statusCode;
-            //p.LastModified = DateTimeOffset.Now;
-            //p.ModifiedBy = _APP_NAME;
-
-            //tks.Add(_repo.UpdateParcel(p).ContinueWith( d => p = d.Result));
-
-            //// p = await _repo.UpdateParcel(p);
-            //await Task.WhenAll(tks);
-
             return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
         }
         [HttpPut("parcels/{pid}/status")]
@@ -520,42 +498,68 @@ namespace ROWM.Controllers
 
             await ud.Apply();
 
-            //List<Task> tks = new List<Task>();
+            return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
+        }
+        #endregion
+        #region community engagement
+        [HttpPost("parcel/{pid}/outreach")]
+        public async Task<ActionResult<ParcelGraph>> UpdateOutreach(string pid, [FromBody] OutreachRequest r)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
 
-            //try
-            //{
-            //    var dv = _statusHelper.GetRoeDomainValue(statusCode);
-            //    tks.Add( null == condition ?
-            //        _featureUpdate.UpdateFeatureRoe(pid, dv) : _featureUpdate.UpdateFeatureRoe_Ex(pid, dv, condition));
-            //}
-            //catch( InvalidOperationException )
-            //{
-            //    Trace.TraceWarning($"bad roe status domain {statusCode}");
-            //    return BadRequest();
-            //}
+            var p = await _repo.GetParcel(pid);
+            if (p == null)
+                return BadRequest();
 
-            //p.RoeStatusCode = statusCode;
-            //if (!string.IsNullOrWhiteSpace(condition))
-            //{
-            //    if ( null == p.Conditions)
-            //        p.Conditions = new List<RoeCondition>();
+            //
+            if (p.OutreachStatusCode != r.StatusCode)
+            {
+                var dt = DateTimeOffset.UtcNow;
 
-            //    p.Conditions.Add(new RoeCondition() { Condition = condition, IsActive = true, EffectiveStartDate = DateTimeOffset.Now, EffectiveEndDate = DateTimeOffset.MaxValue });
-            //}
-            //p.LastModified = DateTimeOffset.Now;
-            //p.ModifiedBy = _APP_NAME;
+                var act = new StatusActivity
+                {
+                    ActivityDate = r.ChangeDate,
+                    AgentId = r.AgentId,
+                    ParentParcelId = p.ParcelId,
+                    StatusCode = r.StatusCode,
+                    OriginalStatusCode = p.OutreachStatusCode
+                };
+                _ctx.Activities.Add(act);
 
-            //// propagate to parcel 
-            //// TODO: clean up
-            //switch( statusCode )
-            //{
-            //    case "ROE_Obtained": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
-            //    case "ROE_with_Conditions": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
-            //}
+                if (!string.IsNullOrWhiteSpace(r.Action))
+                {
+                    var action = new ActionItem
+                    {
+                        Action = r.Action,
+                        DueDate = r.DueDate.Value,
+                        ParentActivity = act,
+                        Status = ActionStatus.Created,
 
-            //tks.Add( _repo.UpdateParcel(p));
+                        Created = dt,
+                        LastModified = dt,
+                        ModifiedBy = User?.Identity?.Name ?? _APP_NAME
+                    };
+                    _ctx.ActionItem.Add(action);
+                }
 
-            //await Task.WhenAll(tks);
+                p.OutreachStatusCode = r.StatusCode;
+                p.LastModified = dt;
+                p.ModifiedBy = User?.Identity?.Name ?? _APP_NAME;
+
+                var dv = _statusHelper.GetDomainValue(r.StatusCode);
+
+                try
+                {
+                    await Task.WhenAll(
+                        _featureUpdate.UpdateFeatureOutreach(pid, p.Tracking_Number, dv, r.Action, r.DueDate),
+                        _ctx.SaveChangesAsync());
+                }
+                catch ( Exception e)
+                {
+                    Trace.TraceError(e.Message);
+                }
+            }
 
             return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
         }
@@ -852,6 +856,15 @@ namespace ROWM.Controllers
         public DateTimeOffset? EffectiveEnd { get; set; }
         public string Condition { get; set; }
     }
+
+    public class OutreachRequest
+    {
+        public Guid AgentId { get; set; }
+        public string StatusCode { get; set; }
+        public DateTimeOffset ChangeDate { get; set; }
+        public DateTimeOffset? DueDate { get; set; }
+        public string Action { get; set; }
+    }
     #endregion
     #region offer dto
     public class OfferRequest
@@ -1066,6 +1079,13 @@ namespace ROWM.Controllers
         public Guid? StatusAgent { get; set; } = null;
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public DateTime? ActivityDate { get; set; } = null;
+
+        public string Condition { get; set; }
+        public DateTime? EffectiveStart { get; set; }
+        public DateTime? EffectiveEnd { get; set; }
+
+        public string Action { get; set; }
+        public DateTime? DueDate { get; set; }
     }
     #endregion
     #region parcel graph

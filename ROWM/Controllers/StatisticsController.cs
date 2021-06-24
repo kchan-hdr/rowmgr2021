@@ -22,14 +22,16 @@ namespace ROWM.Controllers
         [HttpGet("statistics")]
         public async Task<Statistics2Dto> GetStatistics()
         {
-            await _renderer.ExtractSymbology();
+            var symTask = _renderer.ExtractSymbology();
 
             var s = await _statistics.Snapshot();
-
             var t_ParcelStatus = await _statistics.SnapshotParcelStatus();
             var t_RoeStatus = await _statistics.SnapshotRoeStatus();
             var t_ClearStatus = await _statistics.SnapshotClearanceStatus();
             var t_Outreach = await _statistics.Snapshot("engagement");
+
+            await symTask;
+            //await _renderer.ExtractSymbology();
 
             return new Statistics2Dto
             {

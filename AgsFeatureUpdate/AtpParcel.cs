@@ -142,6 +142,23 @@ namespace geographia.ags
             return await this.Update(u);
         }
 
+        async Task<bool> IFeatureUpdate.UpdateFeatureOutreach(string parcelId, string track, int status, string action, DateTimeOffset? due)
+        {
+            if (string.IsNullOrWhiteSpace(parcelId))
+                throw new ArgumentNullException(nameof(parcelId));
+
+            var oid = await Find(_LAYERID, $"{_PARCEL_KEY}='{track}'");
+            var u = oid.Select(i => new UpdateFeature
+            {
+                attributes = new Status_Req
+                {
+                    OBJECTID = i,
+                    Engagement_Status = status
+                }
+            });
+            return await this.Update(u);
+        }
+
         Task<bool> IFeatureUpdate.UpdateRating(string parcelId, string track, int rating) => Task.FromResult(false); // no op
 
         public async Task<IEnumerable<DomainValue>> GetDomainValues(string layerName) =>
@@ -186,6 +203,8 @@ namespace geographia.ags
             public int? ROE_Status { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string ROE_Condition { get; set; }
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public int? Engagement_Status { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public int? Landowner_Score { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]

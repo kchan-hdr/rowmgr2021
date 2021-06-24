@@ -10,7 +10,7 @@ using Polly;
 
 namespace geographia.ags
 {
-    public class FeatureService_Base
+    public class FeatureService_Base : IFeatureUpdate
     {
         static HttpClient _Client;
 
@@ -87,7 +87,6 @@ namespace geographia.ags
             }
 
             return default;
-            //throw new KeyNotFoundException(query);
         }
 
         public virtual async Task<IEnumerable<T>> GetAll<T>(string query, Func<JArray, IEnumerable<T>> parser)
@@ -170,6 +169,16 @@ namespace geographia.ags
             }
         }
 
+
+        #region IFeatureUpdate interface
+        public Task<bool> UpdateFeature(string parcelId, string track, int status) => Task.FromResult(false);
+        public Task<bool> UpdateFeatureRoe(string parcelId, string track, int status) => Task.FromResult(false);
+        public Task<bool> UpdateFeatureRoe_Ex(string parcelId, string track, int status, string condition) => Task.FromResult(false);
+        public Task<bool> UpdateFeatureOutreach(string parcelId, string track, int status, string action, DateTimeOffset? due) => Task.FromResult(false);
+        public Task<bool> UpdateRating(string parcelId, string track, int rating) => Task.FromResult(false);
+        public Task<bool> UpdateFeatureDocuments(string parcelId, string track, string documentURL) => Task.FromResult(false);
+
+        #endregion
         #region error helper
         static JToken CheckError(JObject j)
         {

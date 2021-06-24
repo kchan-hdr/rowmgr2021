@@ -29,7 +29,7 @@ namespace ROWM.Dal
     {
         readonly OwnerRepository repo;
         readonly IFeatureUpdate _featureUpdate;
-        readonly ParcelStatusHelper _statusHelper;
+        readonly IParcelStatusHelper _statusHelper;
         readonly ROWM_Context _context;
 
 
@@ -47,7 +47,7 @@ namespace ROWM.Dal
 
         public string ModifiedBy { get; set; } = "UP";
 
-        public UpdateParcelStatus(IEnumerable<Parcel> parcels, Agent agent, ROWM_Context context, OwnerRepository repository, IFeatureUpdate featureUpdate, ParcelStatusHelper h)
+        public UpdateParcelStatus(IEnumerable<Parcel> parcels, Agent agent, ROWM_Context context, OwnerRepository repository, IFeatureUpdate featureUpdate, IParcelStatusHelper h)
         {
             this.myAgent = agent;
             this.myParcels = parcels;

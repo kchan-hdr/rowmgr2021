@@ -5,16 +5,28 @@ using System.Security.Cryptography.Xml;
 
 namespace ROWM.Controllers
 {
-    public class ParcelStatusHelper : IParcelStatusHelper
+    public interface IParcelStatusHelper
+    {
+        string ParseDomainValue(int d);
+        int GetDomainValue(string status);
+        int GetRank(string status);
+        int GetRoeDomainValue(string status);
+
+        string ParseScore(int? score);
+        bool IsValidScore(int? score);
+    }
+
+    /// <summary>
+    /// collapsed Parcel_Status & Roe_Status
+    /// </summary>
+    public class ParcelStatusHelperV2 : IParcelStatusHelper
     {
         readonly List<Parcel_Status> _Status;
-        readonly List<Roe_Status> _roeStatus;
         readonly Dictionary<int, Landowner_Score> _Scores;
 
-        public ParcelStatusHelper(ROWM_Context c)
+        public ParcelStatusHelperV2(ROWM_Context c)
         {
             _Status = c.Parcel_Status.AsNoTracking().ToList();
-            _roeStatus = c.Roe_Status.AsNoTracking().ToList();
             _Scores = c.Landowner_Score.AsNoTracking().ToDictionary<Landowner_Score, int>(lls => lls.Score);
         }
 
@@ -32,11 +44,7 @@ namespace ROWM.Controllers
 
         public int GetRank(string status) => _Status.SingleOrDefault(sx => sx.Code.Equals(status))?.DisplayOrder ?? 0;
 
-        public int GetRoeDomainValue(string status)
-        {
-            var s = _roeStatus.Single(sx => sx.Code.Equals(status));
-            return s.DomainValue;
-        }
+        public int GetRoeDomainValue(string status) => GetDomainValue(status);
 
         public static bool HasNoContact(Parcel parcel) => parcel.Parcel_Status.DomainValue <= 0;
 

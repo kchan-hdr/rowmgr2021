@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace geographia.ags
@@ -11,6 +8,7 @@ namespace geographia.ags
         Task<bool> UpdateFeature(string parcelId, string track, int status);
         Task<bool> UpdateFeatureRoe(string parcelId, string track, int status);
         Task<bool> UpdateFeatureRoe_Ex(string parcelId, string track, int status, string condition);
+        Task<bool> UpdateFeatureOutreach(string parcelId, string track, int status, string action, DateTimeOffset? due);
         Task<bool> UpdateRating(string parcelId, string track, int rating);
         Task<bool> UpdateFeatureDocuments(string parcelId, string track, string documentURL);
         Task<(string Token, DateTimeOffset Expiration)> Token();
