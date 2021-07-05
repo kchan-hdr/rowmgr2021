@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
 trigger:
-- sh72
+- denver-dev
 
 pool:
   vmImage: 'windows-latest'
@@ -12,7 +12,7 @@ pool:
 variables:
   solution: 'ROWM.sln'
   myProject: 'ROWM/ROWM.csproj'
-  buildPlatform: 'AnyCPU'
+  buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
 steps:
@@ -25,8 +25,8 @@ steps:
 - task: DownloadBuildArtifacts@0
   inputs:
     buildType: 'specific'
-    project: '3e00398b-12fe-430a-a0a7-f90d332ef5ab'
-    pipeline: '7'
+    project: 'e4d72519-e605-422b-a2bb-d974d9bc3279'
+    pipeline: '3'
     specificBuildWithTriggering: true
     buildVersionToDownload: 'latest'
     downloadType: 'specific'
@@ -36,8 +36,8 @@ steps:
 - task: DownloadBuildArtifacts@0
   inputs:
     buildType: 'specific'
-    project: '3e00398b-12fe-430a-a0a7-f90d332ef5ab'
-    pipeline: '7'
+    project: 'e4d72519-e605-422b-a2bb-d974d9bc3279'
+    pipeline: '3'
     specificBuildWithTriggering: true
     buildVersionToDownload: 'latest'
     downloadType: 'specific'
