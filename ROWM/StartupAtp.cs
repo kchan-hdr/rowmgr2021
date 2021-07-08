@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using ROWM.Models;
 using ROWM.Reports;
 using ROWM.Dal.Repository;
+using ROWM.DAL;
 
 namespace ROWM
 {
@@ -68,6 +69,10 @@ namespace ROWM
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IUpdateParcelStatus,UpdateParcelStatus_wharton>();
             services.AddScoped<UpdateParcelStatus2>();
+
+            services.AddScoped(fac => new RelocationContext(cs));
+            services.AddScoped<RelocationRepository>();
+            services.AddScoped<IRelocationCaseOps,RelocationCaseOps>();
 
             var feat = new AtpParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Texas/ATP_Parcel_FS/FeatureServer");
             services.AddSingleton<IFeatureUpdate>(feat);
