@@ -102,7 +102,7 @@
     <ProjectReference Include="..\AgsFeatureUpdate\AgsFeatureUpdate.csproj" />
     <ProjectReference Include="..\ExcelExport\ExcelExport.csproj" />
     <ProjectReference Include="..\Relocation.Contracts\Relocation.Contracts.csproj" />
-    <ProjectReference Include="..\Relocation.DAL\Relocation.DAL.csproj" />
+    <ProjectReference Include="..\Relocation.DAL\Relocation.Dal.csproj" />
     <ProjectReference Include="..\Reports\Reports.csproj" />
     <ProjectReference Include="..\ROWM3.Dal\ROWM3.Dal.csproj" />
     <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj" />

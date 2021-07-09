@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ROWM.DAL
+namespace ROWM.Dal
 {
     [Table("Relocation_Case", Schema = "Austin")]
     public partial class RelocationCase

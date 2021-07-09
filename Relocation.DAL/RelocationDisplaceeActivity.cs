@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ROWM.DAL
+namespace ROWM.Dal
 {
     [Table("Relocation_Displacee_Activity", Schema ="Austin")]
     public class RelocationDisplaceeActivity : IRelocationDisplaceeActivity

@@ -8,20 +8,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ROWM.DAL
+namespace ROWM.Dal
 {
     public interface IRelocationCaseOps
     {
         Task<IParcelRelocation> GetRelocation(Guid parcelId);
         Task<IEnumerable<IRelocationCase>> GetRelocationCases(Guid parcelId);
+        Task<IParcelRelocation> AddRelocationCase(Guid parcelId, string displaceeName, string eligibility, string[] displaceeType, float? hs, float? rap);
         Task<IParcelRelocation> AddRelocationCase(Guid parcelId, string displaceeName, RelocationStatus eligibility, DisplaceeType displaceeType, RelocationType reloType);
+        
         Task<IParcelRelocation> ChangeEligibility(Guid caseId, RelocationStatus eligibility, Guid agentId, DateTimeOffset date, string notes);
+
 
         Task<IParcelRelocation> AddActivity(Guid caseId, string activityCode, DisplaceeActivity act, string desc, Guid agentId, DateTimeOffset date, string notes, int? money = null, bool? bValue = null);
 
         Task<IEnumerable<IRelocationActivityType>> GetActivityTypes();
     }
-
+    #region noop
     public class RelocationCaseNoOp : IRelocationCaseOps
     {
         public Task<IParcelRelocation> AddActivity(Guid caseId, string activityCode, DisplaceeActivity atc, string desc, Guid agentId, DateTimeOffset date, string notes, int? money = null, bool? bValue = null)
@@ -30,6 +33,11 @@ namespace ROWM.DAL
         }
 
         public Task<IParcelRelocation> AddRelocationCase(Guid parcelId, string displaceeName, RelocationStatus eligibility, DisplaceeType displaceeType, RelocationType reloType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IParcelRelocation> AddRelocationCase(Guid parcelId, string displaceeName, string eligibility, string[] displaceeType, float? hs, float? rap)
         {
             throw new NotImplementedException();
         }
@@ -54,7 +62,7 @@ namespace ROWM.DAL
             throw new NotImplementedException();
         }
     }
-
+    #endregion
     public class RelocationCaseOps : IRelocationCaseOps
     {
         readonly RelocationContext _context;
@@ -72,6 +80,18 @@ namespace ROWM.DAL
         {
             var p = await _repo.GetRelocation(parcelId) ?? throw new KeyNotFoundException(nameof(parcelId));
             return p.RelocationCases;
+        }
+
+
+        public async Task<IParcelRelocation> AddRelocationCase(Guid parcelId, string displaceeName, string eligibility, string[] displaceeType, float? hs, float? rap)
+        {
+            if (Enum.TryParse<RelocationStatus>(eligibility, true, out var elig)
+                && Enum.TryParse<DisplaceeType>(displaceeType[0], true, out var dType))
+            {
+                return await AddRelocationCase(parcelId, displaceeName, elig, dType, RelocationType.PersonalProperty);
+            }
+
+            throw new KeyNotFoundException();
         }
 
         public async Task<IParcelRelocation> AddRelocationCase(Guid parcelId, string displaceeName, RelocationStatus eligibility, DisplaceeType displaceeType, RelocationType reloType)

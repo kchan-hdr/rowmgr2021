@@ -1,5 +1,5 @@
 ﻿using com.hdr.rowmgr.Relocation;
-using ROWM.DAL;
+using ROWM.Dal;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ROWM.DAL
+namespace ROWM.Dal
 {
     [Table("Parcel_Relocation", Schema ="Austin")]
     public partial class ParcelRelocation

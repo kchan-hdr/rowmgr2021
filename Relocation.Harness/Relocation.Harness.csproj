@@ -54,9 +54,9 @@
       <Project>{4bdb440a-ef56-4c49-8917-1d3451a2f94f}</Project>
       <Name>Relocation.Contracts</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Relocation.DAL\Relocation.DAL.csproj">
+    <ProjectReference Include="..\Relocation.DAL\Relocation.Dal.csproj">
       <Project>{201733cb-c330-492f-a38c-0475cbea3913}</Project>
-      <Name>Relocation.DAL</Name>
+      <Name>Relocation.Dal</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

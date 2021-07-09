@@ -21,6 +21,8 @@ namespace com.hdr.rowmgr.Relocation
         IEnumerable<IRelocationEligibilityActivity> EligibilityHistory { get; }
         IEnumerable<IRelocationDisplaceeActivity> DisplaceeActivities { get; }
 
+        // APN or Tracking Number. Use in AcqFilenamePrefix
+        string ParcelKey { get; set; }
 
         // derived
         string AcqFilenamePrefix { get; }

@@ -20,7 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using ROWM.Models;
 using ROWM.Reports;
 using ROWM.Dal.Repository;
-using ROWM.DAL;
+using ROWM.Dal;
 
 namespace ROWM
 {

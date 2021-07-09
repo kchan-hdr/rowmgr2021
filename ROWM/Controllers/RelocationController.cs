@@ -1,7 +1,7 @@
 ﻿using com.hdr.rowmgr.Relocation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using ROWM.DAL;
+using ROWM.Dal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +13,49 @@ namespace ROWM.Controllers
     [ApiController]
     public class RelocationController : ControllerBase
     {
+        readonly OwnerRepository _oRepo;
         readonly RelocationRepository _repo;
         readonly IRelocationCaseOps _caseOps;
-        public RelocationController(RelocationRepository r, IRelocationCaseOps ops) => (_repo,_caseOps) = (r,ops);
+        public RelocationController(OwnerRepository or, RelocationRepository r, IRelocationCaseOps ops) => (_oRepo, _repo, _caseOps) = (or, r, ops);
 
         [HttpGet("api/RelocationActivityTypes"), ResponseCache(Duration=60*60)]
         public async Task<IEnumerable<IRelocationActivityType>> GetTypes() => await _repo.GetActivityTypes();
+
+        [HttpGet("api/RelocationActivityPicklist"), ResponseCache(Duration = 60 * 60)]
+        public async Task<IEnumerable<ActivityTaskPick>> GetPicklist()
+        {
+            var acts = await _repo.GetActivityTypes();
+
+            return acts.OrderBy(a => a.DisplayOrder)
+                .SelectMany(a => a.GetTasks())
+                .ToArray();
+        }
+
+        /// <summary>
+        /// Get Relocation Cases by APN or Tracking Number
+        /// </summary>
+        /// <param name="pid"></param>
+        /// <returns></returns>
+        [HttpGet("api/parcels/{pid}/relocations")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RelocationDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetRelocation(string pid)
+        {
+            var p = await _oRepo.GetParcel(pid);
+            if (p == null)
+                return NotFound($"bad parcel {pid}");
+
+            var r = await _repo.GetRelocation(p.ParcelId);
+            if (r==null)
+                return NotFound($"bad parcel {pid}");
+
+            // this needs to be configurable
+            foreach( var c in r.RelocationCases)
+                c.ParcelKey = p.Tracking_Number;
+
+            return new JsonResult(new RelocationDto(r));
+        }
 
         [HttpGet("api/parcels/{pId:Guid}/relocations")]
         [ProducesResponseType(StatusCodes.Status200OK, Type=typeof(RelocationDto))]
@@ -28,6 +65,7 @@ namespace ROWM.Controllers
                 return BadRequest();
 
             var r = await _repo.GetRelocation(pId);
+            
             return new JsonResult(new RelocationDto(r));
         }
 
@@ -38,11 +76,11 @@ namespace ROWM.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var r = await _caseOps.AddRelocationCase(pId, rCase.DisplaceeName, rCase.Eligibility, rCase.DisplaceeType, rCase.RelocationType);
+            var r = await _caseOps.AddRelocationCase(pId, rCase.DisplaceeName, rCase.Eligibility, rCase.DisplaceeType, rCase.Hs, rCase.Rap);
             return new JsonResult(new RelocationDto(r));
         }
 
-        [HttpPost("api/relocations/{rcId}/activities")]
+        [HttpPost("api/relocations/{rcId}/activities"), ActionName("GetReloCase")]
         [ProducesResponseType(StatusCodes.Status202Accepted, Type = typeof(RelocationDto))]
         public async Task<IActionResult> AddRelocationActivity(Guid rcId, [FromBody] RequestActivity act)
         {
@@ -97,6 +135,7 @@ namespace ROWM.Controllers
 
 
         public string AcqFilenamePrefix { get; set; }
+        public string CaseUrl { get; set; }
 
         public RelocationCaseDto(IRelocationCase c)
         {
@@ -116,9 +155,11 @@ namespace ROWM.Controllers
     public class RequestCase
     {
         public string DisplaceeName { get; set; }
-        public RelocationStatus Eligibility { get; set; }
-        public DisplaceeType DisplaceeType { get; set; }
-        public RelocationType RelocationType { get; set; }
+        public string Eligibility { get; set; }
+        public string[] DisplaceeType { get; set; }
+        //public RelocationType RelocationType { get; set; }
+        public float? Hs { get; set; }
+        public float? Rap { get; set; }
     }
 
     public class RequestActivity

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ROWM.DAL
+namespace ROWM.Dal
 {
     [Table("Relocation_Activity_Type", Schema ="Austin")]
     public partial class RelocationActivityType

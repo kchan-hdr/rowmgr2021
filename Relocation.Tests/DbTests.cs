@@ -1,6 +1,6 @@
 ﻿using com.hdr.rowmgr.Relocation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ROWM.DAL;
+using ROWM.Dal;
 using System;
 using System.Diagnostics;
 using System.Linq;

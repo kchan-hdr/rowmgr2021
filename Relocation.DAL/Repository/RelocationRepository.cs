@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ROWM.DAL
+namespace ROWM.Dal
 {
     public class RelocationRepository
     {
@@ -25,7 +25,9 @@ namespace ROWM.DAL
                 .ToListAsync();
 
         public async Task<bool> HasRelocation(Guid parcelId) => await _context.Relocations.AnyAsync(r => r.ParcelId == parcelId);
-        public async Task<IParcelRelocation> GetRelocation(Guid parcelId) => await _context.Relocations.SingleOrDefaultAsync(r => r.ParcelId == parcelId);
+        public async Task<IParcelRelocation> GetRelocation(Guid parcelId) => 
+            await _context.Relocations
+                .SingleOrDefaultAsync(r => r.ParcelId == parcelId);
 
 
         internal ParcelRelocation MakeNewRelocation => _context.Relocations.Add(new ParcelRelocation());

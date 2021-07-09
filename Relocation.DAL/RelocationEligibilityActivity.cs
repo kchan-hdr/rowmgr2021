@@ -3,7 +3,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ROWM.DAL
+namespace ROWM.Dal
 {
     [Table("Relocation_Eligibility", Schema = "Austin")]
     public class RelocationEligibilityActivity : IRelocationEligibilityActivity

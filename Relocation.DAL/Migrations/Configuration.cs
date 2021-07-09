@@ -1,20 +1,20 @@
 ﻿namespace Relocation.DAL.Migrations
 {
-    using ROWM.DAL;
+    using ROWM.Dal;
     using System;
     using System.Collections.Generic;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<ROWM.DAL.RelocationContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<ROWM.Dal.RelocationContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
-        protected override void Seed(ROWM.DAL.RelocationContext context)
+        protected override void Seed(ROWM.Dal.RelocationContext context)
         {
             //  This method will be called after migrating to the latest version.
 

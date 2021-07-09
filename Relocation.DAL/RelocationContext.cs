@@ -1,7 +1,7 @@
 ﻿using Relocation.DAL;
 using System.Data.Entity;
 
-namespace ROWM.DAL
+namespace ROWM.Dal
 {
     public class RelocationContext : DbContext
     {

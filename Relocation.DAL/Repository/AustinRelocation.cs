@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ROWM.DAL
+namespace ROWM.Dal
 {
     public partial class ParcelRelocation : IParcelRelocation
     {

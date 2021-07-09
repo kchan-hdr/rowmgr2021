@@ -1,5 +1,5 @@
 ﻿using com.hdr.rowmgr.Relocation;
-using ROWM.DAL;
+using ROWM.Dal;
 using System;
 using System.Collections.Generic;
 using System.Linq;

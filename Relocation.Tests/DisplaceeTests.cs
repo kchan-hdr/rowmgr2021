@@ -1,6 +1,6 @@
 ﻿using com.hdr.rowmgr.Relocation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ROWM.DAL;
+using ROWM.Dal;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -39,6 +39,12 @@ namespace Relocation.Tests
                 else
                     await h.AddActivity(ca.RelocationCaseId, tt.ActivityTypeCode, tt.Activity, tt.Caption, Guid.NewGuid(), DateTimeOffset.UtcNow, t.Description);
             }
+        }
+
+        [TestMethod]
+        public void Parse_Eligibility()
+        {
+            Assert.IsTrue( Enum.TryParse<RelocationStatus>("ineligible", true, out var r));
         }
     }
 }
