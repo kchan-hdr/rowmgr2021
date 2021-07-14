@@ -65,8 +65,8 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<DeleteHelper>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new DocTypes(fac.GetRequiredService<ROWM_Context>()));
-            services.AddScoped<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IUpdateParcelStatus,UpdateParcelStatus_wharton>();
+            services.AddScoped<Controllers.IParcelStatusHelper, Controllers.ParcelStatusHelperV2>();
+            services.AddScoped<IUpdateParcelStatus, UpdateParcelStatus_wharton>();
             services.AddScoped<UpdateParcelStatus2>();
 
             var feat = new AtpParcel("https://maps.hdrgateway.com/arcgis/rest/services/Texas/ATP_Parcel_FS/FeatureServer");
