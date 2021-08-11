@@ -45,7 +45,31 @@ namespace ROWM.Controllers
             return r;
         }
 
-        [HttpGet("api/vocabulary")]
+        [HttpGet("api/v2/map")]
+        public async Task<Map> GetMapLayers()
+        {
+            var r = new Map();
+
+            r.Parcel_Fc = _repo.GetLayers().Where(lx => lx.LayerType == LayerType.Parcel).FirstOrDefault();
+
+            // not used in v2 (OPPD)
+            //r.Reference_MapLayer = _repo.GetLayers().Where(lx => lx.LayerType == LayerType.Reference).FirstOrDefault();
+
+            // switchable layers
+            r.References = _repo.GetLayers().Where(lx => lx.IsActive && lx.LayerType == LayerType.Reference).ToArray();
+
+            var(t, d) = await _ags.Token();
+            r.Token = t;
+            r.Expiration = d;
+
+            return r;
+        }
+
+        [HttpGet("api/v2/parts"), ResponseCache(Duration = 60 * 60)]
+        public IEnumerable<Lookup> GetProjectParts() =>
+            _Context.ProjectParts.Where(pp => pp.IsActive).OrderBy(pp => pp.DisplayOrder).Select(pp => new Lookup { Code = pp.ProjectPartId.ToString(), Description = pp.Caption, DisplayOrder = pp.DisplayOrder ?? 0 });
+
+       [HttpGet("api/vocabulary")]
         public Vocabulary Get()
         {
             var titles = _Context.DocumentTitlePicklist.ToArray();
@@ -67,7 +91,7 @@ namespace ROWM.Controllers
         [HttpGet("api/parcelStatus")]
         public async Task<IEnumerable<StatusDto>> GetParcelStatus()
         {
-            var sym = await _renderer.GetDomainValues(11);
+            var sym = await _renderer.GetDomainValues("parcel acquisition status");
 
             var pStatus = _Context.Parcel_Status.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.DisplayOrder).ToList();
 
@@ -156,6 +180,7 @@ namespace ROWM.Controllers
         {
             public MapConfiguration Parcel_Fc { get; set; }
             public MapConfiguration Reference_MapLayer { get; set; }
+            public MapConfiguration[] References { get; set; }
             public string Token { get; set; }
             public DateTimeOffset Expiration { get; set; }
         }

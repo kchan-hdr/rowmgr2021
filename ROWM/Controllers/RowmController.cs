@@ -31,7 +31,7 @@ namespace ROWM.Controllers
         readonly OwnerRepository _repo;
         readonly ParcelStatusRepository _parcelList;
         readonly ContactInfoRepository _contactRepo;
-        readonly StatisticsRepository _statistics;
+        readonly IStatisticsRepository _statistics;
         readonly DeleteHelper _delete;
         readonly IParcelStatusHelper _statusHelper;
         readonly IUpdateParcelStatus _statusUpdate;
@@ -39,7 +39,7 @@ namespace ROWM.Controllers
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
 
-        public RowmController(ROWM_Context ctx, OwnerRepository r, ParcelStatusRepository l, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, UpdateParcelStatus2 u, IUpdateParcelStatus w, IParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
+        public RowmController(ROWM_Context ctx, OwnerRepository r, ParcelStatusRepository l, ContactInfoRepository c, IStatisticsRepository sr, DeleteHelper del, UpdateParcelStatus2 u, IUpdateParcelStatus w, IParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
         {
             _ctx = ctx;
             _repo = r;
@@ -794,6 +794,23 @@ namespace ROWM.Controllers
 
         [HttpGet("financials")]
         public async Task<StatisticsRepository.Financials> GetFinancials() => await _statistics.GetFinancials();
+
+        //[HttpGet("v2/statistics/{partId}")]
+        //public async Task<StatisticsDto> GetStatistics(int partId)
+        //{
+        //    if (partId <= 0)
+        //        return await GetStatistics();
+
+        //    var s = await _statistics.Snapshot(partId);
+        //    return new StatisticsDto
+        //    {
+        //        NumberOfOwners = s.nOwners,
+        //        NumberOfParcels = s.nParcels,
+        //        ParcelStatus = await _statistics.SnapshotParcelStatus(partId),
+        //        RoeStatus = await _statistics.SnapshotRoeStatus(partId),
+        //        Access = await _statistics.SnapshotAccessLikelihood(partId)
+        //    };
+        //}
         #endregion
     }
 
@@ -1094,8 +1111,10 @@ namespace ROWM.Controllers
         public string ParcelId { get; set; }
         public string TractNo { get; set; }
         public string ParcelStatusCode { get; set; }
+        public string ParcelStatusDate { get; set; }
         public string ParcelStatus => this.ParcelStatusCode;        // to be removed
         public string RoeStatusCode { get; set; }
+        public string RoeStatusDate { get; set; }
         public string RoeCondition { get; set; }
         public int? LandownerScore { get; set; }
         public string SitusAddress { get; set; }
@@ -1119,7 +1138,9 @@ namespace ROWM.Controllers
             TractNo = p.Tracking_Number;
             ParcelStatusCode = p.ParcelStatusCode;
             //ParcelStatus = Enum.GetName(typeof(Parcel.RowStatus), p.ParcelStatus);
+            ParcelStatusDate = p.Activities.Where(ax => ax.StatusCode == ParcelStatusCode).OrderBy(ax => ax.ActivityDate).LastOrDefault()?.ActivityDate.LocalDateTime.ToShortDateString() ?? string.Empty;
             RoeStatusCode = p.RoeStatusCode;
+            RoeStatusDate = p.Activities.Where(ax => ax.StatusCode == RoeStatusCode).OrderBy(ax => ax.ActivityDate).LastOrDefault()?.ActivityDate.LocalDateTime.ToShortDateString() ?? string.Empty;
             RoeCondition = p.Conditions.FirstOrDefault()?.Condition ?? "";
             SitusAddress = p.SitusAddress;
 

@@ -14,10 +14,10 @@ namespace ROWM.Controllers
     [ApiController]
     public class StatisticsController : ControllerBase
     {
-        readonly StatisticsRepository _statistics;
+        readonly IStatisticsRepository _statistics;
         readonly IMapSymbology _renderer;
 
-        public StatisticsController(StatisticsRepository s, IMapSymbology r = null) => (_statistics, _renderer) = (s, r);
+        public StatisticsController(IStatisticsRepository s, IMapSymbology r = null) => (_statistics, _renderer) = (s, r);
 
         [HttpGet("statistics")]
         public async Task<Statistics2Dto> GetStatistics()
@@ -32,6 +32,34 @@ namespace ROWM.Controllers
 
             await symTask;
             //await _renderer.ExtractSymbology();
+
+            return new Statistics2Dto
+            {
+                NumberOfOwners = s.nOwners,
+                NumberOfParcels = s.nParcels,
+                ParcelStatus = Colorize(t_ParcelStatus, _renderer.AcquisitionSymbols),
+                RoeStatus = Colorize(t_RoeStatus, _renderer.RoeSymbols),
+                ClearStatus = Colorize(t_ClearStatus, _renderer.ClearanceSymbols),
+                OutreachStatus = Colorize(t_Outreach, _renderer.OutreachSymbols),
+                Access = await _statistics.SnapshotAccessLikelihood()
+            };
+        }
+
+        [HttpGet("v2/statistics/{partId}")]
+        public async Task<Statistics2Dto> GetStatistics(int partId)
+        {
+            if (partId <= 0)
+                return await GetStatistics();
+
+            var symTask = _renderer.ExtractSymbology();
+
+            var s = await _statistics.Snapshot(partId);
+            var t_ParcelStatus = await _statistics.SnapshotParcelStatus(partId);
+            var t_RoeStatus = await _statistics.SnapshotRoeStatus(partId);
+            var t_ClearStatus = await _statistics.SnapshotClearanceStatus(partId);
+            var t_Outreach = await _statistics.Snapshot("engagement");
+
+            await symTask;
 
             return new Statistics2Dto
             {

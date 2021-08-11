@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ROWM.Dal
 {
@@ -26,5 +22,8 @@ namespace ROWM.Dal
         public string LayerId { get; set; }
 
         public int DisplayOrder { get; set; }
+
+        public int? ProjectPartId { get; set; }
+        public bool IsActive { get; set; }
     }
 }

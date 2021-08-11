@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace ROWM.Dal
 {
-    public class StatisticsRepository
+    public class StatisticsRepository : IStatisticsRepository
     {
         #region ctor
-        readonly ROWM_Context _context;
+        protected readonly ROWM_Context _context;
 
         public StatisticsRepository(ROWM_Context c)
         {
@@ -30,11 +30,12 @@ namespace ROWM.Dal
             new SubTotal { Title = "2", Caption = "Unlikely", Count = 0 },
             new SubTotal { Title = "1", Caption = "Likely", Count = 0}};
 
-        IQueryable<Parcel> ActiveParcels() => _context.Parcel.Where(px => px.IsActive);
+        protected IQueryable<Parcel> ActiveParcels() => _context.Parcel.Where(px => px.IsActive);
+        protected virtual IQueryable<Parcel> ActiveParcels(int? part) => ActiveParcels();
 
-        public async Task<(int nParcels, int nOwners)> Snapshot()
+        public async Task<(int nParcels, int nOwners)> Snapshot(int? part = null)
         {
-            var actives = ActiveParcels();
+            var actives = ActiveParcels(part);
             var np = await actives.CountAsync(px => px.IsActive);
 
             var owners = actives.SelectMany(px => px.Ownership.Select(ox => ox.OwnerId));
@@ -43,9 +44,9 @@ namespace ROWM.Dal
             return (np, no);
         }
 
-        public async Task<IEnumerable<SubTotal>> SnapshotParcelStatus()
+        public async Task<IEnumerable<SubTotal>> SnapshotParcelStatus(int? part=null)
         {
-            var q = await (from p in ActiveParcels()
+            var q = await (from p in ActiveParcels(part)
                            group p by p.ParcelStatusCode into psg
                            select new SubTotal { Title = psg.Key, Count = psg.Count() }).ToArrayAsync();
 
@@ -55,9 +56,9 @@ namespace ROWM.Dal
                       select new SubTotal{ Title = b.Title, Caption = b.Caption, DomainValue = b.DomainValue, Count = sub?.Count ?? 0 };
         }
 
-        public async Task<IEnumerable<SubTotal>> SnapshotRoeStatus()
+        public async Task<IEnumerable<SubTotal>> SnapshotRoeStatus(int? part=null)
         {
-            var q = await (from p in ActiveParcels()
+            var q = await (from p in ActiveParcels(part)
                           group p by p.RoeStatusCode into psg
                           select new SubTotal { Title = psg.Key, Count = psg.Count() }).ToArrayAsync();
 
@@ -67,9 +68,9 @@ namespace ROWM.Dal
                    select new SubTotal { Title = b.Title, Caption = b.Caption, DomainValue = b.DomainValue, Count = sub?.Count ?? 0 };
         }
 
-        public async Task<IEnumerable<SubTotal>> SnapshotClearanceStatus()
+        public async Task<IEnumerable<SubTotal>> SnapshotClearanceStatus(int? part=null)
         {
-            var q = await (from p in ActiveParcels()
+            var q = await (from p in ActiveParcels(part)
                            group p by p.RoeStatusCode into psg
                            select new SubTotal { Title = psg.Key, Count = psg.Count() }).ToArrayAsync();
 
@@ -79,9 +80,9 @@ namespace ROWM.Dal
                    select new SubTotal { Title = b.Title, Caption = b.Caption, DomainValue = b.DomainValue, Count = sub?.Count ?? 0 };
         }
 
-        public async Task<IEnumerable<SubTotal>> SnapshotAccessLikelihood()
+        public async Task<IEnumerable<SubTotal>> SnapshotAccessLikelihood(int? part=null)
         {
-            var q = await (from p in ActiveParcels()
+            var q = await (from p in ActiveParcels(part)
                            group p by p.Landowner_Score ?? 0 into psg
                            select new SubTotal { Title = psg.Key.ToString(), Count = psg.Count() }).ToArrayAsync();
 

@@ -134,12 +134,16 @@
     <Compile Include="Ownership.cs" />
     <Compile Include="Ownership_t.cs" />
     <Compile Include="Parcel.cs" />
+    <Compile Include="ParcelAllocation.cs" />
     <Compile Include="Parcel_Status.cs" />
+    <Compile Include="ProjectPart.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repesentation_Type.cs" />
     <Compile Include="Repository\AppRepository.cs" />
     <Compile Include="Repository\ContactInfoRepository.cs" />
     <Compile Include="Repository\DeleteHelper.cs" />
+    <Compile Include="Repository\FilteredStatisticsRepository.cs" />
+    <Compile Include="Repository\IStatisticsRepository.cs" />
     <Compile Include="Repository\OwnerRepository.cs" />
     <Compile Include="Repository\ParcelStatusRepository.cs" />
     <Compile Include="Repository\StatisticsRepository.cs" />
