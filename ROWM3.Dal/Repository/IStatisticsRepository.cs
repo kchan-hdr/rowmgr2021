@@ -5,7 +5,7 @@ namespace ROWM.Dal
 {
     public interface IStatisticsRepository
     {
-        Task<IEnumerable<StatisticsRepository.SubTotal>> Snapshot(string cat);
+        Task<IEnumerable<StatisticsRepository.SubTotal>> Snapshot(string cat, int? part = null);
 
         Task<(int nParcels, int nOwners)> Snapshot(int? part = null);
         Task<IEnumerable<StatisticsRepository.SubTotal>> SnapshotAccessLikelihood(int? part = null);
@@ -13,6 +13,6 @@ namespace ROWM.Dal
         Task<IEnumerable<StatisticsRepository.SubTotal>> SnapshotRoeStatus(int? part = null);
         Task<IEnumerable<StatisticsRepository.SubTotal>> SnapshotClearanceStatus(int? part = null);
 
-        Task<StatisticsRepository.Financials> GetFinancials();
+        Task<StatisticsRepository.Financials> GetFinancials(int? part = null);
     }
 }

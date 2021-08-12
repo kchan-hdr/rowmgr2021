@@ -68,7 +68,7 @@ namespace ROWM.Dal
                     dirty = true;
 
                     // wharton silliness ...
-                    if (target > p.Parcel_Status.DisplayOrder)
+                    if (target > ( p.Parcel_Status?.DisplayOrder ?? -1))
                     {
                         p.ParcelStatusCode = this.AcquisitionStatus;
 

@@ -97,13 +97,13 @@ namespace ROWM.Dal
         /// </summary>
         /// <param name="cat"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<SubTotal>> Snapshot(string cat)
+        public async Task<IEnumerable<SubTotal>> Snapshot(string cat, int? part = null)
         {
             var baseCounts = await MakeBaseCounts(cat);
             if (!baseCounts.Any())
                 throw new KeyNotFoundException($"no category {cat}");
 
-            var snap = GetSnapshot(cat);
+            var snap = GetSnapshot(cat, part);
 
             return from b in baseCounts
                    join pg in snap on b.Title equals pg.Title into matg
@@ -111,35 +111,35 @@ namespace ROWM.Dal
                    select new SubTotal { Title = b.Title, Caption = b.Caption, DomainValue = b.DomainValue, Count = sub?.Count ?? 0 };
         }
 
-        public IQueryable<SubTotal> GetSnapshot(string cat)
+        public IQueryable<SubTotal> GetSnapshot(string cat, int? part = null)
         {
             IQueryable<IGrouping<string, Parcel>> myQuery;
 
             switch ( cat )
             {
                 case "acquisition":
-                    myQuery = ActiveParcels().GroupBy(p => p.ParcelStatusCode).DefaultIfEmpty();
+                    myQuery = ActiveParcels(part).GroupBy(p => p.ParcelStatusCode).DefaultIfEmpty();
                     break;
                 case "roe":
-                    myQuery = ActiveParcels().GroupBy(p => p.RoeStatusCode).DefaultIfEmpty();
+                    myQuery = ActiveParcels(part).GroupBy(p => p.RoeStatusCode).DefaultIfEmpty();
                     break;
                 case "engagement":
-                    myQuery = ActiveParcels().GroupBy(p => p.OutreachStatusCode).DefaultIfEmpty();
+                    myQuery = ActiveParcels(part).GroupBy(p => p.OutreachStatusCode).DefaultIfEmpty();
                     break;
                 case "clearance":
-                    myQuery = ActiveParcels().GroupBy(p => p.RoeStatusCode).DefaultIfEmpty();
+                    myQuery = ActiveParcels(part).GroupBy(p => p.RoeStatusCode).DefaultIfEmpty();
                     break;
                 default:
-                    myQuery = ActiveParcels().GroupBy(p => p.ParcelStatusCode).DefaultIfEmpty();
+                    myQuery = ActiveParcels(part).GroupBy(p => p.ParcelStatusCode).DefaultIfEmpty();
                     break;
             }
 
             return myQuery.Select(pg => new SubTotal { Title = pg.Key, Count = pg.Count() });
         }
 
-        public async Task<Financials> GetFinancials()
+        public async Task<Financials> GetFinancials(int? part = null)
         {
-            var p = await ActiveParcels().ToArrayAsync();
+            var p = await ActiveParcels(part).ToArrayAsync();
 
             return new Financials
             {

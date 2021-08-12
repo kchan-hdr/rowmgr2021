@@ -45,6 +45,10 @@ namespace ROWM.Controllers
             };
         }
 
+        [HttpGet("v2/statistics/financials/{partId}")]
+        public async Task<StatisticsRepository.Financials> GetFinancials(int partId) => await _statistics.GetFinancials(partId);
+
+
         [HttpGet("v2/statistics/{partId}")]
         public async Task<Statistics2Dto> GetStatistics(int partId)
         {
@@ -57,7 +61,7 @@ namespace ROWM.Controllers
             var t_ParcelStatus = await _statistics.SnapshotParcelStatus(partId);
             var t_RoeStatus = await _statistics.SnapshotRoeStatus(partId);
             var t_ClearStatus = await _statistics.SnapshotClearanceStatus(partId);
-            var t_Outreach = await _statistics.Snapshot("engagement");
+            var t_Outreach = await _statistics.Snapshot("engagement", partId);
 
             await symTask;
 

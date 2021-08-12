@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 
 namespace ROWM.Dal.Repository
 {
@@ -12,7 +8,7 @@ namespace ROWM.Dal.Repository
 
         protected override IQueryable<Parcel> ActiveParcels(int? part)
         {
-            if (!part.HasValue)
+            if (!part.HasValue || part == 0)
                 return ActiveParcels();
 
             var q = from p in _context.Parcel.AsNoTracking()
