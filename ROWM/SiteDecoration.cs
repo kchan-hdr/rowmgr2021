@@ -59,4 +59,9 @@
     {
         public string SiteTitle() => "ATP";
     }
+
+    public class Swan : SiteDecoration
+    {
+        public string SiteTitle() => "Swan Lake";
+    }
 }
