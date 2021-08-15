@@ -106,7 +106,7 @@ namespace ROWM.Dal
             else           
             {
                 var q = from a in p.Activities
-                        group a by a.StatusCode into ag
+                        group a by a.ParcelStatusCode into ag
                         select ag.OrderByDescending(ax => ax.ActivityDate).Take(1);
 
                 return q.SelectMany(qx => qx);

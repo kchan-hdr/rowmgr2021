@@ -109,6 +109,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SwanLakeParcel.cs" />
     <Compile Include="IRenderer.cs" />
     <Compile Include="AtpParcel.cs" />
     <Compile Include="WhartonParcel.cs" />

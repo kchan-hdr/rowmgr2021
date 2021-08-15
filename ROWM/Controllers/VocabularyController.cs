@@ -77,7 +77,7 @@ namespace ROWM.Controllers
             var agents = _Context.Agent.Where(a => a.IsActive);
             var channels = _Context.Contact_Channel.Where(c => c.IsActive).OrderBy(c => c.DisplayOrder);
             var purposes = _Context.Contact_Purpose.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder);
-            var rels = _Context.Repesentation_Type.Where(r => r.IsActive).OrderBy(r => r.DisplayOrder);
+            var rels = _Context.Representation_Type.Where(r => r.IsActive).OrderBy(r => r.DisplayOrder);
 
             var pStatus = _Context.Parcel_Status.Where(p => p.IsActive && p.Category == "acquisition").OrderBy(p => p.DisplayOrder);
             var rStatus = _Context.Parcel_Status.Where(p => p.IsActive && p.Category == "roe").OrderBy(p => p.DisplayOrder);
@@ -151,7 +151,7 @@ namespace ROWM.Controllers
                 IEnumerable<Agent> agents,
                 IEnumerable<Contact_Channel> channels,
                 IEnumerable<Contact_Purpose> purposes,
-                IEnumerable<Repesentation_Type> rels,
+                IEnumerable<Representation_Type> rels,
                 IEnumerable<Parcel_Status> p,
                 IEnumerable<Parcel_Status> r,
                 IEnumerable<Parcel_Status> cl,

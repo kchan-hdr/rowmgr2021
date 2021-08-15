@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ROWM.Dal
 {
-    [Table("Status_Activity", Schema ="ROWM")]
+    [Table("StatusActivity", Schema ="ROWM")]
     public class StatusActivity
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -25,20 +25,20 @@ namespace ROWM.Dal
         [Required, ForeignKey("Agent")]
         public Guid AgentId { get; set; }
 
-        [StringLength(40)]
-        public string StatusCode { get; set; }
-        [StringLength(40)]
-        public string OriginalStatusCode { get; set; }
+        //[StringLength(40)]
+        //public string StatusCode { get; set; }
+        //[StringLength(40)]
+        //public string OriginalStatusCode { get; set; }
 
-        //[StringLength(40)]
-        //public string ParcelStatusCode { get; set; }
-        //[StringLength(40)]
-        //public string OrigianlParcelStatusCode { get; set; }
+        [StringLength(40)]
+        public string ParcelStatusCode { get; set; }
+        [StringLength(40)]
+        public string OrigianlParcelStatusCode { get; set; }
 
-        //[StringLength(40)]
-        //public string RoeStatusCode { get; set; }
-        //[StringLength(40)]
-        //public string OriginalRoeStatusCode { get; set; }
+        [StringLength(40)]
+        public string RoeStatusCode { get; set; }
+        [StringLength(40)]
+        public string OriginalRoeStatusCode { get; set; }
 
         public string Notes { get; set; }
     }

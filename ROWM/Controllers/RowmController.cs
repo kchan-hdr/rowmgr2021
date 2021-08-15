@@ -274,7 +274,7 @@ namespace ROWM.Controllers
             }
 
             var q = from s in MasterParcelStatus
-                          join sx in st on s.Code equals sx.StatusCode into h
+                          join sx in st on s.Code equals sx.ParcelStatusCode into h
                           from evt in h.DefaultIfEmpty()
                           orderby s.DisplayOrder
                           select new StatusDto { 
@@ -318,7 +318,7 @@ namespace ROWM.Controllers
                 }
             }
 
-            var current = st.OrderByDescending(sx => sx.ActivityDate).FirstOrDefault()?.StatusCode ?? "";
+            var current = st.OrderByDescending(sx => sx.ActivityDate).FirstOrDefault()?.ParcelStatusCode ?? "";
             var status = MasterParcelStatus.SingleOrDefault(sx => sx.Code == current) ?? MasterParcelStatus.First();
             var statusCode = string.IsNullOrEmpty(status.ParentStatusCode) ? status.Code : status.ParentStatusCode;
 
@@ -522,8 +522,8 @@ namespace ROWM.Controllers
                     ActivityDate = r.ChangeDate,
                     AgentId = r.AgentId,
                     ParentParcelId = p.ParcelId,
-                    StatusCode = r.StatusCode,
-                    OriginalStatusCode = p.OutreachStatusCode
+                    ParcelStatusCode = r.StatusCode,
+                    OrigianlParcelStatusCode = p.OutreachStatusCode
                 };
                 _ctx.Activities.Add(act);
 
@@ -1138,9 +1138,9 @@ namespace ROWM.Controllers
             TractNo = p.Tracking_Number;
             ParcelStatusCode = p.ParcelStatusCode;
             //ParcelStatus = Enum.GetName(typeof(Parcel.RowStatus), p.ParcelStatus);
-            ParcelStatusDate = p.Activities.Where(ax => ax.StatusCode == ParcelStatusCode).OrderBy(ax => ax.ActivityDate).LastOrDefault()?.ActivityDate.LocalDateTime.ToShortDateString() ?? string.Empty;
+            ParcelStatusDate = p.Activities.Where(ax => ax.ParcelStatusCode == ParcelStatusCode).OrderBy(ax => ax.ActivityDate).LastOrDefault()?.ActivityDate.LocalDateTime.ToShortDateString() ?? string.Empty;
             RoeStatusCode = p.RoeStatusCode;
-            RoeStatusDate = p.Activities.Where(ax => ax.StatusCode == RoeStatusCode).OrderBy(ax => ax.ActivityDate).LastOrDefault()?.ActivityDate.LocalDateTime.ToShortDateString() ?? string.Empty;
+            RoeStatusDate = p.Activities.Where(ax => ax.RoeStatusCode == RoeStatusCode).OrderBy(ax => ax.ActivityDate).LastOrDefault()?.ActivityDate.LocalDateTime.ToShortDateString() ?? string.Empty;
             RoeCondition = p.Conditions.FirstOrDefault()?.Condition ?? "";
             SitusAddress = p.SitusAddress;
 

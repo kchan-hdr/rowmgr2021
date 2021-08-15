@@ -28,7 +28,7 @@ namespace ROWM.Controllers
             var t_ParcelStatus = await _statistics.SnapshotParcelStatus();
             var t_RoeStatus = await _statistics.SnapshotRoeStatus();
             var t_ClearStatus = await _statistics.SnapshotClearanceStatus();
-            var t_Outreach = await _statistics.Snapshot("engagement");
+            var t_Outreach = new List<StatisticsRepository.SubTotal>(); //await _statistics.Snapshot("engagement");
 
             await symTask;
             //await _renderer.ExtractSymbology();
@@ -61,7 +61,7 @@ namespace ROWM.Controllers
             var t_ParcelStatus = await _statistics.SnapshotParcelStatus(partId);
             var t_RoeStatus = await _statistics.SnapshotRoeStatus(partId);
             var t_ClearStatus = await _statistics.SnapshotClearanceStatus(partId);
-            var t_Outreach = await _statistics.Snapshot("engagement", partId);
+            var t_Outreach = new List<StatisticsRepository.SubTotal>(); // await _statistics.Snapshot("engagement", partId);
 
             await symTask;
 

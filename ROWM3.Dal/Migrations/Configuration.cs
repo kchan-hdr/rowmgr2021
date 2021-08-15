@@ -22,14 +22,14 @@ namespace ROWM.Dal.Migrations
                 new Contact_Purpose { PurposeCode = "Negotiation", Description = "Negotiation", DisplayOrder = 3, IsActive = true }
             );
 
-            context.Repesentation_Type.AddOrUpdate(
+            context.Representation_Type.AddOrUpdate(
                 r => r.RelationTypeCode,
-                new Repesentation_Type { RelationTypeCode = "Self", Description = "Self", DisplayOrder = 1, IsActive = true },
-                new Repesentation_Type { RelationTypeCode = "Spouse", Description = "Spouse", DisplayOrder = 2, IsActive = true },
-                new Repesentation_Type { RelationTypeCode = "Child", Description = "Child", DisplayOrder = 3, IsActive = true },
-                new Repesentation_Type { RelationTypeCode = "Tenant", Description = "Tenant", DisplayOrder = 4, IsActive = true },
-                new Repesentation_Type { RelationTypeCode = "Attorney", Description = "Attorney", DisplayOrder = 5, IsActive = true },
-                new Repesentation_Type { RelationTypeCode = "Other", Description = "Other", DisplayOrder = 6, IsActive = true }
+                new Representation_Type { RelationTypeCode = "Self", Description = "Self", DisplayOrder = 1, IsActive = true },
+                new Representation_Type { RelationTypeCode = "Spouse", Description = "Spouse", DisplayOrder = 2, IsActive = true },
+                new Representation_Type { RelationTypeCode = "Child", Description = "Child", DisplayOrder = 3, IsActive = true },
+                new Representation_Type { RelationTypeCode = "Tenant", Description = "Tenant", DisplayOrder = 4, IsActive = true },
+                new Representation_Type { RelationTypeCode = "Attorney", Description = "Attorney", DisplayOrder = 5, IsActive = true },
+                new Representation_Type { RelationTypeCode = "Other", Description = "Other", DisplayOrder = 6, IsActive = true }
             );
 
             context.Contact_Channel.AddOrUpdate(

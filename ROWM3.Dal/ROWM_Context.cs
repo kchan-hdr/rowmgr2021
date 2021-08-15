@@ -31,7 +31,7 @@ namespace ROWM.Dal
         public virtual DbSet<Parcel_Status> Parcel_Status { get; set; }
         public virtual DbSet<ProjectPart> ProjectParts { get; set; }
         public virtual DbSet<ParcelAllocation> Allocations { get; set; }
-        public virtual DbSet<Repesentation_Type> Repesentation_Type { get; set; }
+        public virtual DbSet<Representation_Type> Representation_Type { get; set; }
         public virtual DbSet<Roe_Status> Roe_Status { get; set; }
         public virtual DbSet<RoeCondition> RoeCondition { get; set; }
         public virtual DbSet<StatusActivity> Activities { get; set; }

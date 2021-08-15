@@ -7,7 +7,7 @@ namespace ROWM.Dal
     using System.Data.Entity.Spatial;
 
     [Table("ROWM.Representation_Type")]
-    public partial class Repesentation_Type
+    public partial class Representation_Type
     {
         [Key]
         [StringLength(20)]
