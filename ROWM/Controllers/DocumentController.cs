@@ -29,7 +29,7 @@ namespace ROWM.Controllers
         #region ctor            
         private readonly ISharePointCRUD _sharePointCRUD;
         private readonly UpdateParcelStatus2 _updater;
-        private readonly ParcelStatusHelper _statusHelper;
+        private readonly IParcelStatusHelper _statusHelper;
         private readonly DocTypes _docTypes;
 
         readonly ROWM_Context _ctx;
@@ -38,7 +38,7 @@ namespace ROWM.Controllers
         readonly TxDotNeogitations.ITxDotNegotiation _txDotHelper;
         readonly DeleteHelper _deleteHelper;
 
-        public DocumentController(ROWM_Context c, OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, UpdateParcelStatus2 u, IFeatureUpdate f, DeleteHelper del, DocTypes d)
+        public DocumentController(ROWM_Context c, OwnerRepository r, IParcelStatusHelper h, ISharePointCRUD sp, UpdateParcelStatus2 u, IFeatureUpdate f, DeleteHelper del, DocTypes d)
         {
             _ctx = c;
             _repo = r;

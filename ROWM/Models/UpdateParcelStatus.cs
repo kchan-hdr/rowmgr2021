@@ -91,6 +91,9 @@ namespace ROWM.Dal
 
                 if (this.RoeStatus != null && p.RoeStatusCode != this.RoeStatus)
                 {
+                    history.OrigianlParcelStatusCode = p.RoeStatusCode;
+                    history.ParcelStatusCode = this.RoeStatus;
+
                     history.OriginalRoeStatusCode = p.RoeStatusCode;
                     history.RoeStatusCode = this.RoeStatus;
 
@@ -122,7 +125,7 @@ namespace ROWM.Dal
                 }
             }
 
-            // tks.Add(this._context.SaveChangesAsync());
+            tks.Add(this._context.SaveChangesAsync());
 
             await Task.WhenAll(tks);
 

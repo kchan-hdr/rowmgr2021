@@ -49,7 +49,7 @@ namespace ROWM.Models
             var myphases = parcel.ContactLog.Select(l => l.ProjectPhase).Distinct();
             if (myphases.Any())
             {
-                var rr = myphases.Select(mp => _PURPOSE.SingleOrDefault(p => p.PurposeCode == mp).Milestone);
+                var rr = myphases.Select(mp => _PURPOSE.SingleOrDefault(p => p.PurposeCode == mp)?.Milestone);
                 rr = rr.Where(mx => mx != null);
                 if ( rr.Any())
                     statux.AddRange(rr);
