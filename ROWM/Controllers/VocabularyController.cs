@@ -1,5 +1,6 @@
 ﻿using geographia.ags;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ROWM.Dal;
 using SharePointInterface;
 using System;
@@ -64,6 +65,22 @@ namespace ROWM.Controllers
 
             return r;
         }
+
+        [HttpGet("api/v2/actionItemStatus")]
+        public IEnumerable<Lookup> GetActionItemStatus()
+        {
+            var vals = Enum.GetValues(typeof(ActionStatus)).Cast<int>();
+            var keys = Enum.GetNames(typeof(ActionStatus));
+            return keys.Zip(vals, (k,v) => new Lookup { Code = k, Description = k, DisplayOrder = v });
+        }
+
+        [HttpGet("api/v2/actionGroups")]
+        public IEnumerable<Lookup> GetActionItemGroups() =>
+            _Context.Groups
+                .AsNoTracking()
+                .Where(gx => gx.IsActive)
+                .OrderBy(gx => gx.DisplayOrder)
+                .Select(gx => new Lookup { Code = gx.ActionItemGroupId.ToString(), Description = gx.GroupNameCaption, DisplayOrder = gx.DisplayOrder });
 
         [HttpGet("api/v2/parts"), ResponseCache(Duration = 60 * 60)]
         public IEnumerable<Lookup> GetProjectParts() =>

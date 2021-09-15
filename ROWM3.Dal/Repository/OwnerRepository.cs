@@ -50,6 +50,7 @@ namespace ROWM.Dal
             var p = await ActiveParcels()
                 .Include(px => px.Ownership.Select( o=>o.Owner.ContactLog))
                 .Include(px => px.ContactLog)
+                .Include(px => px.ActionItems)
                 .FirstOrDefaultAsync(px => px.Tracking_Number == pid);
 
             return p;

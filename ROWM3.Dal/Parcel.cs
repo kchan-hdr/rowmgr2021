@@ -116,5 +116,9 @@ namespace ROWM.Dal
         public virtual ICollection<StatusActivity> Activities { get; set; }
 
         public virtual ICollection<Parcel> RelatedParcels { get; set; }
+
+
+        //
+        public virtual ICollection<ActionItem> ActionItems { get; set; }
     }
 }

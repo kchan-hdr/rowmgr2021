@@ -1104,6 +1104,14 @@ namespace ROWM.Controllers
         public string Action { get; set; }
         public DateTime? DueDate { get; set; }
     }
+
+    public class ActionItemDto
+    {
+        public Guid ActionItemId { get; set; }
+        public string Action { get; set; }
+        public string StatusCode { get; set; }
+        public DateTimeOffset? DueDate { get; set; }
+    }
     #endregion
     #region parcel graph
     public class ParcelGraph
@@ -1116,6 +1124,7 @@ namespace ROWM.Controllers
         public string RoeStatusCode { get; set; }
         public string RoeStatusDate { get; set; }
         public string RoeCondition { get; set; }
+        public string OutreachStatusCode { get; set; }
         public int? LandownerScore { get; set; }
         public string SitusAddress { get; set; }
         public double Acreage { get; set; }
@@ -1131,6 +1140,7 @@ namespace ROWM.Controllers
         public IEnumerable<OwnerDto> Owners { get; set; }
         public IEnumerable<ContactLogDto> ContactsLog { get; set; }
         public IEnumerable<DocumentHeader> Documents { get; set; }
+        public IEnumerable<ActionItemDto> ActionItems { get; set; }
 
         internal ParcelGraph(Parcel p, IEnumerable<Document> d)
         {
@@ -1142,6 +1152,7 @@ namespace ROWM.Controllers
             RoeStatusCode = p.RoeStatusCode;
             RoeStatusDate = p.Activities.Where(ax => ax.StatusCode == RoeStatusCode).OrderBy(ax => ax.ActivityDate).LastOrDefault()?.ActivityDate.LocalDateTime.ToShortDateString() ?? string.Empty;
             RoeCondition = p.Conditions.FirstOrDefault()?.Condition ?? "";
+            OutreachStatusCode = p.OutreachStatusCode;
             SitusAddress = p.SitusAddress;
 
             LandownerScore = p.Landowner_Score;
@@ -1157,6 +1168,8 @@ namespace ROWM.Controllers
             Owners = p.Ownership.Select(ox => new OwnerDto(ox.Owner, ox.Ownership_t));
             ContactsLog = p.ContactLog.Where(cx => !cx.IsDeleted).Select(cx => new ContactLogDto(cx));
             Documents = d.Where(dx => !dx.IsDeleted).Select(dx => new DocumentHeader(dx));
+
+            ActionItems = p.ActionItems.Select(ax => new ActionItemDto { ActionItemId = ax.ActionItemId, Action = ax.Action, StatusCode = Enum.GetName(typeof(ActionStatus), ax.Status), DueDate = ax.DueDate });
         }
     }
     #endregion
