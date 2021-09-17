@@ -59,7 +59,7 @@ namespace ROWM.Dal
         public string ModifiedBy { get; set; }
 
         [Required]
-        [StringLength(20)]
+        [StringLength(50)]
         public string Representation { get; set; }
 
         public virtual Owner Owner { get; set; }

@@ -14,7 +14,7 @@ namespace ROWM.Dal
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid OrganizationId { get; set; }
 
-        [StringLength(200)]
+        [StringLength(int.MaxValue)]
         public string Name { get; set; }
 
         public DateTimeOffset Created { get; set; }
