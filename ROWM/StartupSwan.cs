@@ -66,7 +66,7 @@ namespace ROWM
             services.AddScoped<DeleteHelper>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new DocTypes(fac.GetRequiredService<ROWM_Context>()));
             services.AddScoped<Controllers.IParcelStatusHelper, Controllers.ParcelStatusHelperV2>();
-            services.AddScoped<IUpdateParcelStatus,UpdateParcelStatus_wharton>();
+            services.AddScoped<IUpdateParcelStatus,UpdateParcelStatusNormal>();
             services.AddScoped<UpdateParcelStatus2>();
 
             var feat = new SwanLakeParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Oregon/SwanLanke_Parcel_FS/FeatureServer");
