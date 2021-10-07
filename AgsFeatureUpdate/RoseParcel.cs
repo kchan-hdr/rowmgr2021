@@ -15,7 +15,7 @@ namespace geographia.ags
         public RoseParcel(string url = "")
         {
             _URL = string.IsNullOrWhiteSpace(url) ?
-                "https://maps-stg.hdrgateway.com/arcgis/rest/services/Texas/CoW_Parcel_FS/FeatureServer"
+                "https://maps-stg.hdrgateway.com/arcgis/rest/services/Oregon/RQ_Parcel_FS/FeatureServer"
                 : url;
 
             _LAYERID = 0;
@@ -93,7 +93,7 @@ namespace geographia.ags
             {
                 attributes = new Status_Req
                 {
-                    OBJECTID_1 = i,
+                    OBJECTID = i,
                     Documents = documentURL
                 }
             });
@@ -110,7 +110,7 @@ namespace geographia.ags
             {
                 attributes = new Status_Req
                 {
-                    OBJECTID_1 = i,
+                    OBJECTID = i,
                     ParcelStatus = status
                 }
             });
@@ -131,7 +131,7 @@ namespace geographia.ags
             {
                 attributes = new Status_Req
                 {
-                    OBJECTID_1 = i,
+                    OBJECTID = i,
                     ROE_Status = status,
                     ROE_Condition = condition
                 }
@@ -172,7 +172,7 @@ namespace geographia.ags
 
         public class Status_Req
         {
-            public int OBJECTID_1 { get; set; }
+            public int OBJECTID { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public int? ParcelStatus { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
