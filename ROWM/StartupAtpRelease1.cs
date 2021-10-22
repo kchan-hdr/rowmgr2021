@@ -62,6 +62,7 @@ namespace ROWM
             services.AddScoped<ParcelStatusRepository>();
             services.AddScoped<ROWM.Dal.ContactInfoRepository>();
             services.AddScoped<IStatisticsRepository, FilteredStatisticsRepository>();
+            services.AddScoped<IActionItemRepository, ActionItemRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<DeleteHelper>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new DocTypes(fac.GetRequiredService<ROWM_Context>()));
