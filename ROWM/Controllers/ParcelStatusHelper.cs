@@ -1,21 +1,21 @@
-﻿using ROWM.Dal;
+﻿using Microsoft.EntityFrameworkCore;
+using ROWM.Dal;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.Xml;
 
 namespace ROWM.Controllers
 {
     public class ParcelStatusHelper : IParcelStatusHelper
     {
-        readonly List<Parcel_Status> _Status;
-        readonly List<Roe_Status> _roeStatus;
-        readonly Dictionary<int, Landowner_Score> _Scores;
+        readonly List<ParcelStatus> _Status;
+        readonly List<RoeStatus> _roeStatus;
+        readonly Dictionary<int, LandownerScore> _Scores;
 
         public ParcelStatusHelper(ROWM_Context c)
         {
-            _Status = c.Parcel_Status.AsNoTracking().ToList();
-            _roeStatus = c.Roe_Status.AsNoTracking().ToList();
-            _Scores = c.Landowner_Score.AsNoTracking().ToDictionary<Landowner_Score, int>(lls => lls.Score);
+            _Status = c.ParcelStatuses.AsNoTracking().ToList();
+            _roeStatus = c.RoeStatuses.AsNoTracking().ToList();
+            _Scores = c.LandownerScores.AsNoTracking().ToDictionary<LandownerScore, int>(lls => lls.Score);
         }
 
         public string ParseDomainValue(int d)
@@ -27,7 +27,7 @@ namespace ROWM.Controllers
         public int GetDomainValue(string status)
         {
             var s = _Status.Single(sx => sx.Code.Equals(status));
-            return s.DomainValue ?? 0;
+            return s.DomainValue;
         }
 
         public int GetRank(string status) => _Status.SingleOrDefault(sx => sx.Code.Equals(status))?.DisplayOrder ?? 0;
@@ -38,7 +38,7 @@ namespace ROWM.Controllers
             return s.DomainValue;
         }
 
-        public static bool HasNoContact(Parcel parcel) => parcel.Parcel_Status.DomainValue <= 0;
+        public static bool HasNoContact(Parcel parcel) => parcel.ParcelStatusCodeNavigation.DomainValue <= 0;
 
         #region landowner score 
         public string ParseScore(int? score)
@@ -47,7 +47,7 @@ namespace ROWM.Controllers
             var val = score.Value;
             return _Scores.ContainsKey(val) ? _Scores[val].Caption : "";
         }
-        public bool IsValidScore(int? score) => (!score.HasValue || score == 0) ? false : _Scores.ContainsKey(score.Value);
+        public bool IsValidScore(int? score) => score.HasValue && score != 0 && _Scores.ContainsKey(score.Value);
         #endregion
     }
 }

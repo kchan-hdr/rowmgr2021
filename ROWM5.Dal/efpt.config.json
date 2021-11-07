@@ -1,0 +1,221 @@
+﻿{
+   "CodeGenerationMode": 0,
+   "ContextClassName": "ROWM_Context",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": null,
+   "ProjectRootNamespace": "ROWM.Dal",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "Name": "[App].[Map]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[Austin].[Cost_Estimate]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[Austin].[Document_Title_Picklist]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[Austin].[Parcel_Relocation]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[Austin].[Relocation_Activity_Type]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[Austin].[Relocation_Case]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[Austin].[Relocation_Displacee_Activity]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[Austin].[Relocation_Eligibility]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Action_Item]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Action_Item_Activity]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Action_Item_Group]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Agent]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Appraisal]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Contact_Channel]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Contact_Followup]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Contact_Purpose]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[ContactInfo]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[ContactInfoContactLogs]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[ContactLog]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Document]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Document_Type]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[DocumentActivity]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[DocumentAgents]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[DocumentPackage]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Landowner_Score]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Organization]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Owner]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[OwnerDocuments]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Ownership]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Parcel]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Parcel_Allocation]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Parcel_Node]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Parcel_Status]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[ParcelContactInfo]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[ParcelContactLogs]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[ParcelDocuments]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Preferred_Contact_Mode]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Project_Part]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Representation_Type]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Roe_Status]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[RoeConditions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Status_Activity]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Status_Category]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[SH72].[Negotiation_History]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[SH72].[NegotiationContacts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[SH72].[NegotiationDocuments]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[SH72].[NegotiationParcels]",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": "atp-rowm-dev.rowm",
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDbContextSplitting": true,
+   "UseFluentApiOnly": false,
+   "UseHandleBars": false,
+   "UseInflector": true,
+   "UseLegacyPluralizer": false,
+   "UseNoConstructor": false,
+   "UseNoDefaultConstructor": true,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UseSchemaFolders": true,
+   "UseSpatial": false
+}

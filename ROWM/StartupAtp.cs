@@ -21,6 +21,7 @@ using ROWM.Models;
 using ROWM.Reports;
 using ROWM.Dal.Repository;
 using Austin_Costs;
+using Microsoft.EntityFrameworkCore;
 
 namespace ROWM
 {
@@ -54,14 +55,16 @@ namespace ROWM
             });
 
             var cs = Configuration.GetConnectionString("ROWM_Context");
-            services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
-            {
-                return new Dal.ROWM_Context(cs);
-            });
-            services.AddScoped<CostEstimateContext>(fac =>
-            {
-                return new CostEstimateContext(cs);
-            });
+            services.AddDbContext<ROWM_Context>(o => o.UseSqlServer(cs));
+            services.AddDbContext<CostEstimateContext>(o => o.UseSqlServer(cs));
+            //services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
+            //{
+            //    return new Dal.ROWM_Context(cs);
+            //});
+            //services.AddScoped<CostEstimateContext>(fac =>
+            //{
+            //    return new CostEstimateContext(cs);
+            //});
 
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();

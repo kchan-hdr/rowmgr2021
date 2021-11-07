@@ -1,102 +1,67 @@
-﻿using geographia.ags;
+﻿// This Startup file is based on ASP.NET Core new project templates and is included
+// as a starting point for DI registration and HTTP request processing pipeline configuration.
+// This file will need updated according to the specific scenario of the application being upgraded.
+// For more information on ASP.NET Core startup files, see https://docs.microsoft.com/aspnet/core/fundamentals/startup
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using SharePointInterface;
+using Microsoft.Extensions.Hosting;
 
 namespace ROWM
 {
     public class Startup
     {
-        //public Startup(IHostingEnvironment env)
-        //{
-        //    var builder = new ConfigurationBuilder()
-        //        .SetBasePath(env.ContentRootPath)
-        //        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-        //        .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-        //        .AddEnvironmentVariables();
-        //    if (env.IsDevelopment())
-        //    {
-        //        builder.AddUserSecrets<Startup>();
-        //    }
-        //    Configuration = builder.Build();
-        //}
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
+
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors();
-
-            // Add framework services.
-            services.AddMvc()
-                .AddJsonOptions(o =>
+            services.AddControllersWithViews(ConfigureMvcOptions)
+                // Newtonsoft.Json is added for compatibility reasons
+                // The recommended approach is to use System.Text.Json for serialization
+                // Visit the following link for more guidance about moving away from Newtonsoft.Json to System.Text.Json
+                // https://docs.microsoft.com/dotnet/standard/serialization/system-text-json-migrate-from-newtonsoft-how-to
+                .AddNewtonsoftJson(options =>
                 {
-                    o.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                    options.UseMemberCasing();
                 });
 
-            services.Configure<FormOptions>(o =>
-            {
-                o.ValueLengthLimit = int.MaxValue;
-                o.MultipartBodyLengthLimit = int.MaxValue;
-            });
-
-            var joke = Configuration["joke"];
-            var cs = Configuration.GetConnectionString("ROWM_Context");
-            services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
-            {
-                return new ROWM.Dal.ROWM_Context(cs);
-            });
-
-            services.AddScoped<ROWM.Dal.OwnerRepository>();
-            services.AddScoped<ROWM.Dal.StatisticsRepository>();
-            services.AddScoped<ROWM.Dal.AppRepository>();
-            services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
-            services.AddScoped<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, BlackhillParcel>();
-            services.AddScoped<ISharePointCRUD, SharePointCRUD>();
-
-            services.AddSwaggerDocument();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
             }
 
             app.UseStaticFiles();
-
-            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
-
-            app.UseMvc(routes =>
+            app.UseRouting();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
 
-            app.UseOpenApi();
-            app.UseSwaggerUi3();
+        private void ConfigureMvcOptions(MvcOptions mvcOptions)
+        { 
         }
     }
 }
-

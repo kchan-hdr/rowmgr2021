@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ROWM.Dal;
 using System;
-using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,11 +21,11 @@ namespace ROWM.Controllers
             const string HDR = "Segment,Tract,Owner Name,Contact Name,Contact Phone,No Actvity,ROE In Progress,ROE Obtained - Survey,ROE Obtained - Boring,ROE Obtained Survey and Boring,No Access";
 
             // summary
-            var a = from p in _ctx.Parcel
+            var a = from p in _ctx.Parcels
                     where p.IsActive
                     select p;
 
-            var roes = from status in _ctx.Roe_Status
+            var roes = from status in _ctx.RoeStatuses
                        join t in a on status.Code equals t.RoeStatusCode into g
                        select new { status.Description, status.DisplayOrder, g };
 
@@ -61,14 +61,15 @@ namespace ROWM.Controllers
         {
             const string HDR = "Tract,Property Owner,Initial ROE Offer,Final ROE Offer,Primary Contact Name,Primary Contact Phone";
 
-            var pay = _ctx.Parcel.Where(px => px.IsActive);
+            var pay = _ctx.Parcels.Where(px => px.IsActive);
 
-            var totalInitial = pay.Sum(px => px.InitialROEOffer_OfferAmount);
-            var totalFinal = pay.Sum(px => px.FinalROEOffer_OfferAmount);
+            var totalInitial = pay.Sum(px => px.InitialRoeofferOfferAmount);
+            var totalFinal = pay.Sum(px => px.FinalRoeofferOfferAmount);
 
             var pays = await pay
-                .Where(p => p.InitialROEOffer_OfferAmount.HasValue || p.FinalROEOffer_OfferAmount.HasValue)
-                .Select(p => new { p, p.Ownership.FirstOrDefault().Owner.PartyName, c = p.Ownership.FirstOrDefault().Owner.ContactInfo.FirstOrDefault(ct => ct.Representation == "comc") }).ToListAsync();
+                .Where(p => p.InitialRoeofferOfferAmount.HasValue || p.FinalRoeofferOfferAmount.HasValue)
+                .Select(p => new { p, p.Ownerships.FirstOrDefault().Owner.PartyName, c = p.Ownerships.FirstOrDefault().Owner.ContactInfos.FirstOrDefault(ct => ct.Representation == "comc") })
+                .ToListAsync();
 
             using (var s = new MemoryStream())
             {
@@ -82,8 +83,8 @@ namespace ROWM.Controllers
 
                     writer.WriteLine(HDR);
 
-                    foreach (var tract in pays.OrderBy(px => px.p.Tracking_Number))
-                        writer.WriteLine($"{tract.p.Tracking_Number},\"{tract.PartyName}\",{PrettyMoney(tract.p.InitialROEOffer_OfferAmount)},{PrettyMoney(tract.p.FinalROEOffer_OfferAmount)},{tract.c?.FirstName ?? string.Empty},{tract.c?.WorkPhone ?? string.Empty}");
+                    foreach (var tract in pays.OrderBy(px => px.p.TrackingNumber))
+                        writer.WriteLine($"{tract.p.TrackingNumber},\"{tract.PartyName}\",{PrettyMoney(tract.p.InitialRoeofferOfferAmount)},{PrettyMoney(tract.p.FinalRoeofferOfferAmount)},{tract.c?.FirstName ?? string.Empty},{tract.c?.WorkPhone ?? string.Empty}");
 
                     writer.Close();
                 }

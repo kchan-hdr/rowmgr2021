@@ -1,9 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>ROWM.Reports</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="WhartonReport.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="CoW_ACQUISITION_Status_Report.xlsx" />
@@ -20,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EntityFramework" Version="6.2.0" />
     <PackageReference Include="EPPlus" Version="4.5.3.3" />
     <PackageReference Include="SonarAnalyzer.CSharp" Version="8.12.0.21095">
       <PrivateAssets>all</PrivateAssets>
@@ -29,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ROWM3.Dal\ROWM3.Dal.csproj" />
+    <ProjectReference Include="..\ROWM5.Dal\ROWM5.Dal.csproj" />
   </ItemGroup>
 
 </Project>

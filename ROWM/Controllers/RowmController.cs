@@ -24,7 +24,7 @@ namespace ROWM.Controllers
     public class RowmController : Controller
     {
         static readonly string _APP_NAME = "ROWM";
-        static IEnumerable<Parcel_Status> MasterParcelStatus;
+        static IEnumerable<ParcelStatus> MasterParcelStatus;
 
         #region ctor
         readonly ROWM_Context _ctx;
@@ -109,7 +109,7 @@ namespace ROWM.Controllers
                 StreetAddress = info.OwnerStreetAddress,
                 City = info.OwnerCity,
                 State = info.OwnerState,
-                ZIP = info.OwnerZIP,
+                Zip = info.OwnerZIP,
 
                 Email = info.OwnerEmail,
                 CellPhone = info.OwnerCellPhone,
@@ -123,7 +123,7 @@ namespace ROWM.Controllers
                 LastModified = dt,
                 ModifiedBy = _APP_NAME
             };
-            o.ContactInfo.Add(newc);
+            o.ContactInfos.Add(newc);
 
             await CheckBusiness(newc, info);
 
@@ -150,7 +150,7 @@ namespace ROWM.Controllers
             var dt = DateTimeOffset.Now;
 
             var o = await _repo.GetOwner(id);
-            var c = o.ContactInfo.Single(cx => cx.ContactId == cinfo);
+            var c = o.ContactInfos.Single(cx => cx.ContactId == cinfo);
 
             c.FirstName = info.OwnerFirstName;
             c.LastName = info.OwnerLastName;
@@ -158,7 +158,7 @@ namespace ROWM.Controllers
             c.StreetAddress = info.OwnerStreetAddress;
             c.City = info.OwnerCity;
             c.State = info.OwnerState;
-            c.ZIP = info.OwnerZIP;
+            c.Zip = info.OwnerZIP;
 
             c.Email = info.OwnerEmail;
             c.CellPhone = info.OwnerCellPhone;
@@ -198,7 +198,7 @@ namespace ROWM.Controllers
                 if (c.OrganizationId.HasValue)
                 {
                     c.OrganizationId = null;
-                    c.Affiliation = null;
+                    c.Organization = null;
                 }
 
                 return c;
@@ -218,7 +218,7 @@ namespace ROWM.Controllers
                 Trace.TraceWarning($"changing affilitation for {c.FirstName} to {org.Name}");
             }
 
-            c.Affiliation = org;
+            c.Organization = org;
             return c;
         }
 
@@ -241,7 +241,7 @@ namespace ROWM.Controllers
                 State = c.State,
                 StreetAddress = c.StreetAddress,
                 WorkPhone = c.WorkPhone,
-                ZIP = c.ZIP
+                ZIP = c.Zip
             };
         #endregion
         #endregion
@@ -270,7 +270,7 @@ namespace ROWM.Controllers
 
             if ( MasterParcelStatus == null )
             {
-                MasterParcelStatus = _ctx.Parcel_Status.AsNoTracking().Where(s=> s.IsActive).ToArray();
+                MasterParcelStatus = _ctx.ParcelStatuses.AsNoTracking().Where(s=> s.IsActive).ToArray();
             }
 
             var q = from s in MasterParcelStatus
@@ -282,7 +282,7 @@ namespace ROWM.Controllers
                               Label = s.Description,
                               Category = s.Category,
                               ParentCode = s.ParentStatusCode,
-                              DisplayOrder = s.DisplayOrder ?? 0, 
+                              DisplayOrder = s.DisplayOrder, 
                               IsSet = evt != null,
                               Stage = ( evt?.ActivityDate == null ) ? StatusDto.StageCode.Pending.ToString() : s.IsAbort == true ? StatusDto.StageCode.Aborted.ToString() : StatusDto.StageCode.Completed.ToString(),
                               ActivityDate = evt?.ActivityDate.UtcDateTime ?? null,
@@ -361,19 +361,19 @@ namespace ROWM.Controllers
             switch (offer_t)
             {
                 case "roe":
-                    p.InitialROEOffer_OfferDate = offer.OfferDate;
-                    p.InitialROEOffer_OfferAmount = offer.Amount;
-                    p.InitialROEOffer_OfferNotes = offer.Notes;
+                    p.InitialRoeofferOfferDate = offer.OfferDate;
+                    p.InitialRoeofferOfferAmount = offer.Amount;
+                    p.InitialRoeofferOfferNotes = offer.Notes;
                     break;
                 case "option":
-                    p.InitialOptionOffer_OfferDate = offer.OfferDate;
-                    p.InitialOptionOffer_OfferAmount = offer.Amount;
-                    p.InitialOptionOffer_OfferNotes = offer.Notes;
+                    p.InitialOptionOfferOfferDate = offer.OfferDate;
+                    p.InitialOptionOfferOfferAmount = offer.Amount;
+                    p.InitialOptionOfferOfferNotes = offer.Notes;
                     break;
                 case "easement":
-                    p.InitialEasementOffer_OfferDate = offer.OfferDate;
-                    p.InitialEasementOffer_OfferAmount = offer.Amount;
-                    p.InitialEasementOffer_OfferNotes = offer.Notes;
+                    p.InitialEasementOfferOfferDate = offer.OfferDate;
+                    p.InitialEasementOfferOfferAmount = offer.Amount;
+                    p.InitialEasementOfferOfferNotes = offer.Notes;
                     break;
                 default:
                     return BadRequest($"Unknown offer type '{offer_t}'");
@@ -399,19 +399,19 @@ namespace ROWM.Controllers
             switch (offer_t)
             {
                 case "roe":
-                    p.FinalROEOffer_OfferDate = offer.OfferDate;
-                    p.FinalROEOffer_OfferAmount = offer.Amount;
-                    p.FinalROEOffer_OfferNotes = offer.Notes;
+                    p.FinalRoeofferOfferDate = offer.OfferDate;
+                    p.FinalRoeofferOfferAmount = offer.Amount;
+                    p.FinalRoeofferOfferNotes = offer.Notes;
                     break;
                 case "option":
-                    p.FinalOptionOffer_OfferDate = offer.OfferDate;
-                    p.FinalOptionOffer_OfferAmount = offer.Amount;
-                    p.FinalOptionOffer_OfferNotes = offer.Notes;
+                    p.FinalOptionOfferOfferDate = offer.OfferDate;
+                    p.FinalOptionOfferOfferAmount = offer.Amount;
+                    p.FinalOptionOfferOfferNotes = offer.Notes;
                     break;
                 case "easement":
-                    p.FinalEasementOffer_OfferDate = offer.OfferDate;
-                    p.FinalEasementOffer_OfferAmount = offer.Amount;
-                    p.FinalEasementOffer_OfferNotes = offer.Notes;
+                    p.FinalEasementOfferOfferDate = offer.OfferDate;
+                    p.FinalEasementOfferOfferAmount = offer.Amount;
+                    p.FinalEasementOfferOfferNotes = offer.Notes;
                     break;
                 default:
                     return BadRequest($"Unknown offer type '{offer_t}'");
@@ -525,7 +525,7 @@ namespace ROWM.Controllers
                     StatusCode = r.StatusCode,
                     OriginalStatusCode = p.OutreachStatusCode
                 };
-                _ctx.Activities.Add(act);
+                _ctx.StatusActivities.Add(act);
 
                 if (!string.IsNullOrWhiteSpace(r.Action))
                 {
@@ -533,14 +533,14 @@ namespace ROWM.Controllers
                     {
                         Action = r.Action,
                         DueDate = r.DueDate.Value,
-                        ParentActivity = act,
+                        Activity = act,
                         Status = ActionStatus.Created,
 
                         Created = dt,
                         LastModified = dt,
                         ModifiedBy = User?.Identity?.Name ?? _APP_NAME
                     };
-                    _ctx.ActionItem.Add(action);
+                    _ctx.ActionItems.Add(action);
                 }
 
                 p.OutreachStatusCode = r.StatusCode;
@@ -552,7 +552,7 @@ namespace ROWM.Controllers
                 try
                 {
                     await Task.WhenAll(
-                        _featureUpdate.UpdateFeatureOutreach(pid, p.Tracking_Number, dv, r.Action, r.DueDate),
+                        _featureUpdate.UpdateFeatureOutreach(pid, p.TrackingNumber, dv, r.Action, r.DueDate),
                         _ctx.SaveChangesAsync());
                 }
                 catch ( Exception e)
@@ -749,15 +749,15 @@ namespace ROWM.Controllers
                 foreach (var pid in parcelIds)
                 {
                     var p = await _repo.GetParcel(pid);
-                    var oldValue = p.Landowner_Score;
+                    var oldValue = p.LandownerScore;
                     if (oldValue != score)
                     {
-                        p.Landowner_Score = score;
+                        p.LandownerScore = score;
                         p.LastModified = ts;
                         p.ModifiedBy = _APP_NAME;
                         touched++;
 
-                        tasks.Add(_featureUpdate.UpdateRating(p.Assessor_Parcel_Number, p.Tracking_Number, score));
+                        tasks.Add(_featureUpdate.UpdateRating(p.AssessorParcelNumber, p.TrackingNumber, score));
                         tasks.Add(_repo.UpdateParcel(p));
                     }
                 }
@@ -958,8 +958,8 @@ namespace ROWM.Controllers
         public RelatedParcelHeader(Parcel p)
         {
             this.ParcelId = p.ParcelId;
-            this.APN = p.Assessor_Parcel_Number;
-            this.Tracking = p.Tracking_Number;
+            this.APN = p.AssessorParcelNumber;
+            this.Tracking = p.TrackingNumber;
         }
     }
 
@@ -1058,8 +1058,8 @@ namespace ROWM.Controllers
 
         internal ParcelHeaderDto(Ownership o)
         {
-            ParcelId = o.Parcel.Assessor_Parcel_Number;
-            TractNo = o.Parcel.Tracking_Number;
+            ParcelId = o.Parcel.AssessorParcelNumber;
+            TractNo = o.Parcel.TrackingNumber;
             SitusAddress = o.Parcel.SitusAddress;
             IsPrimaryOwner = o.IsPrimary(); // .Ownership_t == Ownership.OwnershipType.Primary;
 
@@ -1144,8 +1144,8 @@ namespace ROWM.Controllers
 
         internal ParcelGraph(Parcel p, IEnumerable<Document> d)
         {
-            ParcelId = p.Assessor_Parcel_Number;
-            TractNo = p.Tracking_Number;
+            ParcelId = p.AssessorParcelNumber;
+            TractNo = p.TrackingNumber;
             ParcelStatusCode = p.ParcelStatusCode;
             //ParcelStatus = Enum.GetName(typeof(Parcel.RowStatus), p.ParcelStatus);
             ParcelStatusDate = p.Activities.Where(ax => ax.StatusCode == ParcelStatusCode).OrderBy(ax => ax.ActivityDate).LastOrDefault()?.ActivityDate.LocalDateTime.ToShortDateString() ?? string.Empty;
@@ -1155,7 +1155,7 @@ namespace ROWM.Controllers
             OutreachStatusCode = p.OutreachStatusCode;
             SitusAddress = p.SitusAddress;
 
-            LandownerScore = p.Landowner_Score;
+            LandownerScore = p.LandownerScore;
 
             Acreage = p.Acreage ?? 0;
             InitialEasementOffer = OfferHelper.MakeCompensation(p, "InitialEasement");

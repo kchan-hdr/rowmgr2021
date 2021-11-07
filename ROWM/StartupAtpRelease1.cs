@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using ROWM.Models;
 using ROWM.Reports;
 using ROWM.Dal.Repository;
+using Austin_Costs;
 
 namespace ROWM
 {
@@ -56,6 +57,10 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {
                 return new Dal.ROWM_Context(cs);
+            }); 
+            services.AddScoped<CostEstimateContext>(fac =>
+            {
+                return new CostEstimateContext(cs);
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
@@ -63,6 +68,7 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.ContactInfoRepository>();
             services.AddScoped<IStatisticsRepository, FilteredStatisticsRepository>();
             services.AddScoped<IActionItemRepository, ActionItemRepository>();
+            services.AddScoped<ICostEstimateRepository, CostEstimateRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<DeleteHelper>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new DocTypes(fac.GetRequiredService<ROWM_Context>()));

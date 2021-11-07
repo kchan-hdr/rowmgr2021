@@ -1,4 +1,5 @@
-﻿using ROWM.Dal;
+﻿using Microsoft.EntityFrameworkCore;
+using ROWM.Dal;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.Xml;
@@ -21,13 +22,13 @@ namespace ROWM.Controllers
     /// </summary>
     public class ParcelStatusHelperV2 : IParcelStatusHelper
     {
-        readonly List<Parcel_Status> _Status;
-        readonly Dictionary<int, Landowner_Score> _Scores;
+        readonly List<ParcelStatus> _Status;
+        readonly Dictionary<int, LandownerScore> _Scores;
 
         public ParcelStatusHelperV2(ROWM_Context c)
         {
-            _Status = c.Parcel_Status.AsNoTracking().ToList();
-            _Scores = c.Landowner_Score.AsNoTracking().ToDictionary<Landowner_Score, int>(lls => lls.Score);
+            _Status = c.ParcelStatuses.AsNoTracking().ToList();
+            _Scores = c.LandownerScores.AsNoTracking().ToDictionary<LandownerScore, int>(lls => lls.Score);
         }
 
         public string ParseDomainValue(int d)
@@ -39,14 +40,14 @@ namespace ROWM.Controllers
         public int GetDomainValue(string status)
         {
             var s = _Status.Single(sx => sx.Code.Equals(status));
-            return s.DomainValue ?? 0;
+            return s.DomainValue;
         }
 
         public int GetRank(string status) => _Status.SingleOrDefault(sx => sx.Code.Equals(status))?.DisplayOrder ?? 0;
 
         public int GetRoeDomainValue(string status) => GetDomainValue(status);
 
-        public static bool HasNoContact(Parcel parcel) => parcel.Parcel_Status.DomainValue <= 0;
+        public static bool HasNoContact(Parcel parcel) => parcel.ParcelStatusCodeNavigation.DomainValue <= 0;
 
         #region landowner score 
         public string ParseScore(int? score)

@@ -1,9 +1,7 @@
 ﻿using ROWM.Dal;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Forms.VisualStyles;
 
 namespace ROWM.Models
 {
@@ -11,8 +9,8 @@ namespace ROWM.Models
     {
         readonly OwnerRepository _repo;
         readonly DocTypes _DOCTYPES;
-        IEnumerable<Parcel_Status> _STATUS;
-        IEnumerable<Contact_Purpose> _PURPOSE;
+        IEnumerable<ParcelStatus> _STATUS;
+        IEnumerable<ContactPurpose> _PURPOSE;
 
         public UpdateParcelStatus2(OwnerRepository p, DocTypes dt)
         {
@@ -33,9 +31,9 @@ namespace ROWM.Models
             return rst.Any(r => r);
         }
 
-        public async Task<( bool, Parcel_Status)> DoUpdate(Parcel parcel)
+        public async Task<( bool, ParcelStatus)> DoUpdate(Parcel parcel)
         {
-            var statux = new List<Parcel_Status>();
+            var statux = new List<ParcelStatus>();
 
             // get all documents
             var mydocs = parcel.Document.Select(d => d.DocumentType)?.Distinct() ?? default;
@@ -60,8 +58,8 @@ namespace ROWM.Models
 
 
             // get current status
-            var currentParcel = parcel.Parcel_Status;
-            var currentROE = parcel.Roe_Status;
+            var currentParcel = parcel.ParcelStatusCodeNavigation;
+            var currentROE = parcel.RoeStatusCodeNavigation;
 
             var proposed = statux.OrderByDescending(dt => dt.DisplayOrder).First();
 
@@ -74,7 +72,7 @@ namespace ROWM.Models
         }
 
         #region helper
-        async Task<Parcel_Status> FindStatus(string code)
+        async Task<ParcelStatus> FindStatus(string code)
         {
             if (_STATUS == null)
                 _STATUS = await _repo.GetParcelStatus();
@@ -82,7 +80,7 @@ namespace ROWM.Models
             return _STATUS.SingleOrDefault(s => s.Code == code);
         }
 
-        async Task<Contact_Purpose> FindPurpose(string code)
+        async Task<ContactPurpose> FindPurpose(string code)
         {
             if (_PURPOSE == null)
                 _PURPOSE = await _repo.GetPurpose();

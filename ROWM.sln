@@ -5,11 +5,11 @@ VisualStudioVersion = 16.0.29411.138
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ROWM", "ROWM\ROWM.csproj", "{31360B6A-20FE-4159-A5F6-081E6126D04A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgsFeatureUpdate", "AgsFeatureUpdate\AgsFeatureUpdate.csproj", "{9EBA766E-DDA1-49BD-845E-ADA468FBC00B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgsFeatureUpdate", "AgsFeatureUpdate\AgsFeatureUpdate.csproj", "{9EBA766E-DDA1-49BD-845E-ADA468FBC00B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SunflowerParcel.Test", "SunflowerParcel.Test\SunflowerParcel.Test.csproj", "{A2BDF433-4688-4941-86A7-0E57845535AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharePointInterface", "SharePointInterface\SharePointInterface.csproj", "{1F998EDB-3A5D-4F61-A1E8-62B6AFBEA99B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharePointInterface", "SharePointInterface\SharePointInterface.csproj", "{1F998EDB-3A5D-4F61-A1E8-62B6AFBEA99B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharePointInterface.Test", "SharePointInterface.Test\SharePointInterface.Test.csproj", "{C31D42F1-DC7F-4C90-83C8-DE81BA5C3AA8}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -18,11 +18,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharePointInterface.Test", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharePointUtil_Sunflower", "SharePointUtil_Sunflower\SharePointUtil_Sunflower.csproj", "{20759891-DF1A-4E84-8762-D8A61BF9EC54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelExport", "ExcelExport\ExcelExport.csproj", "{04C417C5-B978-42AA-A648-FE51EA68670C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExcelExport", "ExcelExport\ExcelExport.csproj", "{04C417C5-B978-42AA-A648-FE51EA68670C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelExport.Test", "ExcelExport.Test\ExcelExport.Test.csproj", "{5AFDF246-5B5A-4F37-A04E-536281668C17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Export.Dal", "Export.Dal\Export.Dal.csproj", "{45FCF3B8-2FD3-4EBB-80C9-4CF24CA0500D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Export.Dal", "Export.Dal\Export.Dal.csproj", "{45FCF3B8-2FD3-4EBB-80C9-4CF24CA0500D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ROWM2.Dal.Test", "ROWM2.Dal.Test\ROWM2.Dal.Test.csproj", "{04A38203-265C-46FC-B3A0-7120164C1E12}"
 EndProject
@@ -34,17 +34,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tectra", "Tectra\Tectra.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backfill", "Backfill\Backfill.csproj", "{919CF726-2B55-4DBC-BEDA-F0106FC4EB47}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ROWM3.Dal", "ROWM3.Dal\ROWM3.Dal.csproj", "{D9838F13-BB90-4B23-9192-95FEDBA58696}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ROWM3.Dal", "ROWM3.Dal\ROWM3.Dal.csproj", "{D9838F13-BB90-4B23-9192-95FEDBA58696}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ROWM3.Dal.Test", "ROWM3.Dal.Test\ROWM3.Dal.Test.csproj", "{2BDE000E-0473-4255-8D4F-79C2CF2D6A7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ags.Test", "Ags.Test\Ags.Test.csproj", "{ECD532C1-8E7D-4125-A763-2B5E9CF8C2C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ags.Test", "Ags.Test\Ags.Test.csproj", "{ECD532C1-8E7D-4125-A763-2B5E9CF8C2C2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharePointHelper", "SharePointHelper\SharePointHelper.csproj", "{F895F201-0A4F-4D9F-B41E-18A226FAAF22}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlackHillsDocumentToSharePoint", "BlackHillsDocumentToSharePoint\BlackHillsDocumentToSharePoint.csproj", "{F828AD5F-B737-4FBC-82AA-78A384E01D31}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ROWM4.Dal", "ROWM4.Dal\ROWM4.Dal.csproj", "{C1B93865-17E1-4CAD-A349-AC3864ECE446}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dal.Test", "Dal.Test\Dal.Test.csproj", "{51478B34-EBD1-498E-90C9-4EBB88041A22}"
 EndProject
@@ -54,7 +52,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TxDotNegotiations.Test", "T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reports", "Reports\Reports.csproj", "{5BE00375-53C8-4667-9BF0-50BEF01FEDD3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Austin-Costs", "Austin-Costs\Austin-Costs.csproj", "{92AD9295-A098-4537-A218-9804786AF535}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Austin-Costs", "Austin-Costs\Austin-Costs.csproj", "{92AD9295-A098-4537-A218-9804786AF535}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharePointInterface2", "SharePointInterface2\SharePointInterface2.csproj", "{D091B206-21D0-4171-A0C9-B11A1B2465A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ROWM5.Dal", "ROWM5.Dal\ROWM5.Dal.csproj", "{1795AB4C-48E7-4AC3-A037-600952A2E0BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -216,14 +218,6 @@ Global
 		{F828AD5F-B737-4FBC-82AA-78A384E01D31}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F828AD5F-B737-4FBC-82AA-78A384E01D31}.Release|x64.ActiveCfg = Release|Any CPU
 		{F828AD5F-B737-4FBC-82AA-78A384E01D31}.Release|x64.Build.0 = Release|Any CPU
-		{C1B93865-17E1-4CAD-A349-AC3864ECE446}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C1B93865-17E1-4CAD-A349-AC3864ECE446}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C1B93865-17E1-4CAD-A349-AC3864ECE446}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{C1B93865-17E1-4CAD-A349-AC3864ECE446}.Debug|x64.Build.0 = Debug|Any CPU
-		{C1B93865-17E1-4CAD-A349-AC3864ECE446}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C1B93865-17E1-4CAD-A349-AC3864ECE446}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C1B93865-17E1-4CAD-A349-AC3864ECE446}.Release|x64.ActiveCfg = Release|Any CPU
-		{C1B93865-17E1-4CAD-A349-AC3864ECE446}.Release|x64.Build.0 = Release|Any CPU
 		{51478B34-EBD1-498E-90C9-4EBB88041A22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{51478B34-EBD1-498E-90C9-4EBB88041A22}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51478B34-EBD1-498E-90C9-4EBB88041A22}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -264,6 +258,22 @@ Global
 		{92AD9295-A098-4537-A218-9804786AF535}.Release|Any CPU.Build.0 = Release|Any CPU
 		{92AD9295-A098-4537-A218-9804786AF535}.Release|x64.ActiveCfg = Release|Any CPU
 		{92AD9295-A098-4537-A218-9804786AF535}.Release|x64.Build.0 = Release|Any CPU
+		{D091B206-21D0-4171-A0C9-B11A1B2465A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D091B206-21D0-4171-A0C9-B11A1B2465A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D091B206-21D0-4171-A0C9-B11A1B2465A6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D091B206-21D0-4171-A0C9-B11A1B2465A6}.Debug|x64.Build.0 = Debug|Any CPU
+		{D091B206-21D0-4171-A0C9-B11A1B2465A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D091B206-21D0-4171-A0C9-B11A1B2465A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D091B206-21D0-4171-A0C9-B11A1B2465A6}.Release|x64.ActiveCfg = Release|Any CPU
+		{D091B206-21D0-4171-A0C9-B11A1B2465A6}.Release|x64.Build.0 = Release|Any CPU
+		{1795AB4C-48E7-4AC3-A037-600952A2E0BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1795AB4C-48E7-4AC3-A037-600952A2E0BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1795AB4C-48E7-4AC3-A037-600952A2E0BE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1795AB4C-48E7-4AC3-A037-600952A2E0BE}.Debug|x64.Build.0 = Debug|Any CPU
+		{1795AB4C-48E7-4AC3-A037-600952A2E0BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1795AB4C-48E7-4AC3-A037-600952A2E0BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1795AB4C-48E7-4AC3-A037-600952A2E0BE}.Release|x64.ActiveCfg = Release|Any CPU
+		{1795AB4C-48E7-4AC3-A037-600952A2E0BE}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
