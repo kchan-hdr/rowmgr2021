@@ -69,7 +69,7 @@ namespace ROWM.Controllers
             ActionItemId = a.ActionItemId;
             ParcelId = a.ParcelId.Value;
             AssignedGroupId = a.AssignedGroupId.Value;
-            Assigned = a.AssignedGroup.GroupNameCaption;
+            Assigned = a.AssignedGroup?.GroupNameCaption ?? string.Empty;
             Action = a.Action;
             DueDate = a.DueDate;
             StatusCode = Enum.GetName(typeof(ActionStatus), a.Status);
