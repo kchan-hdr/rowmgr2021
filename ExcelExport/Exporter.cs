@@ -56,7 +56,7 @@ namespace ExcelExport
         virtual protected void Write(uint pageId) { }
 
         #region implementation
-        void WriteCoverPage(uint id, string name)
+        protected void WriteCoverPage(uint id, string name)
         {
             var p = bookPart.AddNewPart<WorksheetPart>($"uId{id}");
             var d = new SheetData();
@@ -173,9 +173,18 @@ namespace ExcelExport
         #region helpers
         static protected string GetColumnCode(int c = 0) => ((char)('A' + c)).ToString();   // only up to 24 columns
 
-        static SpreadsheetDocument MakeDoc(Stream s) => SpreadsheetDocument.Create(s, SpreadsheetDocumentType.Workbook);
+        static protected SpreadsheetDocument MakeDoc(Stream s) => SpreadsheetDocument.Create(s, SpreadsheetDocumentType.Workbook);
 
         static SpreadsheetDocument MakeDoc(string path) => SpreadsheetDocument.Create(path, SpreadsheetDocumentType.Workbook);
+
+        static protected Cell WriteDate(Row row, string c, DateTime date)
+        {
+            var cell = InsertCell(row, c);
+            cell.CellValue = new CellValue(date.ToOADate().ToString());
+            cell.DataType = CellValues.Number;
+            cell.StyleIndex = 2;
+            return cell;
+        }
 
         static protected Cell WriteNumber(Row row, string c, string text) => WriteCell(row, c, text, CellValues.Number);
         static protected Cell WriteTrueFalse(Row row, string c, string text) => WriteCell(row, c, text, CellValues.Boolean);
@@ -239,7 +248,7 @@ namespace ExcelExport
         }
         #endregion
         #region format helper
-        void MakeStyles()
+        protected void MakeStyles()
         {
             var myStyles = bookPart.AddNewPart<WorkbookStylesPart>();
             var styles = new Stylesheet();
@@ -268,9 +277,15 @@ namespace ExcelExport
             {
                 FontId = 1
             };
+            var cellformatDate = new CellFormat
+            {
+                NumberFormatId = 14,
+                ApplyNumberFormat = true
+            };
             var cellformats = new CellFormats();
             cellformats.Append(cellformat0);
             cellformats.Append(cellformat1);
+            cellformats.Append(cellformatDate);
 
             styles.Append(fonts);
             styles.Append(fills);

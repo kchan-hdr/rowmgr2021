@@ -304,6 +304,18 @@ namespace ROWM.Controllers
                 return File(s.GetBuffer(), "text/csv", "contacts.csv");
             }
         }
+
+        [HttpGet("export/engagement")]
+        public async Task<IActionResult> ExportEngagement(string f)
+        {
+            if ("excel" != f)
+                return BadRequest($"not supported export '{f}'");
+
+            var data = await _repo.GetEngagement();
+            var e = new ExcelExport.EngagementExport(data);
+            var bytes = e.Export();
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "outreach.xlsx");
+        }
         #region logo image
         string GetLogo()
         {

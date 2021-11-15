@@ -391,6 +391,76 @@ namespace ROWM.Dal
             return o;
         }
 
+        #region engagement dto
+        public async Task<IEnumerable<EngagementDto>> GetEngagement()
+        {
+            var ppp = await ActiveParcels()
+                .Join(_ctx.Parcel_Status, px => px.OutreachStatusCode, sx => sx.Code, (px,sx) => new { px, sx } )
+                .Select(p => new EngagementDto
+                {
+                    Apn = p.px.Assessor_Parcel_Number,
+                    TrackingNumber = p.px.Tracking_Number,
+                    OwnerName = p.px.Ownership.Select(ox => ox.Owner.PartyName),
+                    Project = p.px.ParcelAllocations.Select(ax => ax.ProjectPart.Caption),
+                    OutreachStatus = p.sx.Description,
+                    Actions = p.px.ActionItems.Select( ax => new ActionItemHdr
+                    {
+                        Action = ax.Action,
+                        Due = ax.DueDate,
+                        Status = ax.Status
+                    }),
+                    Logs = p.px.ContactLog.Select(cx => new ContactLogHdr
+                    {
+                       AgentName = cx.Agent.AgentName,
+                       Contacts = cx.ContactInfo,
+                       DateAdded = cx.DateAdded,
+                       ContactChannel = cx.ContactChannel,
+                       Title = cx.Title,
+                       Notes = cx.Notes
+                    })
+                })
+                .ToArrayAsync();
+
+            return ppp;
+        }
+
+        public class EngagementDto
+        {
+            public string Apn { get; set; }
+            public string TrackingNumber { get; set; }
+            public string OutreachStatus { get; set; }
+
+            public IEnumerable<string> Project { get; set; }
+            public IEnumerable<string> OwnerName { get; set; }
+            
+            public IEnumerable<ContactLogHdr> Logs { get; set; }
+            public IEnumerable<ActionItemHdr> Actions { get; set; }
+        }
+
+        public class ContactLogHdr
+        { 
+            public string AgentName { get; set; }
+            public IEnumerable<ContactInfo> Contacts { get; set; }
+            public DateTimeOffset DateAdded { get; set; }
+            public string ContactChannel { get; set; }
+            public string Title { get; set; }
+            public string Notes { get; set; }
+
+            public string ContactNames {  get
+                {
+                    return string.Join(" | ", Contacts.Select(cx => $"{cx.FirstName} {cx.LastName}".Trim()));
+                } 
+            }
+        }
+
+        public class ActionItemHdr
+        {
+            public string Action { get; set; }
+            public DateTimeOffset Due { get; set; }
+            public ActionStatus Status { get; set; }
+        }        
+        #endregion
+
         #region statics lookup
         public async Task<IEnumerable<Parcel_Status>> GetParcelStatus() => await _ctx.Parcel_Status.Where(s => s.IsActive).AsNoTracking().ToListAsync();
         public async Task<IEnumerable<Contact_Purpose>> GetPurpose() => await _ctx.Contact_Purpose.Include(p => p.Milestone).Where(p => p.IsActive).AsNoTracking().ToListAsync();

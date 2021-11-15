@@ -120,5 +120,7 @@ namespace ROWM.Dal
 
         //
         public virtual ICollection<ActionItem> ActionItems { get; set; }
+
+        public virtual ICollection<ParcelAllocation> ParcelAllocations { get; set; }
     }
 }
