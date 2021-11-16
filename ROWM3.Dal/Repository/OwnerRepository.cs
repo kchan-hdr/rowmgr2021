@@ -415,6 +415,7 @@ namespace ROWM.Dal
                        Contacts = cx.ContactInfo,
                        DateAdded = cx.DateAdded,
                        ContactChannel = cx.ContactChannel,
+                        ProjectPhase = cx.ProjectPhase,
                        Title = cx.Title,
                        Notes = cx.Notes
                     })
@@ -443,6 +444,7 @@ namespace ROWM.Dal
             public IEnumerable<ContactInfo> Contacts { get; set; }
             public DateTimeOffset DateAdded { get; set; }
             public string ContactChannel { get; set; }
+            public string ProjectPhase { get; set; }
             public string Title { get; set; }
             public string Notes { get; set; }
 

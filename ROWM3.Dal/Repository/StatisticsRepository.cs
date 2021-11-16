@@ -46,9 +46,17 @@ namespace ROWM.Dal
 
         public async Task<IEnumerable<SubTotal>> SnapshotParcelStatus(int? part=null)
         {
-            var q = await (from p in ActiveParcels(part)
-                           group p by p.ParcelStatusCode into psg
-                           select new SubTotal { Title = psg.Key, Count = psg.Count() }).ToArrayAsync();
+            /// TODO: this is too restrictive. need to handle both with/without roll-up
+            var q1 = await (from p in ActiveParcels(part)
+                            select new { p.ParcelId, p.ParcelStatusCode, p.Parcel_Status.ParentStatusCode })
+                     .ToArrayAsync();
+
+            var q = from p in q1
+                    group p by string.IsNullOrEmpty(p.ParentStatusCode) ? p.ParcelStatusCode : p.ParentStatusCode into psg
+                    select new SubTotal { Title = psg.Key, Count = psg.Count() };
+            //var q = await (from p in ActiveParcels(part)
+            //               group p by p.ParcelStatusCode into psg
+            //               select new SubTotal { Title = psg.Key, Count = psg.Count() }).ToArrayAsync();
 
             return from b in _baseParcels.Value
                       join psg in q on b.Title equals psg.Title into matq
@@ -152,7 +160,7 @@ namespace ROWM.Dal
         }
 
         #region helper
-        private IEnumerable<SubTotal> MakeBaseParcels() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "acquisition").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
+        private IEnumerable<SubTotal> MakeBaseParcels() => _context.Parcel_Status.Where(px => px.IsActive && (px.ShowInPie??false) && px.Category == "acquisition").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
         private IEnumerable<SubTotal> MakeBaseRoes() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "roe").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code , Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
         private IEnumerable<SubTotal> MakeBaseClearances() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "clearance").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
 
