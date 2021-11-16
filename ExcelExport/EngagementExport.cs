@@ -62,7 +62,7 @@ namespace ExcelExport
             {
                 if (par.Logs.Any())
                 {
-                    foreach (var cot in par.Logs.OrderBy(pdt => pdt.DateAdded))
+                    foreach (var cot in par.Logs.Where(px => px.ProjectPhase.EndsWith("Engagement")).OrderBy(pdt => pdt.DateAdded))
                     {
                         var r = InsertRow(row++, d);
                         c = 0;
@@ -74,7 +74,7 @@ namespace ExcelExport
                         WriteText(r, GetColumnCode(c++), cot.ContactNames);
 
                         WriteText(r, GetColumnCode(c++), cot.ContactChannel);
-                        WriteText(r, GetColumnCode(c++), par.OutreachStatus);
+                        WriteText(r, GetColumnCode(c++), cot.ProjectPhase);
 
                         WriteText(r, GetColumnCode(c++), cot.Title);
                         WriteText(r, GetColumnCode(c++), cot.Notes);
