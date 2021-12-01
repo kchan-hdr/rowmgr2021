@@ -97,14 +97,35 @@ namespace ROWM.Dal
                     p.RoeStatusCode = this.RoeStatus;
                     dirty = true;
 
-                    if (!string.IsNullOrWhiteSpace(RoeCondition))
-                    {
-                        p.Conditions.Add(new Dal.RoeCondition { Condition = RoeCondition, EffectiveEndDate = ConditionStartDate, EffectiveStartDate = ConditionEndDate, Created = dt, LastModified = dt, ModifiedBy = this.ModifiedBy });
-                    }
+                    //if (!string.IsNullOrWhiteSpace(RoeCondition))
+                    //{
+                    //    p.Conditions.Add(new Dal.RoeCondition { Condition = RoeCondition, EffectiveStartDate = ConditionStartDate, EffectiveEndDate = ConditionEndDate, Created = dt, LastModified = dt, ModifiedBy = this.ModifiedBy });
+                    //}
 
                     var roeDV = _statusHelper.GetRoeDomainValue(RoeStatus);
                     tks.Add(string.IsNullOrWhiteSpace(RoeCondition) ?
                         _featureUpdate.UpdateFeatureRoe(pid, track, roeDV) : _featureUpdate.UpdateFeatureRoe_Ex(pid, track, roeDV, RoeCondition));
+                }
+
+                if (!string.IsNullOrWhiteSpace(RoeCondition))
+                {
+                    if (p.Conditions.Any(px => px.Condition == RoeCondition))
+                    {
+                        var ep = p.Conditions.Where(px => px.Condition == RoeCondition).FirstOrDefault();   // shouldn't have more than one, need to scrub data
+                        if (ep.EffectiveStartDate != ConditionStartDate)
+                        {
+                            ep.EffectiveStartDate = ConditionStartDate;
+                        }
+
+                        if (ep.EffectiveEndDate != ConditionEndDate)
+                        {
+                            ep.EffectiveEndDate = ConditionEndDate;
+                        }
+                    }
+                    else
+                    {
+                        p.Conditions.Add(new Dal.RoeCondition { Condition = RoeCondition, EffectiveStartDate = ConditionStartDate, EffectiveEndDate = ConditionEndDate, Created = dt, LastModified = dt, ModifiedBy = this.ModifiedBy });
+                    }
                 }
 
                 if (dirty)

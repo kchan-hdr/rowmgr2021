@@ -1123,7 +1123,9 @@ namespace ROWM.Controllers
         public string ParcelStatus => this.ParcelStatusCode;        // to be removed
         public string RoeStatusCode { get; set; }
         public string RoeStatusDate { get; set; }
-        public string RoeCondition { get; set; }
+        public string RoeCondition { get; set; } = "";
+        public DateTime? RoeConditionStart { get; set; }
+        public DateTime? RoeConditionEnd { get; set; }
         public string OutreachStatusCode { get; set; }
         public int? LandownerScore { get; set; }
         public string SitusAddress { get; set; }
@@ -1142,6 +1144,23 @@ namespace ROWM.Controllers
         public IEnumerable<DocumentHeader> Documents { get; set; }
         public IEnumerable<ActionItemDto> ActionItems { get; set; }
 
+        RoeCondition ActiveCondition(IEnumerable<RoeCondition> conditions)
+        {
+            if (conditions.Any() == false)
+                return default;
+
+            if (conditions.Count() == 1)
+                return conditions.First();
+
+            var today = DateTimeOffset.UtcNow;
+
+            var q = from c in conditions
+                    where (c.EffectiveStartDate < today || c.EffectiveStartDate == null) && (c.EffectiveEndDate == null || c.EffectiveEndDate > today)
+                    select c;
+
+            return q.Any() ? q.OrderBy(cx => cx.EffectiveStartDate).FirstOrDefault() : default;
+        }
+
         internal ParcelGraph(Parcel p, IEnumerable<Document> d)
         {
             ParcelId = p.Assessor_Parcel_Number;
@@ -1151,7 +1170,16 @@ namespace ROWM.Controllers
             ParcelStatusDate = p.Activities.Where(ax => ax.StatusCode == ParcelStatusCode).OrderBy(ax => ax.ActivityDate).LastOrDefault()?.ActivityDate.LocalDateTime.ToShortDateString() ?? string.Empty;
             RoeStatusCode = p.RoeStatusCode;
             RoeStatusDate = p.Activities.Where(ax => ax.StatusCode == RoeStatusCode).OrderBy(ax => ax.ActivityDate).LastOrDefault()?.ActivityDate.LocalDateTime.ToShortDateString() ?? string.Empty;
-            RoeCondition = p.Conditions.FirstOrDefault()?.Condition ?? "";
+
+            var cod = ActiveCondition(p.Conditions.ToArray());
+            if (cod!=null)
+            {
+                // RoeCondition = p.Conditions.FirstOrDefault()?.Condition ?? "";
+                RoeCondition = cod.Condition;
+                RoeConditionStart = cod.EffectiveStartDate?.LocalDateTime;
+                RoeConditionEnd = cod.EffectiveEndDate?.LocalDateTime;
+            }
+            
             OutreachStatusCode = p.OutreachStatusCode;
             SitusAddress = p.SitusAddress;
 
