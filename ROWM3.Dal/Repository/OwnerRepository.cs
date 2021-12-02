@@ -401,11 +401,13 @@ namespace ROWM.Dal
                     Apn = p.px.Assessor_Parcel_Number,
                     TrackingNumber = p.px.Tracking_Number,
                     OwnerName = p.px.Ownership.Select(ox => ox.Owner.PartyName),
+                    Contacts = p.px.Ownership.SelectMany(ox => ox.Owner.ContactInfo),
                     Project = p.px.ParcelAllocations.Select(ax => ax.ProjectPart.Caption),
                     OutreachStatus = p.sx.Description,
                     Actions = p.px.ActionItems.Select( ax => new ActionItemHdr
                     {
                         Action = ax.Action,
+                        Assigned = ax.AssignedGroup.GroupNameCaption,
                         Due = ax.DueDate,
                         Status = ax.Status
                     }),
@@ -434,8 +436,18 @@ namespace ROWM.Dal
             public IEnumerable<string> Project { get; set; }
             public IEnumerable<string> OwnerName { get; set; }
             
+            public IEnumerable<ContactInfo> Contacts { get; set; }
+
             public IEnumerable<ContactLogHdr> Logs { get; set; }
             public IEnumerable<ActionItemHdr> Actions { get; set; }
+
+            public string ContactNames
+            {
+                get
+                {
+                    return string.Join(" | ", Contacts.Select(cx => $"{cx.FirstName} {cx.LastName}".Trim()));
+                }
+            }
         }
 
         public class ContactLogHdr
@@ -458,6 +470,7 @@ namespace ROWM.Dal
         public class ActionItemHdr
         {
             public string Action { get; set; }
+            public string Assigned { get; set; }
             public DateTimeOffset Due { get; set; }
             public ActionStatus Status { get; set; }
         }        
