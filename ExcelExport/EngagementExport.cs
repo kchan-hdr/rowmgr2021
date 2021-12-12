@@ -44,18 +44,12 @@ namespace ExcelExport
             p.Worksheet = new Worksheet(d);
 
             uint row = 1;
-            var mergeCells = new MergeCells();
-            p.Worksheet.InsertAfter(mergeCells, p.Worksheet.Elements<SheetData>().First());
 
             var rx = InsertRow(row++, d);
             var titleCell = WriteText(rx, "A", $"{line} {reportname}", 1);
-            titleCell.StyleIndex = 4;
-            mergeCells.Append(new MergeCell { Reference = new DocumentFormat.OpenXml.StringValue("A1:J1") });
             
             rx = InsertRow(row++, d);
             var dateCell = WriteText(rx, "A", $"as of {DateTime.Now.ToLongDateString()}");
-            dateCell.StyleIndex = 4;
-            mergeCells.Append(new MergeCell { Reference = new DocumentFormat.OpenXml.StringValue("A2:J2") });
 
             var hr = InsertRow(row++, d);
             var c = 0;
@@ -151,11 +145,6 @@ namespace ExcelExport
             }
 
             sheets.Append(new Sheet { Id = bookPart.GetIdOfPart(p), SheetId = pageId, Name = $"{line} - Action Items" });
-
-            var mergeCells = new MergeCells();
-            p.Worksheet.InsertAfter(mergeCells, p.Worksheet.Elements<SheetData>().First());
-            mergeCells.Append(new MergeCell() { Reference = $"A1:{GetColumnCode(c)}1" });            
-            mergeCells.Append(new MergeCell() { Reference = $"A2:{GetColumnCode(c)}2" });
 
             bookPart.Workbook.Save();
         }

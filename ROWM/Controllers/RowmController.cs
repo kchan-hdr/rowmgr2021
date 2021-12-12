@@ -937,7 +937,7 @@ namespace ROWM.Controllers
         {
             ContactLogId = log.ContactLogId;
             AgentName = log.Agent?.AgentName ?? "";
-            DateAdded = log.DateAdded;
+            DateAdded = log.DateAdded.LocalDateTime;
             ContactType = log.ContactChannel;
 
             ParcelIds = log.Parcel.Select(px => new RelatedParcelHeader(px));

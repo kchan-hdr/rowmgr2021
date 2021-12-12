@@ -36,6 +36,8 @@
     <None Remove="Properties\PublishProfiles\ROWM - Web Deploy.pubxml" />
     <None Remove="Properties\PublishProfiles\ROWM-mezzy - Web Deploy.pubxml" />
     <None Remove="Properties\PublishProfiles\rowmgr2 - Web Deploy.pubxml" />
+    <None Remove="ReportTemplates\ContactLogByParcel.docx" />
+    <None Remove="ReportTemplates\ContactLogByParcel.dotx" />
     <None Remove="ReportTemplates\N94.docx" />
   </ItemGroup>
 
@@ -96,6 +98,7 @@
     <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="ReportTemplates\ContactLogByParcel.docx" />
     <EmbeddedResource Include="ReportTemplates\N94.docx" />
   </ItemGroup>
   <ItemGroup>
@@ -110,6 +113,9 @@
   <ItemGroup>
     <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="wwwroot\js\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ReportTemplates\ContactLogByParcel.dotx" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services" />

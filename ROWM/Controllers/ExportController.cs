@@ -63,6 +63,19 @@ namespace ROWM.Controllers
         }
         #endregion
 
+        [HttpGet("export/contactlog/{parcelId}")]
+        [ProducesDefaultResponseType(typeof(File))]
+        public async Task<IActionResult> ContactLogByParcel(string parcelId)
+        {
+            var p = await _repo.GetParcel(parcelId);
+            if (p == null)
+                return NoContent();
+
+            var h = new Models.AtpRoeReportHelper();
+            var payload = await h.Generate(p);
+            return File(payload.Content, payload.Mime, payload.Filename);
+        }
+
         /// <summary>
         /// support excel only
         /// </summary>
