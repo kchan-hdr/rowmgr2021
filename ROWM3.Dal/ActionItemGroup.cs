@@ -41,5 +41,6 @@ namespace ROWM.Dal
 
         // assigned items
         public virtual ICollection<ActionItem> Assignments { get; private set; } = new HashSet<ActionItem>();
+        public virtual ICollection<ActionItemGroupMember> Members { get; private set; } = new HashSet<ActionItemGroupMember>();
     }
 }

@@ -102,6 +102,7 @@
     <EmbeddedResource Include="ReportTemplates\N94.docx" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ActionItemNotification\ActionItemNotification.csproj" />
     <ProjectReference Include="..\AgsFeatureUpdate\AgsFeatureUpdate.csproj" />
     <ProjectReference Include="..\Austin-Costs\Austin-Costs.csproj" />
     <ProjectReference Include="..\ExcelExport\ExcelExport.csproj" />

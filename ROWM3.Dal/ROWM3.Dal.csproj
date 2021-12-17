@@ -88,6 +88,7 @@
     <Compile Include="ActionItem.cs" />
     <Compile Include="ActionItemActivity.cs" />
     <Compile Include="ActionItemGroup.cs" />
+    <Compile Include="ActionItemGroupMember.cs" />
     <Compile Include="Agent.cs" />
     <Compile Include="Compensation_t.cs" />
     <Compile Include="ContactInfo.cs" />

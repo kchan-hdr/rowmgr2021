@@ -38,5 +38,5 @@ namespace ROWM.Dal
         public virtual ICollection<ActionItemActivity> Activities { get; set; } = new HashSet<ActionItemActivity>();
     }
 
-    public enum ActionStatus { Created = 1, Started, Completed, Canceled }
+    public enum ActionStatus { Pending = 1, Started, Completed, Canceled }
 }

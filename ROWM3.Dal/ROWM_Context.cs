@@ -17,6 +17,7 @@ namespace ROWM.Dal
         public virtual DbSet<Agent> Agent { get; set; }
         public virtual DbSet<ActionItem> ActionItem { get; set; }
         public virtual DbSet<ActionItemGroup> Groups { get; set; }
+        public virtual DbSet<ActionItemGroupMember> GroupMembers { get; set; }
         public virtual DbSet<ActionItemActivity> ActionItemActivity { get; set; }
         public virtual DbSet<Contact_Channel> Contact_Channel { get; set; }
         public virtual DbSet<Contact_Purpose> Contact_Purpose { get; set; }

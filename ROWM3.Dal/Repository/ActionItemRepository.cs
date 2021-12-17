@@ -15,6 +15,7 @@ namespace ROWM.Dal
         Task<IEnumerable<ActionItem>> GetActionItems(string parelId);
         Task<IEnumerable<ActionItem>> GetActionItemsWithHistory(string parelId);
         Task<ActionItem> GetActionItem(Guid itemId);
+        Task<ActionItem> GetFullItem(Guid itemId);
         Task<IEnumerable<ActionItem>> AddActionItem(string parelId, ActionItem item, DateTimeOffset activityDate);
         Task<ActionItem> UpdateActionItem(ActionItem item, DateTimeOffset activityDate);
     }
@@ -24,6 +25,8 @@ namespace ROWM.Dal
         public Task<IEnumerable<ActionItem>> AddActionItem(string parelId, ActionItem item, DateTimeOffset activityDate) => Task.FromResult(Enumerable.Empty<ActionItem>());
 
         public Task<ActionItem> GetActionItem(Guid itemId) => default;
+
+        public Task<ActionItem> GetFullItem(Guid itemId) => default;
 
         public Task<IEnumerable<ActionItem>> GetActionItems(string parelId) => Task.FromResult(System.Linq.Enumerable.Empty<ActionItem>());
 
@@ -83,7 +86,23 @@ namespace ROWM.Dal
             throw new NotImplementedException();
         }
 
-        public async Task<ActionItem> GetActionItem(Guid id) => await _ctx.ActionItem.FindAsync(id);
+        public async Task<ActionItem> GetActionItem(Guid itemId) => await _ctx.ActionItem.FindAsync(itemId);
+        public async Task<ActionItem> GetFullItem(Guid itemId)
+        {
+            try
+            {
+                return await _ctx.ActionItem
+                    //.Include(ax => ax.ParentParcel)
+                    .Include(ax => ax.AssignedGroup.Members)
+                    .Include(ax => ax.Activities)
+                    .Include(ax => ax.Activities.Select(aa => aa.UpdateAgent))
+                    .SingleOrDefaultAsync(ax => ax.ActionItemId == itemId);
+            }
+            catch ( Exception e)
+            {
+                throw;
+            }
+        }
 
         public async Task<ActionItem> UpdateActionItem(ActionItem item, DateTimeOffset activityDate)
         {

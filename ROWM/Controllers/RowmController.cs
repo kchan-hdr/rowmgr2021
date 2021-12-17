@@ -534,7 +534,7 @@ namespace ROWM.Controllers
                         Action = r.Action,
                         DueDate = r.DueDate.Value,
                         ParentActivity = act,
-                        Status = ActionStatus.Created,
+                        Status = ActionStatus.Pending,
 
                         Created = dt,
                         LastModified = dt,

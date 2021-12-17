@@ -4,12 +4,10 @@ namespace ROWM.Dal
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Data.Entity.Spatial;
 
     [Table("ROWM.Agent")]
     public partial class Agent
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Agent()
         {
             ContactLog = new HashSet<ContactLog>();
@@ -23,6 +21,9 @@ namespace ROWM.Dal
         [StringLength(20)]
         public string AgentName { get; set; }
 
+        [StringLength(200)]
+        public string AgentEmail { get; set; }
+
         public DateTimeOffset Created { get; set; }
 
         public DateTimeOffset LastModified { get; set; }
@@ -32,13 +33,10 @@ namespace ROWM.Dal
 
         public bool IsActive { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ContactLog> ContactLog { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<DocumentActivity> DocumentActivity { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Document> Document { get; set; }
     }
 }

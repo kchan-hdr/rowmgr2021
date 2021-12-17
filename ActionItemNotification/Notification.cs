@@ -1,0 +1,59 @@
+﻿using Microsoft.Extensions.Configuration;
+using ROWM.Dal;
+using SendGrid;
+using SendGrid.Helpers.Mail;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace ROWM.ActionItemNotification
+{
+    public class Notification
+    {
+        public enum NotificationType {  New, Update, Cancel, Reminder }
+
+        #region ctor
+        readonly IActionItemRepository _repo;
+        readonly IConfiguration _config;
+        public Notification(IConfiguration c, IActionItemRepository repo) => (_repo, _config) = (repo, c);
+        #endregion
+
+        public async Task<bool> SendNotification(Guid actionId, NotificationType t = NotificationType.New)
+        {
+            var a = await _repo.GetFullItem(actionId);
+            if (a == null)
+                throw new ArgumentOutOfRangeException($"unknown action item <{actionId}>");
+
+            var g = a.AssignedGroup?.Members ?? throw new ArgumentNullException($"action item <{actionId}> has no assigned");
+            var h = a.Activities?.OrderByDescending(ad => ad.ActivityDate).First() ?? throw new ArgumentNullException($"action item <{actionId}> has no history");
+
+            return await SendGrid(g.Where(m => m.IsSend && !m.IsDeleted).Select(m => m.Email), a.Action, a.DueDate, t, a.ParentParcel.Tracking_Number, h.UpdateAgent);
+        }
+
+        /// <summary>
+        /// notification by SendGrid
+        /// </summary>
+        /// <returns></returns>
+        async Task<bool> SendGrid(IEnumerable<string> members, string action, DateTimeOffset due, NotificationType t, string parcelCad, Agent agent)
+        {
+            var SG = _config["SENDGRID_API_KEY"];
+            var client = new SendGridClient(SG);
+
+            var assigned = members.Select(m => new EmailAddress { Email = m }).ToList();
+
+            var mx = t == NotificationType.New ? "An action item has been assigned to you." : "An action item assigned to you was updated.";
+            var content = $"{mx} Due date: {due.LocalDateTime.ToLongDateString()}. Parcel: {parcelCad}. {action}";
+            var html = $"<p>{mx}<br />Due date: {due.LocalDateTime.ToLongDateString()}.<br /><strong>Parcel: {parcelCad}</strong></p><p>{action}</p>";
+
+            var f = new EmailAddress("NO-REPLY@hdrinc.com");
+            var message = MailHelper.CreateSingleEmailToMultipleRecipients(f, assigned, "ATP Right-of-Way Action Item", content, html);
+            if (agent != null)
+                message.AddBcc(new EmailAddress(agent.AgentName));
+            message.AddBccs(new List<EmailAddress> { new EmailAddress("kelly.chan@hdrinc.com") });
+            var r = await client.SendEmailAsync(message);
+
+            return r.IsSuccessStatusCode;
+        }
+    }
+}

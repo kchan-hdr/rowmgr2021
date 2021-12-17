@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using ROWM.ActionItemNotification;
 using ROWM.Dal;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,8 +14,9 @@ namespace ROWM.Controllers
     public class ActionItemController : ControllerBase
     {
         readonly IActionItemRepository _repo;
+        readonly Notification _notify;
 
-        public ActionItemController(IActionItemRepository ownerRepository) => (_repo) = (ownerRepository);
+        public ActionItemController(IActionItemRepository ownerRepository, Notification n) => (_repo, _notify) = (ownerRepository, n);
 
 
         [HttpGet("parcels/{pid}/actionitems")]
@@ -32,7 +34,18 @@ namespace ROWM.Controllers
         [HttpPost("parcels/{pid}/actionitems")]
         public async Task<IEnumerable<ActionItem_dto>> AddActionItem(string pid, [FromBody]ActionItem_Request req)
         {
-            var items = await _repo.AddActionItem(pid, req.ToActionItem(), req.ActivityDate);
+            var a = req.ToActionItem();
+            var items = await _repo.AddActionItem(pid, a, req.ActivityDate);
+
+            try
+            {
+                await _notify.SendNotification(a.ActionItemId, Notification.NotificationType.New);
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError(e.Message);
+            }
+
             var r = items.Select(ix => new ActionItem_dto(ix));
             return r;
         }
@@ -47,7 +60,22 @@ namespace ROWM.Controllers
             if (item == null)
                 return BadRequest();
 
-            item = await _repo.UpdateActionItem(req.ToActionItem(item), req.ActivityDate);
+            var a = req.ToActionItem(item);
+            item = await _repo.UpdateActionItem(a, req.ActivityDate);
+
+            try
+            {
+                if (item.Status != ActionStatus.Completed)
+                {
+                    var t = item.Status == ActionStatus.Canceled ? Notification.NotificationType.Cancel : Notification.NotificationType.Update;
+                    await _notify.SendNotification(a.ActionItemId, t);
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError(e.Message);
+            }
+
             return new JsonResult(new ActionItem_dto(item));
         }
     }
@@ -79,6 +107,8 @@ namespace ROWM.Controllers
     public class ActionItem_Request : ActionItem_dto
     {
         public DateTimeOffset ActivityDate { get; set; }
+        public string AgentName { get; set; }
+        public string CreatorEmail { get; set; }
 
         public ActionItem ToActionItem()
         {
