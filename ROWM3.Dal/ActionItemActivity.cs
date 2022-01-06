@@ -26,7 +26,7 @@ namespace ROWM.Dal
         public ActionStatus Status { get; set; }
         public ActionStatus? OriginalStatus { get; set; }
 
-        public DateTimeOffset DueDate { get; set; }
+        public DateTimeOffset? DueDate { get; set; }
         public DateTimeOffset? OriginalDueDate { get; set; }
 
         public Guid Assigned { get; set; }

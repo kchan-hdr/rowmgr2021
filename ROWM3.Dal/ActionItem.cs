@@ -25,7 +25,7 @@ namespace ROWM.Dal
 
         [StringLength(1000)]
         public string Action { get; set; }
-        public DateTimeOffset DueDate { get; set; }
+        public DateTimeOffset? DueDate { get; set; }
 
         public ActionStatus Status { get; set; }
 

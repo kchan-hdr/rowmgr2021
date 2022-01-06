@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Core.Mapping;
+using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
 using System.Threading.Tasks;
-using System.Data.Entity;
 
 namespace ROWM.Dal
 {
@@ -16,13 +13,18 @@ namespace ROWM.Dal
         Task<IEnumerable<ActionItem>> GetActionItemsWithHistory(string parelId);
         Task<ActionItem> GetActionItem(Guid itemId);
         Task<ActionItem> GetFullItem(Guid itemId);
-        Task<IEnumerable<ActionItem>> AddActionItem(string parelId, ActionItem item, DateTimeOffset activityDate);
-        Task<ActionItem> UpdateActionItem(ActionItem item, DateTimeOffset activityDate);
+        Task<IEnumerable<ActionItem>> AddActionItem(string parelId, ActionItem item, DateTimeOffset activityDate, Guid? agentId);
+        Task<ActionItem> UpdateActionItem(ActionItem item, DateTimeOffset activityDate, Guid? agentId);
+
+        #region workaround
+        Task<IEnumerable<Agent>> GetAgents();
+        Task<Agent> UpdateAgent(Agent a);
+        #endregion
     }
 
     public class ActionItemNoOp : IActionItemRepository
     {
-        public Task<IEnumerable<ActionItem>> AddActionItem(string parelId, ActionItem item, DateTimeOffset activityDate) => Task.FromResult(Enumerable.Empty<ActionItem>());
+        public Task<IEnumerable<ActionItem>> AddActionItem(string parelId, ActionItem item, DateTimeOffset activityDate, Guid? agentId) => Task.FromResult(Enumerable.Empty<ActionItem>());
 
         public Task<ActionItem> GetActionItem(Guid itemId) => default;
 
@@ -35,7 +37,17 @@ namespace ROWM.Dal
             throw new NotImplementedException();
         }
 
-        public Task<ActionItem> UpdateActionItem(ActionItem item, DateTimeOffset activityDate) => default;
+        public Task<ActionItem> UpdateActionItem(ActionItem item, DateTimeOffset activityDate, Guid? agentId) => default;
+
+        public Task<IEnumerable<Agent>> GetAgents()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Agent> UpdateAgent(Agent a)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ActionItemRepository : IActionItemRepository
@@ -45,7 +57,7 @@ namespace ROWM.Dal
 
         public ActionItemRepository(ROWM_Context context, OwnerRepository ownerRepository) => (_ctx, _ownerRepository) = (context, ownerRepository);
 
-        public async Task<IEnumerable<ActionItem>> AddActionItem(string parelId, ActionItem item, DateTimeOffset activityDate)
+        public async Task<IEnumerable<ActionItem>> AddActionItem(string parelId, ActionItem item, DateTimeOffset activityDate, Guid? agentId)
         {
             var p = await _ownerRepository.GetParcel(parelId);
             if (p == null)
@@ -59,7 +71,8 @@ namespace ROWM.Dal
                     Status = item.Status,
                     DueDate = item.DueDate,
                     Assigned = item.AssignedGroupId.Value,
-                    ActivityDate = activityDate
+                    ActivityDate = activityDate,
+                    UpdateAgentId = agentId
                 }
             };
 
@@ -104,7 +117,7 @@ namespace ROWM.Dal
             }
         }
 
-        public async Task<ActionItem> UpdateActionItem(ActionItem item, DateTimeOffset activityDate)
+        public async Task<ActionItem> UpdateActionItem(ActionItem item, DateTimeOffset activityDate, Guid? agentId)
         {
             _ = item ?? throw new ArgumentNullException(nameof(item));
 
@@ -114,8 +127,10 @@ namespace ROWM.Dal
                 Status = item.Status,
                 DueDate = item.DueDate,
                 Assigned = item.AssignedGroupId.Value,
-                ActivityDate = activityDate
+                ActivityDate = activityDate,
+                UpdateAgentId = agentId
             };
+
             var acts = item.Activities ?? (item.Activities = new List<ActionItemActivity>());
 
             if (acts.Any())
@@ -143,5 +158,22 @@ namespace ROWM.Dal
 
             return item;
         }
+
+        #region helper
+        public async Task<IEnumerable<Agent>> GetAgents() =>
+            await _ctx.Agent.AsNoTracking().ToArrayAsync();
+
+        public async Task<Agent> UpdateAgent(Agent a)
+        {
+            if (_ctx.Entry(a).State == EntityState.Detached)
+            {
+                _ctx.Agent.Attach(a);
+                _ctx.Entry(a).State = EntityState.Modified;
+            }
+
+            await _ctx.SaveChangesAsync();
+            return a;
+        }
+        #endregion
     }
 }

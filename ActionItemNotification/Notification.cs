@@ -35,7 +35,7 @@ namespace ROWM.ActionItemNotification
         /// notification by SendGrid
         /// </summary>
         /// <returns></returns>
-        async Task<bool> SendGrid(IEnumerable<string> members, string action, DateTimeOffset due, NotificationType t, string parcelCad, Agent agent)
+        async Task<bool> SendGrid(IEnumerable<string> members, string action, DateTimeOffset? due, NotificationType t, string parcelCad, Agent agent)
         {
             var SG = _config["SENDGRID_API_KEY"];
             var client = new SendGridClient(SG);
@@ -43,13 +43,14 @@ namespace ROWM.ActionItemNotification
             var assigned = members.Select(m => new EmailAddress { Email = m }).ToList();
 
             var mx = t == NotificationType.New ? "An action item has been assigned to you." : "An action item assigned to you was updated.";
-            var content = $"{mx} Due date: {due.LocalDateTime.ToLongDateString()}. Parcel: {parcelCad}. {action}";
-            var html = $"<p>{mx}<br />Due date: {due.LocalDateTime.ToLongDateString()}.<br /><strong>Parcel: {parcelCad}</strong></p><p>{action}</p>";
+            var dueString = due.HasValue ? $"Due date: { due.Value.LocalDateTime.ToLongDateString()}." : "Due date not specified.";
+            var content = $"{mx} {dueString} Parcel: {parcelCad}. {action}";
+            var html = $"<p>{mx}<br />{dueString}<br /><strong>Parcel: {parcelCad}</strong></p><p>{action}</p>";
 
             var f = new EmailAddress("NO-REPLY@hdrinc.com");
-            var message = MailHelper.CreateSingleEmailToMultipleRecipients(f, assigned, "ATP Right-of-Way Action Item", content, html);
+            var message = MailHelper.CreateSingleEmailToMultipleRecipients(f, assigned, "ATP Right-of-Way Action Item", content, html, true);
             if (agent != null)
-                message.AddBcc(new EmailAddress(agent.AgentName));
+                message.AddCc(new EmailAddress(agent.AgentEmail));
             message.AddBccs(new List<EmailAddress> { new EmailAddress("kelly.chan@hdrinc.com") });
             var r = await client.SendEmailAsync(message);
 

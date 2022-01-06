@@ -21,6 +21,8 @@ namespace ROWM.Dal
         [StringLength(20)]
         public string AgentName { get; set; }
 
+        public Guid? AADObjectId { get; set; }
+
         [StringLength(200)]
         public string AgentEmail { get; set; }
 

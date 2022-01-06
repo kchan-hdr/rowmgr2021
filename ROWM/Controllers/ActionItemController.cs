@@ -35,7 +35,8 @@ namespace ROWM.Controllers
         public async Task<IEnumerable<ActionItem_dto>> AddActionItem(string pid, [FromBody]ActionItem_Request req)
         {
             var a = req.ToActionItem();
-            var items = await _repo.AddActionItem(pid, a, req.ActivityDate);
+            var agent = await req.FindAgent(_repo);
+            var items = await _repo.AddActionItem(pid, a, req.ActivityDate, agent?.AgentId ?? Guid.Empty);
 
             try
             {
@@ -61,7 +62,8 @@ namespace ROWM.Controllers
                 return BadRequest();
 
             var a = req.ToActionItem(item);
-            item = await _repo.UpdateActionItem(a, req.ActivityDate);
+            var agent = await req.FindAgent(_repo);
+            item = await _repo.UpdateActionItem(a, req.ActivityDate, agent?.AgentId ?? Guid.Empty);
 
             try
             {
@@ -116,7 +118,7 @@ namespace ROWM.Controllers
             {
                 Action = this.Action,
                 AssignedGroupId = this.AssignedGroupId,
-                DueDate = this.DueDate ?? DateTimeOffset.MaxValue,
+                DueDate = this.DueDate,
                 ParcelId = this.ParcelId,
                 Status = (ActionStatus) Enum.Parse(typeof(ActionStatus), this.StatusCode)
             };
@@ -126,12 +128,49 @@ namespace ROWM.Controllers
         {
             original.Action = this.Action;
             original.AssignedGroupId = this.AssignedGroupId;
-            original.DueDate = this.DueDate.HasValue ? this.DueDate.Value : DateTimeOffset.MaxValue;
+            original.DueDate = this.DueDate;
             original.ParcelId = this.ParcelId;
             original.Status = (ActionStatus)Enum.Parse(typeof(ActionStatus), this.StatusCode);
 
             return original;
         }
+
+        #region match agent
+        /// <summary>
+        /// this is a temporary workaround until we upgrade to Core
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        internal async Task<Agent> FindAgent(IActionItemRepository _repo)
+        {
+            if (string.IsNullOrEmpty(this.CreatorEmail))
+                return default;
+
+            var allAgents = await _repo.GetAgents();
+            var a = allAgents.FirstOrDefault(ax => ax.AADObjectId.ToString().Equals(this.AgentName));
+
+            if (a == null)
+                return default;
+
+            if (string.IsNullOrEmpty(a.AgentEmail))
+            {
+                a.AgentEmail = this.CreatorEmail;
+                a = await _repo.UpdateAgent(a);
+            }
+
+            if ( !a.AgentEmail.Equals(this.CreatorEmail))
+            {
+                Trace.TraceInformation($"agent has different emails {a.AgentEmail} from AAD {this.CreatorEmail}");
+                a.AgentEmail = this.CreatorEmail;
+                a = await _repo.UpdateAgent(a);
+            }
+
+            return a;
+        }
+        #endregion
+
     }
     #endregion
+
+
 }
