@@ -56,7 +56,6 @@ namespace ExcelExport
             WriteText(hr, GetColumnCode(c++), "Parcel ID", 1);
             WriteText(hr, GetColumnCode(c++), "Owner Name", 1);
             WriteText(hr, GetColumnCode(c++), "Contact Name", 1);
-            WriteText(hr, GetColumnCode(c++), "Project", 1);
             WriteText(hr, GetColumnCode(c++), "Date of Contact", 1);
             WriteText(hr, GetColumnCode(c++), "Channel", 1);
             WriteText(hr, GetColumnCode(c++), "Type", 1);
@@ -75,7 +74,6 @@ namespace ExcelExport
                         WriteText(r, GetColumnCode(c++), par.Apn);
                         WriteText(r, GetColumnCode(c++), string.Join(" | ", par.OwnerName));
                         WriteText(r, GetColumnCode(c++), cot.ContactNames);
-                        WriteText(r, GetColumnCode(c++), string.Join(" | ", par.Project));
                         WriteDate(r, GetColumnCode(c++), cot.DateAdded.LocalDateTime);
 
                         WriteText(r, GetColumnCode(c++), cot.ContactChannel);
@@ -118,7 +116,6 @@ namespace ExcelExport
             WriteText(hr, GetColumnCode(c++), "Parcel ID", 1);
             WriteText(hr, GetColumnCode(c++), "Owner Name", 1);
             WriteText(hr, GetColumnCode(c++), "Contacts", 1);
-            WriteText(hr, GetColumnCode(c++), "Project", 1);
             WriteText(hr, GetColumnCode(c++), "Action Item", 1);
             WriteText(hr, GetColumnCode(c++), "Action Item Owner", 1);
             WriteText(hr, GetColumnCode(c++), "Due Date", 1);
@@ -135,10 +132,9 @@ namespace ExcelExport
                     WriteText(r, GetColumnCode(c++), par.Apn);
                     WriteText(r, GetColumnCode(c++), string.Join(" | ", par.OwnerName));
                     WriteText(r, GetColumnCode(c++), par.ContactNames);
-                    WriteText(r, GetColumnCode(c++), string.Join(" | ", par.Project));
                     WriteText(r, GetColumnCode(c++), cot.Action);
                     WriteText(r, GetColumnCode(c++), cot.Assigned);
-                    WriteDate(r, GetColumnCode(c++), cot.Due.LocalDateTime);
+                    WriteDate(r, GetColumnCode(c++), cot.Due.HasValue ? cot.Due.Value.LocalDateTime : default);
                     WriteText(r, GetColumnCode(c++), st);
 
                 }

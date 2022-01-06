@@ -29,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ExcelExport\ExcelExport.csproj" />
     <ProjectReference Include="..\ROWM3.Dal\ROWM3.Dal.csproj" />
   </ItemGroup>
 

@@ -75,6 +75,7 @@ namespace ROWM
             services.AddScoped<Controllers.IParcelStatusHelper, Controllers.ParcelStatusHelperV2>();
             services.AddScoped<IUpdateParcelStatus,UpdateParcelStatus_wharton>();
             services.AddScoped<UpdateParcelStatus2>();
+            services.AddScoped<ActionItemNotification.Notification>();
 
             var feat = new AtpParcel("https://maps.hdrgateway.com/arcgis/rest/services/Texas/ATP_Parcel_FS/FeatureServer");
             services.AddSingleton<IFeatureUpdate>(feat);
@@ -96,7 +97,7 @@ namespace ROWM
             //    template: "Shared Documents/Parcels/_PARCEL_PARCEL No",
             //    d: fac.GetRequiredService<DocTypes>()));
 
-            services.AddScoped<IRowmReports, WhartonReport>();
+            services.AddScoped<IRowmReports, AustinReport>();
 
             services.AddSingleton<SiteDecoration, Atp>();
 

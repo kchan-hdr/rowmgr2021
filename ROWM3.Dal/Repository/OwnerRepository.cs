@@ -427,12 +427,53 @@ namespace ROWM.Dal
             return ppp;
         }
 
+        public async Task<IEnumerable<EngagementDto>> GetEngagement(int part)
+        {
+            var ppp = ActiveParcels()
+                .Join(_ctx.Parcel_Status, px => px.OutreachStatusCode, sx => sx.Code, (px, sx) => new { px, sx })
+                .Select(p => new EngagementDto
+                {
+                    Apn = p.px.Assessor_Parcel_Number,
+                    TrackingNumber = p.px.Tracking_Number,
+                    OwnerName = p.px.Ownership.Select(ox => ox.Owner.PartyName),
+                    Contacts = p.px.Ownership.SelectMany(ox => ox.Owner.ContactInfo),
+                    ProjectCode = p.px.ParcelAllocations.Select(ax => ax.ProjectPartId),
+                    Project = p.px.ParcelAllocations.Select(ax => ax.ProjectPart.Caption),
+                    OutreachStatus = p.sx.Description,
+                    Actions = p.px.ActionItems.Select(ax => new ActionItemHdr
+                    {
+                        Action = ax.Action,
+                        Assigned = ax.AssignedGroup.GroupNameCaption,
+                        Due = ax.DueDate,
+                        Status = ax.Status
+                    }),
+                    Logs = p.px.ContactLog.Select(cx => new ContactLogHdr
+                    {
+                        AgentName = cx.Agent.AgentName,
+                        Contacts = cx.ContactInfo,
+                        DateAdded = cx.DateAdded,
+                        ContactChannel = cx.ContactChannel,
+                        ProjectPhase = cx.ProjectPhase,
+                        Title = cx.Title,
+                        Notes = cx.Notes
+                    })
+                });
+                //.ToArrayAsync();
+
+            var ppx = from par in ppp
+                      where par.ProjectCode.Contains(part)
+                      select par;
+
+            return await ppx.ToArrayAsync();
+        }
+
         public class EngagementDto
         {
             public string Apn { get; set; }
             public string TrackingNumber { get; set; }
             public string OutreachStatus { get; set; }
 
+            public IEnumerable<int> ProjectCode { get; set; }
             public IEnumerable<string> Project { get; set; }
             public IEnumerable<string> OwnerName { get; set; }
             
@@ -471,7 +512,7 @@ namespace ROWM.Dal
         {
             public string Action { get; set; }
             public string Assigned { get; set; }
-            public DateTimeOffset Due { get; set; }
+            public DateTimeOffset? Due { get; set; }
             public ActionStatus Status { get; set; }
         }        
         #endregion

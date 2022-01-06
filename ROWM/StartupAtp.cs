@@ -98,7 +98,7 @@ namespace ROWM
             //    template: "Shared Documents/Parcels/_PARCEL_PARCEL No",
             //    d: fac.GetRequiredService<DocTypes>()));
 
-            services.AddScoped<IRowmReports, WhartonReport>();
+            services.AddScoped<IRowmReports, AustinReport>();
 
             services.AddSingleton<SiteDecoration, Atp>();
 

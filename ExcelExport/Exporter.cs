@@ -177,12 +177,15 @@ namespace ExcelExport
 
         static SpreadsheetDocument MakeDoc(string path) => SpreadsheetDocument.Create(path, SpreadsheetDocumentType.Workbook);
 
-        static protected Cell WriteDate(Row row, string c, DateTime date)
+        static protected Cell WriteDate(Row row, string c, DateTime? date)
         {
             var cell = InsertCell(row, c);
-            cell.CellValue = new CellValue(date.ToOADate().ToString());
-            cell.DataType = CellValues.Number;
-            cell.StyleIndex = 2;
+            if (date.HasValue)
+            {
+                cell.CellValue = new CellValue(date.Value.ToOADate().ToString());
+                cell.DataType = CellValues.Number;
+                cell.StyleIndex = 2;
+            }
             return cell;
         }
 
